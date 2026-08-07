@@ -6,41 +6,178 @@ datasource db {
   provider = "postgresql"
 }
 
-enum UserRole {
+enum Role {
   EMPLOYEE
   TECHNICIAN
   ADMIN
 }
 
-enum PreferredLanguage {
-  EN
+enum Language {
   AM
+  EN
+}
+
+enum CategoryType {
+  HARDWARE
+  SOFTWARE
+  NETWORKING
+  OTHER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TicketStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  AWAITING_PURCHASE // Paused for hardware/part procurement by office
+  RESOLVED
+  CLOSED
 }
 
 model Office {
-  id        Int      @id @default(autoincrement())
-  name      String
+  id        String   @id @default(uuid()) @db.Uuid
   code      String   @unique
+  nameAm    String   @db.Text
+  nameEn    String   @db.Text
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users User[]
+  users             User[]
+  tickets           Ticket[]
+  technicianOffices TechnicianOffice[]
 }
 
 model User {
-  id                Int               @id @default(autoincrement())
-  fullName          String
-  phoneNumber       String            @unique
+  id                String   @id @default(uuid()) @db.Uuid
+  fullName          String   @db.Text
+  phoneNumber       String   @unique
   password          String
-  role              UserRole          @default(EMPLOYEE)
-  officeId          Int?
-  isActive          Boolean           @default(true)
-  preferredLanguage PreferredLanguage @default(EN)
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  role              Role
+  officeId          String?  @db.Uuid
+  isActive          Boolean  @default(true)
+  preferredLanguage Language @default(AM)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  office Office? @relation(fields: [officeId], references: [id])
+  office               Office?            @relation(fields: [officeId], references: [id], onDelete: SetNull)
+  employeeTickets      Ticket[]           @relation("EmployeeTickets")
+  technicianTickets    Ticket[]           @relation("TechnicianTickets")
+  technicianOffices    TechnicianOffice[] @relation("TechnicianOfficeTechnician")
+  createdAnnouncements Announcement[]
+  auditLogs            AuditLog[]         @relation("AuditLogActor")
 
   @@index([officeId])
+}
+
+model TechnicianOffice {
+  id           String   @id @default(uuid()) @db.Uuid
+  technicianId String   @db.Uuid
+  officeId     String   @db.Uuid
+  assignedAt   DateTime @default(now())
+
+  technician User   @relation("TechnicianOfficeTechnician", fields: [technicianId], references: [id], onDelete: Cascade)
+  office     Office @relation(fields: [officeId], references: [id], onDelete: Cascade)
+
+  @@unique([technicianId, officeId])
+  @@index([technicianId])
+  @@index([officeId])
+}
+
+model Category {
+  id                      String       @id @default(uuid()) @db.Uuid
+  nameAm                  String       @db.Text
+  nameEn                  String       @db.Text
+  type                    CategoryType
+  expectedResolutionHours Int
+  isActive                Boolean      @default(true)
+  createdAt               DateTime     @default(now())
+  updatedAt               DateTime     @updatedAt
+
+  tickets Ticket[]
+}
+
+model Ticket {
+  id               String       @id @default(uuid()) @db.Uuid
+  title            String       @db.Text
+  description      String       @db.Text
+  categoryId       String       @db.Uuid
+  deviceOrSystem   String?      @db.Text
+  priority         Priority?
+  status           TicketStatus @default(PENDING)
+  employeeId       String       @db.Uuid
+  technicianId     String?      @db.Uuid
+  officeId         String       @db.Uuid
+  rating           Int?
+  feedback         String?      @db.Text
+  isApproved       Boolean?
+  requiresPurchase Boolean      @default(false) // True if parts/items must be bought
+  purchaseDetails  String?      @db.Text // Specifications of required item
+  slaExceeded      Boolean      @default(false)
+  slaJustification String?      @db.Text
+  createdAt        DateTime     @default(now())
+  resolvedAt       DateTime?
+  closedAt         DateTime?
+  updatedAt        DateTime     @updatedAt
+
+  category        Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  employee        User             @relation("EmployeeTickets", fields: [employeeId], references: [id], onDelete: Restrict)
+  technician      User?            @relation("TechnicianTickets", fields: [technicianId], references: [id], onDelete: SetNull)
+  office          Office           @relation(fields: [officeId], references: [id], onDelete: Restrict)
+  maintenanceNote MaintenanceNote?
+  auditLogs       AuditLog[]
+
+  @@index([officeId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([technicianId])
+}
+
+model MaintenanceNote {
+  id                String   @id @default(uuid()) @db.Uuid
+  ticketId          String   @unique @db.Uuid
+  diagnosis         String   @db.Text
+  workPerformed     String   @db.Text
+  partsReplaced     String?  @db.Text
+  recommendations   String?  @db.Text
+  purchasedByOffice Boolean  @default(false)
+  createdAt         DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id            String   @id @default(uuid()) @db.Uuid
+  ticketId      String   @db.Uuid
+  actorId       String   @db.Uuid
+  action        String   @db.Text
+  previousValue String?  @db.Text
+  newValue      String?  @db.Text
+  createdAt     DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  actor  User   @relation("AuditLogActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId])
+  @@index([actorId])
+}
+
+model Announcement {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String   @db.Text
+  content   String   @db.Text
+  authorId  String   @db.Uuid
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([authorId])
 }
