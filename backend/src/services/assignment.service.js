@@ -5,10 +5,7 @@ const logger = require("../config/logger");
 const { createAuditEntry } = require("../utils/audit.util");
 
 /** Ticket statuses that contribute to a technician's active workload. */
-const ACTIVE_TICKET_STATUSES = [
-  TicketStatus.PENDING,
-  TicketStatus.IN_PROGRESS,
-];
+const ACTIVE_TICKET_STATUSES = [TicketStatus.PENDING, TicketStatus.IN_PROGRESS];
 
 /**
  * Finds the active technician mapped to an office with the lowest active
