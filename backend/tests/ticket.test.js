@@ -2,15 +2,24 @@ const request = require("supertest");
 
 const mockPrisma = {
   user: { findUnique: jest.fn(), findFirst: jest.fn() },
-  category: { findUnique: jest.fn() },
-  ticket: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
+  category: { findUnique: jest.fn(), findMany: jest.fn() },
+  ticket: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    count: jest.fn(),
+  },
   $transaction: jest.fn(),
 };
 
 jest.mock("cookie-parser", () => () => (req, res, next) => next(), {
   virtual: true,
 });
-jest.mock("../src/config/db", () => ({ prisma: mockPrisma }));
+jest.mock("../src/config/db", () => ({
+  prisma: mockPrisma,
+  connectDB: jest.fn().mockResolvedValue(undefined),
+}));
 jest.mock("../src/middleware/auth.middleware", () => (req, res, next) => {
   const role = req.headers["x-test-role"];
   if (!role)
@@ -52,7 +61,9 @@ jest.mock("@prisma/client", () => ({
 const {
   createTicket,
   verifyTicket,
+  listTickets,
 } = require("../src/controllers/ticket.controller");
+const { listCategories } = require("../src/controllers/category.controller");
 const {
   assignTechnicianToTicket,
 } = require("../src/services/assignment.service");
@@ -344,5 +355,110 @@ describe("ticket HTTP workflow", () => {
       .set("x-test-role", "TECHNICIAN")
       .send({ status: "IN_PROGRESS" });
     expect(closed.status).toBe(422);
+  });
+});
+
+describe("GET /api/tickets", () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  test("returns paginated tickets with category included", async () => {
+    const tickets = [
+      {
+        id: "t-1",
+        title: "Printer jam",
+        status: "IN_PROGRESS",
+        priority: "HIGH",
+        category: { id: "cat-1", nameEn: "Printer / Scanner Failure" },
+      },
+    ];
+    mockPrisma.ticket.findMany.mockResolvedValue(tickets);
+    mockPrisma.ticket.count.mockResolvedValue(1);
+
+    const res = await request(app)
+      .get("/api/tickets")
+      .set("x-test-role", "TECHNICIAN");
+
+    expect(res.status).toBe(200);
+    expect(res.body.tickets).toEqual(tickets);
+    expect(res.body.totalTickets).toBe(1);
+    expect(res.body.page).toBe(1);
+    expect(res.body.totalPages).toBe(1);
+    expect(mockPrisma.ticket.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        include: { category: true },
+        orderBy: { createdAt: "desc" },
+      }),
+    );
+  });
+
+  test("filters by status", async () => {
+    mockPrisma.ticket.findMany.mockResolvedValue([]);
+    mockPrisma.ticket.count.mockResolvedValue(0);
+
+    const res = await request(app)
+      .get("/api/tickets?status=IN_PROGRESS")
+      .set("x-test-role", "TECHNICIAN");
+
+    expect(res.status).toBe(200);
+    expect(mockPrisma.ticket.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { status: "IN_PROGRESS" } }),
+    );
+  });
+
+  test("handles pagination parameters", async () => {
+    mockPrisma.ticket.findMany.mockResolvedValue([]);
+    mockPrisma.ticket.count.mockResolvedValue(0);
+
+    const res = await request(app)
+      .get("/api/tickets?page=2&limit=5")
+      .set("x-test-role", "TECHNICIAN");
+
+    expect(res.status).toBe(200);
+    expect(res.body.page).toBe(2);
+    expect(mockPrisma.ticket.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 5, take: 5 }),
+    );
+  });
+
+  test("returns 422 for invalid status filter", async () => {
+    const res = await request(app)
+      .get("/api/tickets?status=INVALID_STATUS")
+      .set("x-test-role", "TECHNICIAN");
+
+    expect(res.status).toBe(422);
+    expect(res.body.message).toMatch(/invalid/i);
+  });
+
+  test("requires authentication", async () => {
+    const res = await request(app).get("/api/tickets");
+    expect(res.status).toBe(401);
+  });
+});
+
+describe("GET /api/categories", () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  test("returns active categories", async () => {
+    const categories = [
+      { id: "cat-1", nameEn: "Printer / Scanner Failure", type: "HARDWARE" },
+      { id: "cat-2", nameEn: "OS Failure / Blue Screen", type: "SOFTWARE" },
+    ];
+    mockPrisma.category.findMany.mockResolvedValue(categories);
+
+    const res = await request(app)
+      .get("/api/categories")
+      .set("x-test-role", "EMPLOYEE");
+
+    expect(res.status).toBe(200);
+    expect(res.body.categories).toEqual(categories);
+    expect(mockPrisma.category.findMany).toHaveBeenCalledWith({
+      where: { isActive: true },
+      orderBy: { nameEn: "asc" },
+    });
+  });
+
+  test("requires authentication", async () => {
+    const res = await request(app).get("/api/categories");
+    expect(res.status).toBe(401);
   });
 });
