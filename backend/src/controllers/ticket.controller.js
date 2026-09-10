@@ -321,6 +321,46 @@ async function getTicket(req, res, next) {
   }
 }
 
+async function listTickets(req, res, next) {
+  try {
+    const { status, page = 1, limit = 20 } = req.query;
+
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+    const skip = (pageNum - 1) * limitNum;
+
+    const where = {};
+    if (status) {
+      if (!statuses.includes(status)) {
+        throw error("Invalid status filter.", 422);
+      }
+      where.status = status;
+    }
+
+    const [tickets, totalTickets] = await Promise.all([
+      prisma.ticket.findMany({
+        where,
+        include: { category: true },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limitNum,
+      }),
+      prisma.ticket.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(totalTickets / limitNum) || 1;
+
+    return res.status(200).json({
+      tickets,
+      totalTickets,
+      page: pageNum,
+      totalPages,
+    });
+  } catch (requestError) {
+    return next(requestError);
+  }
+}
+
 module.exports = {
   createTicket,
   assignTicket,
@@ -328,4 +368,5 @@ module.exports = {
   verifyTicket,
   updateStatus,
   getTicket,
+  listTickets,
 };
