@@ -112,6 +112,7 @@ function Register() {
               onChange={handleChange}
               placeholder="Abebe Welde"
               autoComplete="name"
+              className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black  text-[15px]"
             />
           </div>
           {errors.fullName && (
@@ -137,6 +138,7 @@ function Register() {
               onChange={handleChange}
               placeholder="+251 912345678"
               autoComplete="tel"
+              className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black text-[15px]"
             />
           </div>
           {errors.phoneNumber && (
@@ -159,6 +161,7 @@ function Register() {
               name="officeId"
               value={form.officeId}
               onChange={handleChange}
+              className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black text-[12px]"
             >
               <option value="">
                 {officesStatus === "loading"
@@ -195,6 +198,7 @@ function Register() {
                 onChange={handleChange}
                 placeholder="••••••••"
                 autoComplete="new-password"
+                className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black text-[15px]"
               />
             </div>
             <button
@@ -233,6 +237,7 @@ function Register() {
                 value={form.confirmPassword}
                 onChange={handleChange}
                 autoComplete="new-password"
+                className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black text-[15px]"
               />
             </div>
             <button
@@ -273,8 +278,12 @@ function Register() {
         </button>
       </form>
       <div className="mt-[18px] border-t border-[#e5eaf1] pt-3.5 text-center text-xs leading-[1.6] text-[#94a3b8]">
-        {t("auth.termsPrefix")} <a href="#terms">{t("auth.terms")}</a>{" "}
-        {t("auth.and")} <a href="#privacy">{t("auth.privacy")}</a>.
+        {t("auth.termsPrefix")} <a href="#terms" className="text-[#0757c9] hover:underline">
+          {t("auth.terms")}
+        </a>{" "}
+        {t("auth.and")} <a href="#privacy" className="text-[#0757c9] hover:underline">
+          {t("auth.privacy")}
+        </a>.
       </div>
       <div className="hidden">
         {t("auth.haveAccount")} <Link to="/login">{t("auth.signIn")}</Link>

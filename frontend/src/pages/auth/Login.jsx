@@ -80,6 +80,7 @@ function Login() {
               onChange={handleChange}
               placeholder="+251 912345678"
               autoComplete="tel"
+              className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black text-[15px]"
             />
           </div>
           {errors.phoneNumber && (
@@ -106,6 +107,7 @@ function Login() {
                 onChange={handleChange}
                 placeholder="••••••••"
                 autoComplete="current-password"
+               className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black text-[15px]"
               />
             </div>
             <button
@@ -124,7 +126,7 @@ function Login() {
             </p>
           )}
         </div>
-        <div className="-mt-1.5 text-right">
+        <div className="-mt-1.5 text-right text-[11px] text-[#0546b0] hover:underline">
           <Link to="/forgot-password">{t("auth.forgotPassword")}</Link>
         </div>
         {submitError && (
@@ -141,9 +143,11 @@ function Login() {
           <ArrowRight size={16} />
         </button>
       </form>
-      <div className="mt-5 border-t border-[#e5eaf1] pt-4 text-center text-[13px] text-[#64748b]">
+      <div className="mt-5 border-t border-[#e5eaf1] pt-4 text-center text-[12px] text-[#64748b]">
         {t("auth.noAccount")}{" "}
-        <Link to="/register">{t("auth.registerNow")}</Link>
+        <Link to="/register" className="text-[#0546b0] hover:underline">
+          {t("auth.registerNow")}
+        </Link>
       </div>
     </AuthShell>
   );
