@@ -95,6 +95,30 @@ function generateRefreshToken(user) {
   );
 }
 
+function getPasswordResetSecret() {
+  return process.env.JWT_PASSWORD_RESET_SECRET || getRefreshTokenSecret();
+}
+
+function getPasswordResetExpiration() {
+  return process.env.JWT_PASSWORD_RESET_EXPIRATION || "1h";
+}
+
+function generatePasswordResetToken(user) {
+  return signToken(
+    {
+      sub: user.id,
+      phoneNumber: user.phoneNumber,
+      purpose: "password_reset",
+    },
+    getPasswordResetSecret(),
+    getPasswordResetExpiration(),
+  );
+}
+
+function verifyPasswordResetToken(token) {
+  return verifyToken(token, getPasswordResetSecret());
+}
+
 function verifyToken(token, secret) {
   if (!token) {
     throw createAuthError("Authentication token required.", 401);
@@ -144,4 +168,6 @@ module.exports = {
   verifyRefreshToken,
   extractBearerToken,
   getAccessTokenCookieOptions,
+  generatePasswordResetToken,
+  verifyPasswordResetToken,
 };

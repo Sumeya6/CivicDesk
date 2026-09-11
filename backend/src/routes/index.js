@@ -10,12 +10,9 @@ router.get("/", (req, res) => {
   });
 });
 
-// Route modules to be wired as features are implemented:
 router.use("/auth", require("./auth.routes"));
-// router.use("/users", require("./user.routes"));
-// router.use("/offices", require("./office.routes"));
-// router.use("/tickets", require("./ticket.routes"));
-// router.use("/reports", require("./report.routes"));
-// router.use("/announcements", require("./announcement.routes"));
+router.use("/users", require("./user.routes"));
+router.use("/offices", require("./office.routes"));
+router.use("/announcements", require("./announcement.routes"));
 
 module.exports = router;

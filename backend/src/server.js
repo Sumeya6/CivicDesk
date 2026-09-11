@@ -61,22 +61,35 @@ app.use("/api", apiLimiter, routes);
 app.use(notFound);
 app.use(errorHandler);
 
-const server = app.listen(PORT, async () => {
-  try {
-    await connectDB();
-    logger.info(`CivicDesk API listening on port ${PORT} (${NODE_ENV})`);
-  } catch (error) {
-    logger.error("Failed to start server:", error);
-    process.exit(1);
-  }
-});
+let server;
+
+async function startServer() {
+  server = app.listen(PORT, async () => {
+    try {
+      await connectDB();
+      logger.info(`CivicDesk API listening on port ${PORT} (${NODE_ENV})`);
+    } catch (error) {
+      logger.error("Failed to start server:", error);
+      process.exit(1);
+    }
+  });
+}
+
+if (require.main === module) {
+  startServer();
+}
 
 function shutdown(signal) {
   logger.info(`${signal} received. Shutting down gracefully...`);
-  server.close(() => {
-    logger.info("HTTP server closed.");
+
+  if (server) {
+    server.close(() => {
+      logger.info("HTTP server closed.");
+      process.exit(0);
+    });
+  } else {
     process.exit(0);
-  });
+  }
 }
 
 process.on("SIGTERM", () => shutdown("SIGTERM"));
