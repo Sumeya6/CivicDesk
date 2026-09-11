@@ -1,0 +1,100 @@
+{
+  "common": {
+    "civicDesk": "ሲቪክዴስክ",
+    "search": "ፈልግ",
+    "reset": "ዳግም አስጀምር",
+    "loading": "በመጫን ላይ...",
+    "exportCSV": "CSV ላክ",
+    "exportPDF": "PDF ላክ"
+  },
+  "reports": {
+    "title": "የአስተዳደር ትንታኔ እና ወቅታዊ ሪፖርቶች",
+    "description": "የCivicDesk ቲኬት አፈጻጸምን እና የአገልግሎት ጥራትን ይተንትኑ።",
+    "monthly": "ወርሃዊ",
+    "threeMonths": "3 ወራት",
+    "sixMonths": "6 ወራት",
+    "nineMonths": "9 ወራት",
+    "annual": "ዓመታዊ",
+    "totalTickets": "ጠቅላላ ቲኬቶች",
+    "slaCompliance": "የSLA ተገዢነት",
+    "procurementDelays": "የግዥ መዘግየቶች",
+    "averageResolution": "አማካይ የመፍትሄ ጊዜ",
+    "customerSatisfaction": "የደንበኛ እርካታ",
+    "issueCategories": "በብዛት የተዘገቡ የችግር ምድቦች",
+    "technicianWorkload": "የቴክኒሺያን የሥራ ጫና",
+    "procurementAnalytics": "የግዥ መዘግየት ትንታኔ",
+    "awaitingPurchase": "ግዥን በመጠባበቅ ላይ",
+    "averageRating": "አማካይ የደንበኛ ደረጃ",
+    "reportedTickets": "በዚህ ጊዜ የተዘገቡ ቲኬቶች",
+    "ticketsWithinSLA": "በSLA ጊዜ ውስጥ የተፈቱ ቲኬቶች",
+    "physicalProcurement": "በአካላዊ ግዥ ምክንያት የዘገዩ ቲኬቶች",
+    "averageResolutionTime": "አማካይ የመፍትሄ ጊዜ",
+    "rating": "ደረጃ",
+    "tickets": "ቲኬቶች"
+  },
+  "searchFilters": {
+    "title": "የላቀ የቲኬት ፍለጋ",
+    "description": "ቲኬቶችን በተለያዩ መስፈርቶች ይፈልጉ።",
+    "reporter": "ሪፖርት አቅራቢ",
+    "technician": "የተመደበ ቴክኒሺያን",
+    "office": "ክፍለ ከተማ ጽ/ቤት",
+    "status": "ሁኔታ",
+    "priority": "ቅድሚያ",
+    "category": "ምድብ",
+    "startDate": "የመጀመሪያ ቀን",
+    "endDate": "የመጨረሻ ቀን",
+    "allStatuses": "ሁሉም ሁኔታዎች",
+    "allPriorities": "ሁሉም የቅድሚያ ደረጃዎች",
+    "employeeId": "የሰራተኛ ID",
+    "technicianId": "የቴክኒሺያን ID",
+    "officeId": "የጽ/ቤት ID",
+    "categoryId": "የምድብ ID",
+    "searchTickets": "ቲኬቶችን ፈልግ",
+    "searchResults": "የፍለጋ ውጤቶች",
+    "useFilters": "ቲኬቶችን ለመፈለግ ከላይ ያሉትን ማጣሪያዎች ይጠቀሙ።",
+    "noTickets": "ምንም ቲኬት አልተገኘም።",
+    "unableToSearch": "ቲኬቶችን መፈለግ አልተቻለም። እባክዎ እንደገና ይሞክሩ።"
+  },
+  "announcements": {
+    "title": "የስርዓት ማስታወቂያዎች",
+    "description": "አስፈላጊ የCivicDesk ማስታወቂያዎችን ይፍጠሩ እና ያስተዳድሩ",
+    "create": "ማስታወቂያ ፍጠር",
+    "createDescription": "ለCivicDesk ተጠቃሚዎች አስፈላጊ መልዕክት ያትሙ",
+    "titleLabel": "የማስታወቂያ ርዕስ",
+    "titlePlaceholder": "የማስታወቂያ ርዕስ ያስገቡ",
+    "messageLabel": "የማስታወቂያ መልዕክት",
+    "messagePlaceholder": "ማስታወቂያዎን እዚህ ይጻፉ...",
+    "publish": "ማስታወቂያ አትም",
+    "publishing": "በማተም ላይ...",
+    "recent": "የቅርብ ጊዜ ማስታወቂያዎች",
+    "noAnnouncements": "ምንም ማስታወቂያ የለም",
+    "noAnnouncementsDescription": "ከላይ ያለውን ቅጽ በመጠቀም የመጀመሪያውን ማስታወቂያ ይፍጠሩ።",
+    "active": "ንቁ",
+    "delete": "ሰርዝ",
+    "confirmDelete": "ይህን ማስታወቂያ መሰረዝ ይፈልጋሉ?",
+    "announcementBoard": "የማስታወቂያ ሰሌዳ"
+  },
+  "status": {
+    "pending": "በመጠባበቅ ላይ",
+    "assigned": "ተመድቧል",
+    "inProgress": "በሂደት ላይ",
+    "awaitingPurchase": "ግዥን በመጠባበቅ ላይ",
+    "resolved": "ተፈቷል",
+    "closed": "ተዘግቷል"
+  },
+  "priority": {
+    "low": "ዝቅተኛ",
+    "medium": "መካከለኛ",
+    "high": "ከፍተኛ",
+    "critical": "አስቸኳይ"
+  },
+  "categories": {
+    "hardware": "ሃርድዌር",
+    "software": "ሶፍትዌር",
+    "networking": "ኔትወርኪንግ",
+    "other": "ሌላ"
+  },
+  "errors": {
+    "searchFailed": "ፍለጋው አልተሳካም። እባክዎ እንደገና ይሞክሩ።"
+  }
+}

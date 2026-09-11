@@ -1,123 +1,118 @@
+import Announcements from "./pages/admin/Announcements";
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "./assets/vite.svg";
-import heroImg from "./assets/hero.png";
-import "./App.css";
+import { useTranslation } from "react-i18next";
+import PeriodicReports from "./pages/admin/PeriodicReports";
+import AdvancedFilterBar from "./components/AdvancedFilterBar";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const { t, i18n } = useTranslation();
+
+  const [results, setResults] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const changeLanguage = () => {
+    const newLanguage = i18n.language === "en" ? "am" : "en";
+    i18n.changeLanguage(newLanguage);
+  };
 
   return (
-    <>
-      <h1 class="text-3xl font-bold underline">Hello world!</h1>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
+    <div className="min-h-screen bg-gray-100">
+      {/* Language Switcher */}
+      <div className="flex justify-end p-4">
         <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+          onClick={changeLanguage}
+          className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
         >
-          Count is {count}
+          {i18n.language === "en" ? "አማርኛ" : "English"}
         </button>
-      </section>
+      </div>
 
-      <div className="ticks"></div>
+      <div className="px-6 pb-6">
+        <div className="mx-auto max-w-7xl">
+          <PeriodicReports />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+          <div className="mt-8">
+            <Announcements />
+          </div>
+
+          <div className="mt-8">
+            <AdvancedFilterBar onResults={setResults} onLoading={setLoading} />
+          </div>
+
+          <div className="mt-6 rounded-xl bg-white p-6 shadow-md">
+            <h2 className="mb-4 text-xl font-bold text-gray-800">
+              {t("searchFilters.searchResults")}
+            </h2>
+
+            {loading && (
+              <div className="space-y-3">
+                {[1, 2, 3, 4].map((item) => (
+                  <div
+                    key={item}
+                    className="h-12 w-full animate-pulse rounded-lg bg-gray-200"
+                  />
+                ))}
+              </div>
+            )}
+
+            {!loading && results === null && (
+              <p className="text-gray-500">{t("searchFilters.useFilters")}</p>
+            )}
+
+            {!loading &&
+              results !== null &&
+              Array.isArray(results) &&
+              results.length === 0 && (
+                <p className="text-gray-500">{t("searchFilters.noTickets")}.</p>
+              )}
+
+            {!loading && Array.isArray(results) && results.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-left">
+                  <thead>
+                    <tr className="border-b bg-gray-50">
+                      <th className="p-3">Ticket</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3">Priority</th>
+                      <th className="p-3">Category</th>
+                      <th className="p-3">Created</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {results.map((ticket, index) => (
+                      <tr
+                        key={ticket.id || index}
+                        className="border-b hover:bg-gray-50"
+                      >
+                        <td className="p-3">{ticket.id || "N/A"}</td>
+
+                        <td className="p-3">{ticket.status || "N/A"}</td>
+
+                        <td className="p-3">{ticket.priority || "N/A"}</td>
+
+                        <td className="p-3">
+                          {ticket.category?.nameEn ||
+                            ticket.category?.name ||
+                            ticket.categoryId ||
+                            "N/A"}
+                        </td>
+
+                        <td className="p-3">
+                          {ticket.createdAt
+                            ? new Date(ticket.createdAt).toLocaleDateString()
+                            : "N/A"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      </div>
+    </div>
   );
 }
-
 export default App;
