@@ -1,0 +1,202 @@
+{
+  "info": {
+    "name": "CivicDesk Backend - API",
+    "_postman_id": "civicdesk-backend-collection",
+    "description": "Collection for testing CivicDesk backend routes",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth - Register",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"Test User\",\n  \"phoneNumber\": \"{{TEST_PHONE}}\",\n  \"password\": \"{{TEST_PASSWORD}}\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/auth/register",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "auth", "register"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phoneNumber\": \"{{TEST_PHONE}}\",\n  \"password\": \"{{TEST_PASSWORD}}\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/auth/login",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const setCookie = pm.response.headers.get('set-cookie');",
+              "if (setCookie) pm.environment.set('ACCESS_COOKIE', setCookie);",
+              "pm.test('login status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Forgot Password",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phoneNumber\": \"{{TEST_PHONE}}\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/auth/forgot-password",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "auth", "forgot-password"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const body = pm.response.json();",
+              "if (body.resetToken) pm.environment.set('RESET_TOKEN', body.resetToken);",
+              "pm.test('forgot password returns 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Reset Password",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"token\": \"{{RESET_TOKEN}}\",\n  \"newPassword\": \"NewPass123!\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/auth/reset-password",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "auth", "reset-password"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Get Current User",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Cookie", "value": "{{ACCESS_COOKIE}}" }],
+        "url": {
+          "raw": "{{BASE_URL}}/api/auth/me",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "auth", "me"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Change Password",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Cookie", "value": "{{ACCESS_COOKIE}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"currentPassword\": \"{{TEST_PASSWORD}}\",\n  \"newPassword\": \"NewPass123!\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/auth/change-password",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "auth", "change-password"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Logout",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Cookie", "value": "{{ACCESS_COOKIE}}" }],
+        "url": {
+          "raw": "{{BASE_URL}}/api/auth/logout",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "auth", "logout"]
+        }
+      }
+    },
+    {
+      "name": "Users - List",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Cookie", "value": "{{ACCESS_COOKIE}}" }],
+        "url": {
+          "raw": "{{BASE_URL}}/api/users",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "users"]
+        }
+      }
+    },
+    {
+      "name": "Users - Get By ID",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Cookie", "value": "{{ACCESS_COOKIE}}" }],
+        "url": {
+          "raw": "{{BASE_URL}}/api/users/{{USER_ID}}",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "users", "{{USER_ID}}"]
+        }
+      }
+    },
+    {
+      "name": "Offices - List",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{BASE_URL}}/api/offices",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "offices"]
+        }
+      }
+    },
+    {
+      "name": "Offices - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Cookie", "value": "{{ACCESS_COOKIE}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Test Office\",\n  \"description\": \"Created by Postman\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/offices",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "offices"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "BASE_URL", "value": "http://localhost:3000" },
+    { "key": "TEST_PHONE", "value": "+251900000000" },
+    { "key": "TEST_PASSWORD", "value": "Password123!" },
+    { "key": "ACCESS_COOKIE", "value": "" },
+    { "key": "RESET_TOKEN", "value": "" }
+  ]
+}
