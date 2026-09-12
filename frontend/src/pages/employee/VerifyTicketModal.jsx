@@ -102,10 +102,10 @@ export default function VerifyTicketModal({ isOpen, onClose, ticket }) {
       <div className="space-y-4">
         {form.apiError && <Alert type="error" message={form.apiError} onClose={() => formDispatch({ type: "CLEAR_ERROR" })} />}
 
-        <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-sm">
-          <p className="font-medium text-gray-900">{ticket.title}</p>
+        <div style={{ border: "1px solid var(--civic-border)", background: "#f7fafc", borderRadius: 8, padding: 12, fontSize: 14 }}>
+          <p className="font-medium" style={{ color: "var(--civic-text)" }}>{ticket.title}</p>
           {ticket.description && (
-            <p className="mt-1 text-gray-600 line-clamp-2">{ticket.description}</p>
+            <p className="mt-1 line-clamp-2" style={{ color: "var(--civic-muted)" }}>{ticket.description}</p>
           )}
         </div>
 
@@ -131,7 +131,7 @@ export default function VerifyTicketModal({ isOpen, onClose, ticket }) {
         {form.mode === "approve" && (
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="civic-label">
                 Rating <span className="text-red-500">*</span>
               </label>
               <StarRating
@@ -144,7 +144,7 @@ export default function VerifyTicketModal({ isOpen, onClose, ticket }) {
             </div>
 
             <div>
-              <label htmlFor="feedback-approve" className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="feedback-approve" className="civic-label">
                 Feedback (optional)
               </label>
               <textarea
@@ -152,15 +152,15 @@ export default function VerifyTicketModal({ isOpen, onClose, ticket }) {
                 rows={3}
                 value={form.feedback}
                 onChange={(e) => formDispatch({ type: "SET_FEEDBACK", value: e.target.value })}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="civic-textarea"
               />
             </div>
 
-            <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+            <div className="flex justify-end gap-2 border-t pt-4" style={{ borderColor: "var(--civic-border)" }}>
               <button
                 type="button"
                 onClick={() => formDispatch({ type: "SET_MODE", value: null })}
-                className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="button-secondary"
               >
                 Back
               </button>
@@ -168,7 +168,7 @@ export default function VerifyTicketModal({ isOpen, onClose, ticket }) {
                 type="button"
                 onClick={handleApprove}
                 disabled={form.submitting || form.rating < 1 || form.rating > 5}
-                className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="button-primary"
               >
                 {form.submitting ? "Submitting…" : "Approve & Close"}
               </button>
@@ -179,7 +179,7 @@ export default function VerifyTicketModal({ isOpen, onClose, ticket }) {
         {form.mode === "reject" && (
           <div className="space-y-4">
             <div>
-              <label htmlFor="feedback-reject" className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="feedback-reject" className="civic-label">
                 Feedback (optional)
               </label>
               <textarea
@@ -187,15 +187,15 @@ export default function VerifyTicketModal({ isOpen, onClose, ticket }) {
                 rows={3}
                 value={form.feedback}
                 onChange={(e) => formDispatch({ type: "SET_FEEDBACK", value: e.target.value })}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="civic-textarea"
               />
             </div>
 
-            <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+            <div className="flex justify-end gap-2 border-t pt-4" style={{ borderColor: "var(--civic-border)" }}>
               <button
                 type="button"
                 onClick={() => formDispatch({ type: "SET_MODE", value: null })}
-                className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="button-secondary"
               >
                 Back
               </button>
@@ -203,7 +203,7 @@ export default function VerifyTicketModal({ isOpen, onClose, ticket }) {
                 type="button"
                 onClick={handleReject}
                 disabled={form.submitting}
-                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="button-primary"
               >
                 {form.submitting ? "Submitting…" : "Reject & Reopen"}
               </button>
