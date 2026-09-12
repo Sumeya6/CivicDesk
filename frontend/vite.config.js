@@ -5,4 +5,15 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/__tests__/setup.js',
+    css: false,
+    include: [
+      'src/__tests__/i18n.test.jsx',
+      'src/__tests__/PeriodicReports.test.jsx',
+      'src/__tests__/AdvancedFilterBar.test.jsx',
+    ],
+  },
 })
