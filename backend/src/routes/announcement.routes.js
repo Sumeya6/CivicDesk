@@ -7,13 +7,15 @@ const {
   updateAnnouncement,
   deleteAnnouncement,
 } = require("../controllers/announcement.controller");
+const authenticateUser = require("../middleware/auth.middleware");
+const { authorize } = require("../middleware/auth.middleware");
 
 const router = Router();
 
 router.get("/", getAnnouncements);
 router.get("/:id", getAnnouncementById);
-router.post("/", createAnnouncement);
-router.put("/:id", updateAnnouncement);
-router.delete("/:id", deleteAnnouncement);
+router.post("/", authenticateUser, authorize("ADMIN"), createAnnouncement);
+router.put("/:id", authenticateUser, authorize("ADMIN"), updateAnnouncement);
+router.delete("/:id", authenticateUser, authorize("ADMIN"), deleteAnnouncement);
 
 module.exports = router;

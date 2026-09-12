@@ -39,11 +39,11 @@ async function getAnnouncementById(req, res, next) {
 // Create announcement
 async function createAnnouncement(req, res, next) {
   try {
-    const { title, content, authorId, isActive } = req.body;
+    const { title, content, isActive } = req.body;
 
-    if (!title || !content || !authorId) {
+    if (!title || !content) {
       return res.status(400).json({
-        message: "Title, content, and authorId are required",
+        message: "Title and content are required",
       });
     }
 
@@ -51,7 +51,7 @@ async function createAnnouncement(req, res, next) {
       data: {
         title,
         content,
-        authorId,
+        authorId: req.user.id,
         isActive: isActive !== undefined ? Boolean(isActive) : true,
       },
     });
