@@ -5,7 +5,10 @@
     "reset": "Reset",
     "loading": "Loading...",
     "exportCSV": "Export CSV",
-    "exportPDF": "Export PDF"
+    "exportPDF": "Export PDF",
+    "page": "Page",
+    "previous": "Previous",
+    "next": "Next"
   },
   "reports": {
     "title": "Admin Analytics & Periodic Reports",
@@ -30,7 +33,9 @@
     "physicalProcurement": "Tickets delayed by physical procurement",
     "averageResolutionTime": "Average resolution time",
     "rating": "rating",
-    "tickets": "tickets"
+    "tickets": "tickets",
+    "noData": "No report data available",
+    "tryAnotherPeriod": "Try selecting a different reporting period."
   },
 
   "searchFilters": {
@@ -54,7 +59,12 @@
     "searchResults": "Search Results",
     "useFilters": "Use the filters above to search for tickets.",
     "noTickets": "No tickets found.",
-    "unableToSearch": "Unable to search tickets. Please try again."
+    "unableToSearch": "Unable to search tickets. Please try again.",
+    "freeTextSearch": "Search by keyword",
+    "freeTextSearchPlaceholder": "Search tickets by keyword...",
+    "dateRange": "Date Range",
+    "assignment": "Assignment",
+    "ticketDetails": "Ticket Details"
   },
   "announcements": {
     "title": "System Announcements",
@@ -73,7 +83,9 @@
     "active": "Active",
     "delete": "Delete",
     "confirmDelete": "Are you sure you want to delete this announcement?",
-    "announcementBoard": "Announcement Board"
+    "announcementBoard": "Announcement Board",
+    "error": "Error",
+    "validationError": "Please enter both a title and content."
   },
   "status": {
     "pending": "Pending",

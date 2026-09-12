@@ -5,7 +5,10 @@
     "reset": "ዳግም አስጀምር",
     "loading": "በመጫን ላይ...",
     "exportCSV": "CSV ላክ",
-    "exportPDF": "PDF ላክ"
+    "exportPDF": "PDF ላክ",
+    "page": "ገጹ",
+    "previous": "ቀደም",
+    "next": "ቀጣይ"
   },
   "reports": {
     "title": "የአስተዳደር ትንታኔ እና ወቅታዊ ሪፖርቶች",
@@ -30,7 +33,9 @@
     "physicalProcurement": "በአካላዊ ግዥ ምክንያት የዘገዩ ቲኬቶች",
     "averageResolutionTime": "አማካይ የመፍትሄ ጊዜ",
     "rating": "ደረጃ",
-    "tickets": "ቲኬቶች"
+    "tickets": "ቲኬቶች",
+    "noData": "የሪፖርት መረጃ አይገኘም",
+    "tryAnotherPeriod": "ሌላ የሪፖርት ጊዜ ለመምረጥ ይሞክሩ።"
   },
   "searchFilters": {
     "title": "የላቀ የቲኬት ፍለጋ",
@@ -53,7 +58,12 @@
     "searchResults": "የፍለጋ ውጤቶች",
     "useFilters": "ቲኬቶችን ለመፈለግ ከላይ ያሉትን ማጣሪያዎች ይጠቀሙ።",
     "noTickets": "ምንም ቲኬት አልተገኘም።",
-    "unableToSearch": "ቲኬቶችን መፈለግ አልተቻለም። እባክዎ እንደገና ይሞክሩ።"
+    "unableToSearch": "ቲኬቶችን መፈለግ አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
+    "freeTextSearch": "በቃላዊ ምልክት ፈልግ",
+    "freeTextSearchPlaceholder": "ቲኬቶችን በቃላዊ ምልክት ይፈልጉ...",
+    "dateRange": "የቀን ክልል",
+    "assignment": "የስራ መስጠፍ",
+    "ticketDetails": "የቲኬት ዝርዝሮች"
   },
   "announcements": {
     "title": "የስርዓት ማስታወቂያዎች",
@@ -72,7 +82,9 @@
     "active": "ንቁ",
     "delete": "ሰርዝ",
     "confirmDelete": "ይህን ማስታወቂያ መሰረዝ ይፈልጋሉ?",
-    "announcementBoard": "የማስታወቂያ ሰሌዳ"
+    "announcementBoard": "የማስታወቂያ ሰሌዳ",
+    "error": "ስህተት",
+    "validationError": "እባክዎ ርዕስ እና ይዘት ያስገቡ።"
   },
   "status": {
     "pending": "በመጠባበቅ ላይ",
