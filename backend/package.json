@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --runInBand tests/assignment.test.js tests/ticket.test.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

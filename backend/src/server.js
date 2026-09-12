@@ -73,6 +73,9 @@ const server = app.listen(PORT, async () => {
 
 function shutdown(signal) {
   logger.info(`${signal} received. Shutting down gracefully...`);
+  if (!server) {
+    process.exit(0);
+  }
   server.close(() => {
     logger.info("HTTP server closed.");
     process.exit(0);
