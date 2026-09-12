@@ -6,8 +6,10 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   test: {
+    globals: true,
     environment: 'jsdom',
     setupFiles: './src/__tests__/setup.js',
+    css: true,
     pool: 'threads',
     maxWorkers: 1,
   },

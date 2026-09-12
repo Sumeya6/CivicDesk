@@ -82,14 +82,13 @@ if (require.main === module) {
 function shutdown(signal) {
   logger.info(`${signal} received. Shutting down gracefully...`);
 
-  if (server) {
-    server.close(() => {
-      logger.info("HTTP server closed.");
-      process.exit(0);
-    });
-  } else {
+  if (!server) {
     process.exit(0);
   }
+  server.close(() => {
+    logger.info("HTTP server closed.");
+    process.exit(0);
+  });
 }
 
 process.on("SIGTERM", () => shutdown("SIGTERM"));

@@ -202,6 +202,15 @@ async function main() {
   }
 
   const users = {
+    system: await prisma.user.create({
+      data: {
+        fullName: "CivicDesk System",
+        phoneNumber: process.env.SYSTEM_ACTOR_PHONE || "+251900000000",
+        password: passwordHash,
+        role: Role.ADMIN,
+        preferredLanguage: Language.EN,
+      },
+    }),
     admin: await prisma.user.create({
       data: {
         fullName: "አበበ ከበደ (Abebe Kebede)",

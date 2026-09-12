@@ -1,11 +1,15 @@
-import { ClipboardList, MapPin, Wrench } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { ClipboardList, MapPin, Wrench } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import AnnouncementBoard from "../../components/AnnouncementBoard";
 import { fetchOfficeOptions } from "../../store/officeSlice";
 import { fetchMyTechnicianOffices } from "../../store/userSlice";
+import AnnouncementBoard from "../../components/AnnouncementBoard";
+import TechnicianQueue from "./TechnicianQueue";
+import TicketResolveModal from "./TicketResolveModal";
+import RequestPurchaseModal from "./RequestPurchaseModal";
+import AuditTrailModal from "../../components/AuditTrailModal";
 
 function TechnicianDashboard() {
   const { t } = useTranslation();
@@ -13,6 +17,10 @@ function TechnicianDashboard() {
   const { currentUser } = useAuth();
   const offices = useSelector((state) => state.offices.items);
   const [assignedOfficeIds, setAssignedOfficeIds] = useState([]);
+  const [resolveTicket, setResolveTicket] = useState(null);
+  const [purchaseTicket, setPurchaseTicket] = useState(null);
+  const [auditTicketId, setAuditTicketId] = useState(null);
+
   const assignedOffices = offices.filter((office) =>
     assignedOfficeIds.includes(office.id),
   );
@@ -100,15 +108,34 @@ function TechnicianDashboard() {
         </section>
         <AnnouncementBoard />
       </div>
+
       <section className="dashboard-panel">
         <div className="dashboard-panel-heading">
           <h2>{t("dashboard.recentRequests")}</h2>
           <ClipboardList size={18} />
         </div>
-        <div className="dashboard-empty">
-          <p>{t("dashboard.requestsUnavailable")}</p>
-        </div>
+        <TechnicianQueue
+          onRequestPurchase={(ticket) => setPurchaseTicket(ticket)}
+          onResolve={(ticket) => setResolveTicket(ticket)}
+          onViewAudit={(ticket) => setAuditTicketId(ticket.id)}
+        />
       </section>
+
+      <TicketResolveModal
+        isOpen={!!resolveTicket}
+        onClose={() => setResolveTicket(null)}
+        ticket={resolveTicket}
+      />
+      <RequestPurchaseModal
+        isOpen={!!purchaseTicket}
+        onClose={() => setPurchaseTicket(null)}
+        ticket={purchaseTicket}
+      />
+      <AuditTrailModal
+        isOpen={!!auditTicketId}
+        onClose={() => setAuditTicketId(null)}
+        ticketId={auditTicketId}
+      />
     </section>
   );
 }

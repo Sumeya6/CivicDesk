@@ -9,6 +9,7 @@ import Unauthorized from "./pages/auth/Unauthorized";
 import OfficeManagement from "./pages/admin/OfficeManagement";
 import UserManagement from "./pages/admin/UserManagement";
 import DashboardRouter from "./pages/DashboardRouter";
+import CreateTicket from "./pages/employee/CreateTicket";
 
 function App() {
   return (
@@ -45,9 +46,7 @@ function App() {
             path="/requests/create"
             element={
               <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                  Create Request
-                </div>
+                <CreateTicket />
               </ProtectedRoute>
             }
           />
