@@ -4,7 +4,9 @@ import { useTranslation } from "react-i18next";
 import { fetchUsers } from "../../store/userSlice";
 import { fetchOffices } from "../../store/officeSlice";
 import { fetchTickets } from "../../store/ticketSlice";
-import { Pagination, StatusBadge, PriorityBadge } from "../../components/Pagination";
+import { Pagination } from "../../components/Pagination";
+import StatusBadge from "../../components/StatusBadge";
+import PriorityBadge from "../../components/PriorityBadge";
 import { formatDate } from "../../components/ticketConfig";
 import AssignTechnicianModal from "./AssignTechnicianModal";
 import AuditTrailModal from "../../components/AuditTrailModal";
@@ -146,7 +148,7 @@ function AdminDashboard() {
           <button
             type="button"
             onClick={loadTickets}
-            className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="button-secondary"
           >
             <RefreshCw className="h-4 w-4" />
             {t("dashboard.refresh", "Refresh")}
@@ -154,14 +156,14 @@ function AdminDashboard() {
         </div>
 
         {error && (
-          <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+          <div className="workspace-alert" role="alert">{error}</div>
         )}
 
-        <div className="mb-3 flex items-center gap-3">
+        <div className="flex items-center gap-2 px-4 pb-3">
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            className="rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-[var(--civic-blue-700)] focus:outline-none focus:ring-1 focus:ring-[var(--civic-blue-700)]"
+            className="civic-select"
           >
             <option value="">All Statuses</option>
             {STATUSES.map((s) => (
@@ -171,7 +173,7 @@ function AdminDashboard() {
         </div>
 
         {loading && (
-          <div className="flex items-center justify-center py-12 text-slate-500">
+          <div className="table-state">
             <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
             Loading tickets…
           </div>
@@ -184,49 +186,49 @@ function AdminDashboard() {
         )}
 
         {!loading && tickets.length > 0 && (
-          <div className="overflow-x-auto rounded-lg border border-slate-200">
-            <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50">
+          <div className="table-scroll">
+            <table className="workspace-table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Title</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Category</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Priority</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Device/System</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Created</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Actions</th>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Device/System</th>
+                  <th>Created</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 bg-white">
+              <tbody>
                 {tickets.map((ticket) => (
-                  <tr key={ticket.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3">
-                      <div className="text-sm font-medium text-slate-900">{ticket.title}</div>
+                  <tr key={ticket.id}>
+                    <td>
+                      <div className="entity-name">{ticket.title}</div>
                       {ticket.description && (
-                        <div className="mt-0.5 text-xs text-slate-500 line-clamp-1">{ticket.description}</div>
+                        <div className="entity-secondary line-clamp-1">{ticket.description}</div>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-700">
+                    <td>
                       {ticket.category?.nameEn || ticket.categoryId}
                     </td>
-                    <td className="px-4 py-3">
+                    <td>
                       <PriorityBadge priority={ticket.priority} />
                     </td>
-                    <td className="px-4 py-3">
+                    <td>
                       <StatusBadge status={ticket.status} />
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-700">
+                    <td>
                       {ticket.deviceOrSystem || "—"}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-500">
+                    <td>
                       {formatDate(ticket.createdAt)}
                     </td>
-                    <td className="px-4 py-3">
+                    <td>
                       <div className="flex flex-wrap gap-1">
                         <button
                           type="button"
                           onClick={() => setAssignTicket(ticket)}
-                          className="inline-flex items-center gap-1 rounded bg-[var(--civic-blue-800)] px-2 py-1 text-xs text-white hover:bg-[var(--civic-blue-950)]"
+                          className="button-primary"
                         >
                           <UserCog className="h-3 w-3" />
                           Assign
@@ -234,7 +236,7 @@ function AdminDashboard() {
                         <button
                           type="button"
                           onClick={() => setAuditTicketId(ticket.id)}
-                          className="rounded border border-slate-200 px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
+                          className="table-action"
                         >
                           Audit
                         </button>

@@ -74,21 +74,21 @@ export default function AssignTechnicianModal({ isOpen, onClose, ticket }) {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {apiError && <Alert type="error" message={apiError} onClose={() => setApiError(null)} />}
 
-        <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-sm">
-          <p className="font-medium text-gray-900">{ticket.title}</p>
+        <div style={{ border: "1px solid var(--civic-border)", background: "#f7fafc", borderRadius: 8, padding: 12, fontSize: 14 }}>
+          <p className="font-medium" style={{ color: "var(--civic-text)" }}>{ticket.title}</p>
           {ticket.description && (
-            <p className="mt-1 text-gray-600 line-clamp-2">{ticket.description}</p>
+            <p className="mt-1 line-clamp-2" style={{ color: "var(--civic-muted)" }}>{ticket.description}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="technicianId" className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor="technicianId" className="civic-label">
             Technician
           </label>
           <select
             id="technicianId"
             {...register("technicianId")}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="civic-select"
           >
             <option value="">Keep current assignment</option>
             {technicians.map((tech) => (
@@ -100,13 +100,13 @@ export default function AssignTechnicianModal({ isOpen, onClose, ticket }) {
         </div>
 
         <div>
-          <label htmlFor="priority" className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor="priority" className="civic-label">
             Priority
           </label>
           <select
             id="priority"
             {...register("priority")}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="civic-select"
           >
             {PRIORITIES.map((p) => (
               <option key={p} value={p}>
@@ -116,18 +116,18 @@ export default function AssignTechnicianModal({ isOpen, onClose, ticket }) {
           </select>
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+        <div className="flex justify-end gap-2 border-t pt-4" style={{ borderColor: "var(--civic-border)" }}>
           <button
             type="button"
             onClick={handleClose}
-            className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="button-secondary"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="button-primary"
           >
             {submitting ? "Saving…" : "Save Changes"}
           </button>

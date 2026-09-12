@@ -36,26 +36,28 @@ const periods = [
 
 function MetricCard({ title, value, suffix = "", icon, accentColor = "blue" }) {
   const colorMap = {
-    blue: "bg-blue-50 text-blue-600",
-    emerald: "bg-emerald-50 text-emerald-600",
-    amber: "bg-amber-50 text-amber-600",
-    red: "bg-red-50 text-red-600",
-    violet: "bg-violet-50 text-violet-600",
+    blue: { bg: "#eef5fb", fg: "var(--civic-blue-800)" },
+    emerald: { bg: "#edf9f3", fg: "#16734e" },
+    amber: { bg: "#fef9ec", fg: "#92610a" },
+    red: { bg: "#fff1f0", fg: "#b42318" },
+    violet: { bg: "#f1effc", fg: "#5c4ca3" },
   };
 
+  const c = colorMap[accentColor] || colorMap.blue;
+
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 sm:p-5">
-      <div className="flex items-start justify-between">
-        <p className="text-sm font-medium text-gray-500">{title}</p>
+    <div className="civic-card" style={{ padding: 16 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+        <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "var(--civic-muted)" }}>{title}</p>
         {icon && (
-          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${colorMap[accentColor]}`}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 8, background: c.bg, color: c.fg, flexShrink: 0 }}>
             {icon}
           </div>
         )}
       </div>
-      <p className="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+      <p style={{ margin: "8px 0 0", fontSize: 24, fontWeight: 700, color: "var(--civic-text)", letterSpacing: "-0.02em" }}>
         {value}
-        {suffix && <span className="text-lg font-semibold text-gray-500">{suffix}</span>}
+        {suffix && <span style={{ fontSize: 16, fontWeight: 600, color: "var(--civic-muted)" }}>{suffix}</span>}
       </p>
     </div>
   );
@@ -63,16 +65,15 @@ function MetricCard({ title, value, suffix = "", icon, accentColor = "blue" }) {
 
 function ProgressBar({ value, color = "blue" }) {
   const colorMap = {
-    blue: "bg-blue-600",
-    yellow: "bg-yellow-400",
-    red: "bg-red-500",
+    blue: "var(--civic-blue-800)",
+    yellow: "#facc15",
+    red: "#ef4444",
   };
 
   return (
-    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-100">
+    <div style={{ marginTop: 8, height: 8, width: "100%", overflow: "hidden", borderRadius: 9999, background: "#e7eef5" }}>
       <div
-        className={`h-full rounded-full transition-all duration-500 ${colorMap[color]}`}
-        style={{ width: `${Math.min(value, 100)}%` }}
+        style={{ height: "100%", borderRadius: 9999, transition: "width 500ms", background: colorMap[color] || colorMap.blue, width: `${Math.min(value, 100)}%` }}
       />
     </div>
   );
@@ -82,40 +83,37 @@ function StarRating({ rating }) {
   const rounded = Math.round(rating);
 
   return (
-    <div className="flex items-center gap-1">
+    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`h-4 w-4 ${
-            star <= rounded ? "fill-yellow-400 text-yellow-400" : "fill-gray-200 text-gray-200"
-          }`}
+          style={{ width: 16, height: 16, fill: star <= rounded ? "#facc15" : "#e7eef5", color: star <= rounded ? "#facc15" : "#e7eef5" }}
         />
       ))}
-      <span className="ml-1.5 text-sm font-medium text-gray-600">{rating}/5</span>
+      <span style={{ marginLeft: 6, fontSize: 13, fontWeight: 500, color: "var(--civic-muted)" }}>{rating}/5</span>
     </div>
   );
 }
 
 function ReportSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+      <div className="summary-strip" style={{ gridTemplateColumns: "repeat(5, 1fr)" }}>
         {[1, 2, 3, 4, 5].map((item) => (
-          <SkeletonBlock key={item} className="h-24" />
+          <SkeletonBlock key={item} style={{ height: 96 }} />
         ))}
       </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <SkeletonBlock className="h-56" />
-        <SkeletonBlock className="h-56" />
-        <SkeletonBlock className="h-56" />
-        <SkeletonBlock className="h-56" />
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 16 }}>
+        <SkeletonBlock style={{ height: 224 }} />
+        <SkeletonBlock style={{ height: 224 }} />
+        <SkeletonBlock style={{ height: 224 }} />
+        <SkeletonBlock style={{ height: 224 }} />
       </div>
     </div>
   );
 }
 
-const inputClasses =
-  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20";
+const inputClasses = "civic-input";
 
 function PeriodicReports() {
   const { t } = useTranslation();
@@ -317,54 +315,47 @@ function PeriodicReports() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="admin-surface workspace-page">
       {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <header className="workspace-header">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
-            {t("reports.title")}
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">{t("reports.description")}</p>
+          <p className="workspace-eyebrow"><BarChart3 size={14} /> {t("admin.administration")}</p>
+          <h1>{t("reports.title")}</h1>
+          <p className="workspace-description">{t("reports.description")}</p>
         </div>
-        <div className="flex shrink-0 gap-2">
+        <div className="workspace-actions">
           <button
             onClick={exportCSV}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="button-secondary"
           >
-            <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
-            <span className="hidden sm:inline">{t("common.exportCSV")}</span>
-            <span className="sm:hidden">CSV</span>
+            <FileSpreadsheet style={{ width: 16, height: 16, color: "#16734e" }} />
+            <span style={{ display: "none" }}>{t("common.exportCSV")}</span>
+            <span>CSV</span>
           </button>
           <button
             onClick={exportPDF}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="button-secondary"
           >
-            <FileText className="h-4 w-4 text-red-500" />
-            <span className="hidden sm:inline">{t("common.exportPDF")}</span>
-            <span className="sm:hidden">PDF</span>
+            <FileText style={{ width: 16, height: 16, color: "#ef4444" }} />
+            <span style={{ display: "none" }}>{t("common.exportPDF")}</span>
+            <span>PDF</span>
           </button>
         </div>
-      </div>
+      </header>
 
       {/* Period Selector */}
-      <div className="rounded-lg border border-gray-200 bg-white p-1">
-        <div className="flex gap-1 overflow-x-auto">
-          {periods.map((period) => (
-            <button
-              key={period.value}
-              onClick={() => setSelectedPeriod(period.value)}
-              className={`relative flex-1 whitespace-nowrap rounded-md px-4 py-2.5 text-sm font-medium transition focus:outline-none ${
-                selectedPeriod === period.value
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
-              }`}
-            >
-              {t(`reports.${period.label}`)}
-            </button>
-          ))}
-        </div>
+      <div className="civic-tabs">
+        {periods.map((period) => (
+          <button
+            key={period.value}
+            onClick={() => setSelectedPeriod(period.value)}
+            className={`civic-tab ${selectedPeriod === period.value ? "civic-tab-active" : ""}`}
+          >
+            {t(`reports.${period.label}`)}
+          </button>
+        ))}
       </div>
 
       {/* Content */}
@@ -373,93 +364,86 @@ function PeriodicReports() {
       ) : report ? (
         <>
           {/* Metric Cards */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="summary-strip" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
             <MetricCard
               title={t("reports.totalTickets")}
               value={report.totalTickets}
-              icon={<BarChart3 className="h-4 w-4" />}
+              icon={<BarChart3 style={{ width: 16, height: 16 }} />}
               accentColor="blue"
             />
             <MetricCard
               title={t("reports.slaCompliance")}
               value={report.slaCompliance}
               suffix="%"
-              icon={<CheckCircle2 className="h-4 w-4" />}
+              icon={<CheckCircle2 style={{ width: 16, height: 16 }} />}
               accentColor="emerald"
             />
             <MetricCard
               title={t("reports.procurementDelays")}
               value={report.procurementDelays}
-              icon={<AlertTriangle className="h-4 w-4" />}
+              icon={<AlertTriangle style={{ width: 16, height: 16 }} />}
               accentColor="amber"
             />
             <MetricCard
               title={t("reports.averageResolution")}
               value={report.averageResolution}
               suffix="hrs"
-              icon={<Timer className="h-4 w-4" />}
+              icon={<Timer style={{ width: 16, height: 16 }} />}
               accentColor="red"
             />
             <MetricCard
               title={t("reports.customerSatisfaction")}
               value={report.satisfaction}
               suffix="/5"
-              icon={<Star className="h-4 w-4" />}
+              icon={<Star style={{ width: 16, height: 16 }} />}
               accentColor="violet"
             />
           </div>
 
           {/* Detailed Charts */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 16 }}>
             {/* SLA Compliance */}
-            <div className="rounded-lg border border-gray-200 bg-white p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50">
-                  <TrendingUp className="h-4 w-4 text-blue-600" />
+            <div className="civic-card" style={{ padding: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div className="summary-icon summary-icon-success">
+                  <TrendingUp style={{ width: 16, height: 16 }} />
                 </div>
-                <h3 className="text-sm font-semibold text-gray-800">
+                <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "var(--civic-text)" }}>
                   {t("reports.slaCompliance")}
                 </h3>
               </div>
-              <p className="mt-3 text-3xl font-bold tracking-tight text-gray-900">
+              <p style={{ margin: "12px 0 0", fontSize: 30, fontWeight: 700, color: "var(--civic-text)", letterSpacing: "-0.02em" }}>
                 {report.slaCompliance}%
               </p>
               <ProgressBar value={report.slaCompliance} />
             </div>
 
             {/* Customer Satisfaction */}
-            <div className="rounded-lg border border-gray-200 bg-white p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50">
-                  <Star className="h-4 w-4 text-violet-600" />
+            <div className="civic-card" style={{ padding: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div className="summary-icon summary-icon-purple">
+                  <Star style={{ width: 16, height: 16 }} />
                 </div>
-                <h3 className="text-sm font-semibold text-gray-800">
+                <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "var(--civic-text)" }}>
                   {t("reports.customerSatisfaction")}
                 </h3>
               </div>
-              <div className="mt-3">
+              <div style={{ marginTop: 12 }}>
                 <StarRating rating={report.satisfaction} />
               </div>
-              <div className="mt-4 space-y-2">
+              <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
                 {[5, 4, 3, 2, 1].map((star) => (
-                  <div key={star} className="flex items-center gap-2">
-                    <span className="w-6 text-right text-xs font-medium text-gray-500">
+                  <div key={star} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ width: 24, textAlign: "right", fontSize: 12, fontWeight: 500, color: "var(--civic-muted)" }}>
                       {star}
                     </span>
-                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
+                    <Star style={{ width: 12, height: 12, fill: "#facc15", color: "#facc15" }} />
+                    <div style={{ height: 6, flex: 1, overflow: "hidden", borderRadius: 9999, background: "#e7eef5" }}>
                       <div
-                        className="h-full rounded-full bg-yellow-400"
-                        style={{
-                          width: `${
-                            report.totalTickets > 0
-                              ? (report.ratings[star] / report.totalTickets) * 100
-                              : 0
-                          }%`,
-                        }}
+                        style={{ height: "100%", borderRadius: 9999, background: "#facc15", width: `${report.totalTickets > 0 ? (report.ratings[star] / report.totalTickets) * 100 : 0}%` }}
                       />
                     </div>
-                    <span className="w-8 text-right text-xs text-gray-400">
+                    <span style={{ width: 32, textAlign: "right", fontSize: 12, color: "var(--civic-muted)" }}>
                       {report.ratings[star]}
                     </span>
                   </div>
@@ -468,23 +452,23 @@ function PeriodicReports() {
             </div>
 
             {/* Technician Workload */}
-            <div className="rounded-lg border border-gray-200 bg-white p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50">
-                  <Users className="h-4 w-4 text-emerald-600" />
+            <div className="civic-card" style={{ padding: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div className="summary-icon summary-icon-cyan">
+                  <Users style={{ width: 16, height: 16 }} />
                 </div>
-                <h3 className="text-sm font-semibold text-gray-800">
+                <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "var(--civic-text)" }}>
                   {t("reports.technicianWorkload")}
                 </h3>
               </div>
-              <div className="mt-4 space-y-3">
+              <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>
                 {report.technicians.map((technician) => (
                   <div key={technician.name}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 13, fontWeight: 500, color: "var(--civic-text)" }}>
                         {technician.name}
                       </span>
-                      <span className="text-xs text-gray-400">
+                      <span style={{ fontSize: 12, color: "var(--civic-muted)" }}>
                         {technician.tickets} {t("reports.tickets")}
                       </span>
                     </div>
@@ -497,25 +481,25 @@ function PeriodicReports() {
             </div>
 
             {/* Issue Categories */}
-            <div className="rounded-lg border border-gray-200 bg-white p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50">
-                  <Tags className="h-4 w-4 text-amber-600" />
+            <div className="civic-card" style={{ padding: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div className="summary-icon summary-icon-amber">
+                  <Tags style={{ width: 16, height: 16 }} />
                 </div>
-                <h3 className="text-sm font-semibold text-gray-800">
+                <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "var(--civic-text)" }}>
                   {t("reports.issueCategories")}
                 </h3>
               </div>
-              <div className="mt-4 space-y-2">
+              <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
                 {report.categories.map((category) => (
                   <div
                     key={category.name}
-                    className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2.5"
+                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderRadius: 7, background: "#f7fafc", padding: "10px 12px" }}
                   >
-                    <span className="text-sm font-medium text-gray-700">
+                    <span style={{ fontSize: 13, fontWeight: 500, color: "var(--civic-text)" }}>
                       {category.name}
                     </span>
-                    <span className="text-sm font-semibold text-blue-600">
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--civic-blue-800)" }}>
                       {category.count}
                     </span>
                   </div>
@@ -525,29 +509,29 @@ function PeriodicReports() {
           </div>
 
           {/* Procurement Analytics */}
-          <div className="rounded-lg border border-gray-200 bg-white p-5">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50">
-                <ShoppingCart className="h-4 w-4 text-red-600" />
+          <div className="civic-card" style={{ padding: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div className="summary-icon" style={{ background: "#fff1f0", color: "#b42318" }}>
+                <ShoppingCart style={{ width: 16, height: 16 }} />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-800">
+                <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "var(--civic-text)" }}>
                   {t("reports.procurementAnalytics")}
                 </h3>
-                <p className="text-xs text-gray-500">
+                <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--civic-muted)" }}>
                   {t("reports.physicalProcurement")}
                 </p>
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-4">
-              <span className="text-4xl font-bold text-red-600">
+            <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 16 }}>
+              <span style={{ fontSize: 40, fontWeight: 700, color: "#b42318" }}>
                 {report.procurementDelays}
               </span>
               <div>
-                <p className="text-sm font-medium text-gray-700">
+                <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "var(--civic-text)" }}>
                   {t("reports.awaitingPurchase")}
                 </p>
-                <p className="text-xs text-gray-400">
+                <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--civic-muted)" }}>
                   {t("reports.physicalProcurement")}
                 </p>
               </div>
@@ -555,20 +539,16 @@ function PeriodicReports() {
           </div>
 
           {/* Inline Search Section */}
-          <div className="rounded-lg border border-gray-200 bg-white">
-            <div className="border-b border-gray-100 px-5 py-4">
-              <h3 className="text-sm font-semibold text-gray-800">
-                {t("searchFilters.title")}
-              </h3>
-              <p className="mt-0.5 text-xs text-gray-500">
-                {t("searchFilters.description")}
-              </p>
+          <div className="civic-card">
+            <div className="civic-card-header">
+              <h3>{t("searchFilters.title")}</h3>
+              <p>{t("searchFilters.description")}</p>
             </div>
 
-            <div className="p-5">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="civic-card-body">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16 }}>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-gray-500">
+                  <label className="civic-label">
                     {t("searchFilters.status")}
                   </label>
                   <select
@@ -587,7 +567,7 @@ function PeriodicReports() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-gray-500">
+                  <label className="civic-label">
                     {t("searchFilters.priority")}
                   </label>
                   <select
@@ -604,7 +584,7 @@ function PeriodicReports() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-gray-500">
+                  <label className="civic-label">
                     {t("searchFilters.startDate")}
                   </label>
                   <input
@@ -616,7 +596,7 @@ function PeriodicReports() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-gray-500">
+                  <label className="civic-label">
                     {t("searchFilters.endDate")}
                   </label>
                   <input
@@ -628,36 +608,37 @@ function PeriodicReports() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-gray-500">
+                  <label className="civic-label">
                     {t("searchFilters.freeTextSearch")}
                   </label>
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+                  <div style={{ position: "relative" }}>
+                    <Search style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: "var(--civic-muted)" }} />
                     <input
                       type="text"
                       value={searchFilters.q}
                       onChange={(e) => handleFilterChange("q", e.target.value)}
                       placeholder={t("searchFilters.freeTextSearch")}
-                      className={`${inputClasses} pl-8`}
+                      className={inputClasses}
+                      style={{ paddingLeft: 32 }}
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 flex gap-2">
+              <div style={{ marginTop: 16, display: "flex", gap: 8 }}>
                 <button
                   onClick={() => handleSearch(1)}
                   disabled={searchLoading}
-                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+                  className="button-primary"
                 >
-                  <Search className="h-3.5 w-3.5" />
+                  <Search style={{ width: 16, height: 16 }} />
                   {searchLoading ? t("common.loading") : t("searchFilters.searchTickets")}
                 </button>
                 <button
                   onClick={resetSearch}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+                  className="button-secondary"
                 >
-                  <RotateCcw className="h-3.5 w-3.5" />
+                  <RotateCcw style={{ width: 16, height: 16 }} />
                   {t("common.reset")}
                 </button>
               </div>
@@ -665,72 +646,55 @@ function PeriodicReports() {
           </div>
 
           {/* Search Results */}
-          <div className="rounded-lg border border-gray-200 bg-white">
-            <div className="border-b border-gray-100 px-5 py-4">
-              <h3 className="text-sm font-semibold text-gray-800">
-                {t("searchFilters.searchResults")}
-              </h3>
+          <div className="civic-card">
+            <div className="civic-card-header">
+              <h3>{t("searchFilters.searchResults")}</h3>
             </div>
 
             {searchLoading ? (
-              <div className="p-5">
-                <div className="space-y-3">
+              <div className="civic-card-body">
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {[1, 2, 3, 4].map((item) => (
-                    <SkeletonBlock key={item} className="h-12" />
+                    <SkeletonBlock key={item} style={{ height: 40 }} />
                   ))}
                 </div>
               </div>
             ) : searchResults.length === 0 ? (
-              <div className="p-5">
+              <div className="civic-card-body">
                 <EmptyState
-                  icon={<Search className="h-5 w-5" />}
+                  icon={<Search style={{ width: 20, height: 20 }} />}
                   title={t("searchFilters.noTickets")}
                   description={t("searchFilters.useFilters")}
                 />
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
+              <div className="table-scroll">
+                <table className="workspace-table">
                   <thead>
-                    <tr className="border-b border-gray-100 bg-gray-50/80">
-                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        {t("searchFilters.title")}
-                      </th>
-                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        {t("searchFilters.status")}
-                      </th>
-                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        {t("searchFilters.priority")}
-                      </th>
-                      <th className="hidden px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 sm:table-cell">
-                        {t("searchFilters.office")}
-                      </th>
-                      <th className="hidden px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 sm:table-cell">
-                        {t("searchFilters.category")}
-                      </th>
+                    <tr>
+                      <th>{t("searchFilters.title")}</th>
+                      <th>{t("searchFilters.status")}</th>
+                      <th>{t("searchFilters.priority")}</th>
+                      <th>{t("searchFilters.office")}</th>
+                      <th>{t("searchFilters.category")}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody>
                     {searchResults.map((ticket) => (
-                      <tr
-                        key={ticket.id}
-                        className="transition hover:bg-gray-50/50"
-                      >
-                        <td className="max-w-[200px] truncate px-5 py-3 font-medium text-gray-800">
-                          {ticket.title || ticket.subject || ticket.description || "-"}
+                      <tr key={ticket.id}>
+                        <td>
+                          <div className="entity-name" style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {ticket.title || ticket.subject || ticket.description || "-"}
+                          </div>
                         </td>
-                        <td className="px-5 py-3">
+                        <td>
                           <StatusBadge status={ticket.status} />
                         </td>
-                        <td className="px-5 py-3">
+                        <td>
                           <PriorityBadge priority={ticket.priority} />
                         </td>
-                        <td className="hidden px-5 py-3 text-gray-600 sm:table-cell">
-                          {ticket.office?.nameEn || "-"}
-                        </td>
-                        <td className="hidden px-5 py-3 text-gray-600 sm:table-cell">
-                          {ticket.category?.nameEn || "-"}
-                        </td>
+                        <td>{ticket.office?.nameEn || "-"}</td>
+                        <td>{ticket.category?.nameEn || "-"}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -740,26 +704,26 @@ function PeriodicReports() {
 
             {/* Pagination */}
             {searchPagination && searchPagination.totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-gray-100 px-5 py-3">
-                <span className="text-xs text-gray-500">
+              <div className="civic-pagination">
+                <span style={{ fontSize: 12, color: "var(--civic-muted)" }}>
                   {t("common.page")} {searchPagination.page} / {searchPagination.totalPages}
                 </span>
-                <div className="flex gap-1.5">
+                <div style={{ display: "flex", gap: 6 }}>
                   <button
                     onClick={() => handleSearch(searchPage - 1)}
                     disabled={searchPage === 1 || searchLoading}
-                    className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition hover:bg-gray-50 disabled:opacity-40"
+                    className="civic-pagination-btn"
                   >
-                    <ChevronLeft className="h-3.5 w-3.5" />
+                    <ChevronLeft style={{ width: 14, height: 14 }} />
                     {t("common.previous") || "Prev"}
                   </button>
                   <button
                     onClick={() => handleSearch(searchPage + 1)}
                     disabled={searchPage === searchPagination.totalPages || searchLoading}
-                    className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition hover:bg-gray-50 disabled:opacity-40"
+                    className="civic-pagination-btn"
                   >
                     {t("common.next") || "Next"}
-                    <ChevronRight className="h-3.5 w-3.5" />
+                    <ChevronRight style={{ width: 14, height: 14 }} />
                   </button>
                 </div>
               </div>
@@ -768,7 +732,7 @@ function PeriodicReports() {
         </>
       ) : (
         <EmptyState
-          icon={<BarChart3 className="h-5 w-5" />}
+          icon={<BarChart3 style={{ width: 20, height: 20 }} />}
           title={t("reports.noData") || "No report data available"}
           description={t("reports.tryAnotherPeriod") || "Try selecting a different reporting period."}
         />
