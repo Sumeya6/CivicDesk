@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "src/server.js",
   "scripts": {
-    "test": "jest --runInBand --testEnvironment=node"
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "test": "jest --runInBand --testEnvironment=node --forceExit"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

@@ -16,5 +16,7 @@ router.use("/offices", require("./office.routes"));
 router.use("/announcements", require("./announcement.routes"));
 router.use("/tickets", require("./ticket.routes"));
 router.use("/categories", require("./category.routes"));
+router.use("/reports", require("./report.routes"));
+router.use("/search", require("./search.routes"));
 
 module.exports = router;

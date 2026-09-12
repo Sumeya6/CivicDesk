@@ -9,8 +9,11 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/__tests__/setup.js',
-    css: true,
+    css: false,
     pool: 'threads',
     maxWorkers: 1,
+    include: [
+      'src/__tests__/**/*.test.{js,jsx}',
+    ],
   },
 })

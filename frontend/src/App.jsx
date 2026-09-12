@@ -8,6 +8,8 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import Unauthorized from "./pages/auth/Unauthorized";
 import OfficeManagement from "./pages/admin/OfficeManagement";
 import UserManagement from "./pages/admin/UserManagement";
+import Announcements from "./pages/admin/Announcements";
+import PeriodicReports from "./pages/admin/PeriodicReports";
 import DashboardRouter from "./pages/DashboardRouter";
 import CreateTicket from "./pages/employee/CreateTicket";
 
@@ -77,12 +79,18 @@ function App() {
             }
           />
           <Route
+            path="/announcements"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <Announcements />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/reports"
             element={
               <ProtectedRoute allowedRoles={["ADMIN"]}>
-                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                  Reports
-                </div>
+                <PeriodicReports />
               </ProtectedRoute>
             }
           />
