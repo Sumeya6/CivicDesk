@@ -1,17 +1,17 @@
 export const STATUS_CONFIG = {
-  PENDING: { label: "Pending", className: "bg-gray-100 text-gray-700" },
-  ASSIGNED: { label: "Assigned", className: "bg-blue-100 text-blue-700" },
-  IN_PROGRESS: { label: "In Progress", className: "bg-yellow-100 text-yellow-700" },
-  AWAITING_PURCHASE: { label: "Awaiting Purchase", className: "bg-purple-100 text-purple-700" },
-  RESOLVED: { label: "Resolved", className: "bg-green-100 text-green-700" },
-  CLOSED: { label: "Closed", className: "bg-gray-200 text-gray-500" },
+  PENDING: { label: "Pending", className: "civic-badge civic-badge-pending" },
+  ASSIGNED: { label: "Assigned", className: "civic-badge civic-badge-assigned" },
+  IN_PROGRESS: { label: "In Progress", className: "civic-badge civic-badge-in-progress" },
+  AWAITING_PURCHASE: { label: "Awaiting Purchase", className: "civic-badge civic-badge-awaiting-purchase" },
+  RESOLVED: { label: "Resolved", className: "civic-badge civic-badge-resolved" },
+  CLOSED: { label: "Closed", className: "civic-badge civic-badge-closed" },
 };
 
 export const PRIORITY_CONFIG = {
-  LOW: { label: "Low", className: "bg-gray-100 text-gray-600" },
-  MEDIUM: { label: "Medium", className: "bg-yellow-100 text-yellow-700" },
-  HIGH: { label: "High", className: "bg-orange-100 text-orange-700" },
-  CRITICAL: { label: "Critical", className: "bg-red-100 text-red-700" },
+  LOW: { label: "Low", className: "civic-badge civic-badge-low" },
+  MEDIUM: { label: "Medium", className: "civic-badge civic-badge-medium" },
+  HIGH: { label: "High", className: "civic-badge civic-badge-high" },
+  CRITICAL: { label: "Critical", className: "civic-badge civic-badge-critical" },
 };
 
 export function formatDate(dateStr) {

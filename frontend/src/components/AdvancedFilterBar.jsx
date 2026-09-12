@@ -48,7 +48,7 @@ function FilterField({ label, htmlFor, children }) {
     <div>
       <label
         htmlFor={htmlFor}
-        className="mb-1 block text-sm font-medium text-gray-600"
+        className="civic-label"
       >
         {label}
       </label>
@@ -57,8 +57,7 @@ function FilterField({ label, htmlFor, children }) {
   );
 }
 
-const inputClasses =
-  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20";
+const inputClasses = "civic-input";
 
 function AdvancedFilterBar({ onResults, onLoading }) {
   const { t } = useTranslation();
@@ -113,18 +112,14 @@ function AdvancedFilterBar({ onResults, onLoading }) {
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white">
-      <div className="border-b border-gray-100 px-5 py-4 sm:px-6">
-        <h2 className="text-base font-semibold text-gray-800">
-          {t("searchFilters.title")}
-        </h2>
-        <p className="mt-0.5 text-sm text-gray-500">
-          {t("searchFilters.description")}
-        </p>
+    <div className="civic-card">
+      <div className="civic-card-header">
+        <h2>{t("searchFilters.title")}</h2>
+        <p>{t("searchFilters.description")}</p>
       </div>
 
-      <form onSubmit={handleSearch} className="p-5 sm:p-6">
-        <div className="space-y-5">
+      <form onSubmit={handleSearch} className="civic-card-body">
+        <div className="space-y-4">
           <FilterGroup
             icon={<CalendarDays className="h-3.5 w-3.5" />}
             label={t("searchFilters.dateRange") || "Date Range"}
@@ -270,10 +265,10 @@ function AdvancedFilterBar({ onResults, onLoading }) {
           </div>
         )}
 
-        <div className="mt-5 flex items-center gap-3 border-t border-gray-100 pt-4">
+        <div className="mt-4 flex items-center gap-2 border-t pt-4" style={{ borderColor: "var(--civic-border)" }}>
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="button-primary inline-flex items-center gap-2"
           >
             <Search className="h-4 w-4" />
             {t("searchFilters.searchTickets")}
@@ -282,7 +277,7 @@ function AdvancedFilterBar({ onResults, onLoading }) {
           <button
             type="button"
             onClick={handleReset}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
+            className="button-secondary inline-flex items-center gap-2"
           >
             <RotateCcw className="h-4 w-4" />
             {t("common.reset")}
