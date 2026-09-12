@@ -95,10 +95,10 @@ export default function TicketResolveModal({ isOpen, onClose, ticket }) {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {ui.apiError && <Alert type="error" message={ui.apiError} onClose={() => uiDispatch({ type: "CLEAR_ERROR" })} />}
 
-        <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-sm">
-          <p className="font-medium text-gray-900">{ticket.title}</p>
+        <div style={{ border: "1px solid var(--civic-border)", background: "#f7fafc", borderRadius: 8, padding: 12, fontSize: 14 }}>
+          <p className="font-medium" style={{ color: "var(--civic-text)" }}>{ticket.title}</p>
           {ticket.description && (
-            <p className="mt-1 text-gray-600 line-clamp-2">{ticket.description}</p>
+            <p className="mt-1 line-clamp-2" style={{ color: "var(--civic-muted)" }}>{ticket.description}</p>
           )}
         </div>
 
@@ -110,52 +110,52 @@ export default function TicketResolveModal({ isOpen, onClose, ticket }) {
         )}
 
         <div>
-          <label htmlFor="diagnosis" className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor="diagnosis" className="civic-label">
             Diagnosis <span className="text-red-500">*</span>
           </label>
           <textarea
             id="diagnosis"
             rows={3}
             {...register("diagnosis", { required: "Diagnosis is required" })}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="civic-textarea"
           />
           {errors.diagnosis && <p className="mt-1 text-xs text-red-600">{errors.diagnosis.message}</p>}
         </div>
 
         <div>
-          <label htmlFor="workPerformed" className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor="workPerformed" className="civic-label">
             Work Performed <span className="text-red-500">*</span>
           </label>
           <textarea
             id="workPerformed"
             rows={3}
             {...register("workPerformed", { required: "Work performed is required" })}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="civic-textarea"
           />
           {errors.workPerformed && <p className="mt-1 text-xs text-red-600">{errors.workPerformed.message}</p>}
         </div>
 
         <div>
-          <label htmlFor="partsReplaced" className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor="partsReplaced" className="civic-label">
             Parts Replaced
           </label>
           <input
             id="partsReplaced"
             type="text"
             {...register("partsReplaced")}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="civic-input"
           />
         </div>
 
         <div>
-          <label htmlFor="recommendations" className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor="recommendations" className="civic-label">
             Recommendations
           </label>
           <textarea
             id="recommendations"
             rows={2}
             {...register("recommendations")}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="civic-textarea"
           />
         </div>
 
@@ -173,14 +173,14 @@ export default function TicketResolveModal({ isOpen, onClose, ticket }) {
               />
             )}
           />
-          <label htmlFor="purchasedByOffice" className="text-sm text-gray-700">
+          <label htmlFor="purchasedByOffice" className="text-sm" style={{ color: "var(--civic-text)" }}>
             Parts were purchased by office
           </label>
         </div>
 
         {ticket.slaExceeded && (
           <div>
-            <label htmlFor="slaJustification" className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="slaJustification" className="civic-label">
               SLA Justification <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -188,9 +188,9 @@ export default function TicketResolveModal({ isOpen, onClose, ticket }) {
               rows={2}
               value={ui.slaJustText}
               onChange={(e) => uiDispatch({ type: "SET_SLA_TEXT", value: e.target.value })}
-              className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${
+              className={`civic-textarea ${
                 ui.slaJustText.trim().length > 0 || !ticket.slaExceeded
-                  ? "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  ? ""
                   : "border-red-300 focus:border-red-500 focus:ring-red-500"
               }`}
               placeholder="Explain why this ticket exceeded the SLA window"
@@ -201,18 +201,18 @@ export default function TicketResolveModal({ isOpen, onClose, ticket }) {
           </div>
         )}
 
-        <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+        <div className="flex justify-end gap-2 border-t pt-4" style={{ borderColor: "var(--civic-border)" }}>
           <button
             type="button"
             onClick={handleClose}
-            className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="button-secondary"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={ui.submitting || !slaJustificationValid}
-            className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="button-primary"
           >
             {ui.submitting ? "Resolving…" : "Resolve Ticket"}
           </button>
