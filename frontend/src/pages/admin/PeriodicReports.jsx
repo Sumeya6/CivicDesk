@@ -3,6 +3,28 @@ import { useTranslation } from "react-i18next";
 import Papa from "papaparse";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import api from "../../api/axios";
+import StatusBadge from "../../components/StatusBadge";
+import PriorityBadge from "../../components/PriorityBadge";
+import SkeletonBlock from "../../components/SkeletonBlock";
+import EmptyState from "../../components/EmptyState";
+import {
+  FileSpreadsheet,
+  FileText,
+  CheckCircle2,
+  AlertTriangle,
+  Timer,
+  Star,
+  Users,
+  Tags,
+  ShoppingCart,
+  Search,
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight,
+  BarChart3,
+  TrendingUp,
+} from "lucide-react";
 
 const periods = [
   { value: "1m", label: "monthly" },
@@ -12,30 +34,45 @@ const periods = [
   { value: "1y", label: "annual" },
 ];
 
-function Skeleton({ className = "" }) {
-  return (
-    <div className={`animate-pulse rounded-lg bg-gray-200 ${className}`} />
-  );
-}
+function MetricCard({ title, value, suffix = "", icon, accentColor = "blue" }) {
+  const colorMap = {
+    blue: "bg-blue-50 text-blue-600",
+    emerald: "bg-emerald-50 text-emerald-600",
+    amber: "bg-amber-50 text-amber-600",
+    red: "bg-red-50 text-red-600",
+    violet: "bg-violet-50 text-violet-600",
+  };
 
-function MetricCard({ title, value, suffix = "" }) {
   return (
-    <div className="rounded-xl bg-white p-5 shadow-md">
-      <p className="text-sm font-medium text-gray-500">{title}</p>
-      <p className="mt-2 text-3xl font-bold text-gray-800">
+    <div className="rounded-lg border border-gray-200 bg-white p-4 sm:p-5">
+      <div className="flex items-start justify-between">
+        <p className="text-sm font-medium text-gray-500">{title}</p>
+        {icon && (
+          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${colorMap[accentColor]}`}>
+            {icon}
+          </div>
+        )}
+      </div>
+      <p className="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
         {value}
-        {suffix}
+        {suffix && <span className="text-lg font-semibold text-gray-500">{suffix}</span>}
       </p>
     </div>
   );
 }
 
-function ProgressBar({ value }) {
+function ProgressBar({ value, color = "blue" }) {
+  const colorMap = {
+    blue: "bg-blue-600",
+    yellow: "bg-yellow-400",
+    red: "bg-red-500",
+  };
+
   return (
-    <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-gray-200">
+    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-100">
       <div
-        className="h-full rounded-full bg-blue-600 transition-all duration-500"
-        style={{ width: `${value}%` }}
+        className={`h-full rounded-full transition-all duration-500 ${colorMap[color]}`}
+        style={{ width: `${Math.min(value, 100)}%` }}
       />
     </div>
   );
@@ -47,18 +84,38 @@ function StarRating({ rating }) {
   return (
     <div className="flex items-center gap-1">
       {[1, 2, 3, 4, 5].map((star) => (
-        <span
+        <Star
           key={star}
-          className={star <= rounded ? "text-yellow-400" : "text-gray-300"}
-        >
-          ★
-        </span>
+          className={`h-4 w-4 ${
+            star <= rounded ? "fill-yellow-400 text-yellow-400" : "fill-gray-200 text-gray-200"
+          }`}
+        />
       ))}
-
-      <span className="ml-2 text-sm text-gray-600">{rating}/5</span>
+      <span className="ml-1.5 text-sm font-medium text-gray-600">{rating}/5</span>
     </div>
   );
 }
+
+function ReportSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {[1, 2, 3, 4, 5].map((item) => (
+          <SkeletonBlock key={item} className="h-24" />
+        ))}
+      </div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <SkeletonBlock className="h-56" />
+        <SkeletonBlock className="h-56" />
+        <SkeletonBlock className="h-56" />
+        <SkeletonBlock className="h-56" />
+      </div>
+    </div>
+  );
+}
+
+const inputClasses =
+  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20";
 
 function PeriodicReports() {
   const { t } = useTranslation();
@@ -75,39 +132,32 @@ function PeriodicReports() {
     categoryId: "",
     startDate: "",
     endDate: "",
+    q: "",
   });
 
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchPage, setSearchPage] = useState(1);
   const [searchPagination, setSearchPagination] = useState(null);
+
   const handleSearch = async (page = 1) => {
     try {
       setSearchLoading(true);
 
-      const params = new URLSearchParams();
-
+      const params = {};
       Object.entries(searchFilters).forEach(([key, value]) => {
-        if (value) {
-          params.append(key, value);
-        }
+        if (value) params[key] = value;
       });
 
-      params.append("page", page);
-      params.append("limit", 10);
+      params.page = page;
+      params.limit = 10;
 
-      const response = await fetch(
-        `http://localhost:5000/api/tickets/search?${params.toString()}`,
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to search tickets");
-      }
-
-      const data = await response.json();
-
+      const { data } = await api.get("/tickets/search", { params });
       setSearchResults(data.data);
-      setSearchPagination(data.pagination);
+      setSearchPagination({
+        page: data.currentPage,
+        totalPages: data.totalPages,
+      });
       setSearchPage(page);
     } catch (error) {
       console.error("Error searching tickets:", error);
@@ -122,17 +172,9 @@ function PeriodicReports() {
     const fetchReport = async () => {
       try {
         setLoading(true);
-
-        const response = await fetch(
-          `http://localhost:5000/api/reports/summary?period=${selectedPeriod}`,
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch report");
-        }
-
-        const data = await response.json();
-
+        const { data } = await api.get("/reports/summary", {
+          params: { period: selectedPeriod },
+        });
         setReport({
           totalTickets: data.total,
           slaCompliance: data.slaPercentage,
@@ -168,22 +210,10 @@ function PeriodicReports() {
     if (!report) return;
 
     const rows = [
-      {
-        Metric: "Period",
-        Value: t(`reports.${currentPeriodLabel}`),
-      },
-      {
-        Metric: t("reports.totalTickets"),
-        Value: report.totalTickets,
-      },
-      {
-        Metric: t("reports.slaCompliance"),
-        Value: `${report.slaCompliance}%`,
-      },
-      {
-        Metric: t("reports.procurementDelays"),
-        Value: report.procurementDelays,
-      },
+      { Metric: "Period", Value: t(`reports.${currentPeriodLabel}`) },
+      { Metric: t("reports.totalTickets"), Value: report.totalTickets },
+      { Metric: t("reports.slaCompliance"), Value: `${report.slaCompliance}%` },
+      { Metric: t("reports.procurementDelays"), Value: report.procurementDelays },
       {
         Metric: t("reports.averageResolutionTime"),
         Value: `${report.averageResolution} hours`,
@@ -196,9 +226,7 @@ function PeriodicReports() {
 
     report.categories.forEach((category) => {
       rows.push({
-        Metric: `${t("reports.issueCategories")} - ${t(
-          `categories.${category.name}`,
-        )}`,
+        Metric: `${t("reports.issueCategories")} - ${category.name}`,
         Value: category.count,
       });
     });
@@ -211,21 +239,14 @@ function PeriodicReports() {
     });
 
     const csv = Papa.unparse(rows);
-
-    const blob = new Blob([csv], {
-      type: "text/csv;charset=utf-8;",
-    });
-
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-
     link.href = url;
     link.download = `civicdesk-report-${selectedPeriod}.csv`;
-
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
     URL.revokeObjectURL(url);
   };
 
@@ -233,10 +254,8 @@ function PeriodicReports() {
     if (!report) return;
 
     const doc = new jsPDF();
-
     doc.setFontSize(18);
     doc.text("CivicDesk Periodic Report", 14, 20);
-
     doc.setFontSize(11);
     doc.text(`Period: ${t(`reports.${currentPeriodLabel}`)}`, 14, 30);
 
@@ -255,21 +274,17 @@ function PeriodicReports() {
       ],
     });
 
-    const categoryStartY = doc.lastAutoTable.finalY + 10;
-
     autoTable(doc, {
-      startY: categoryStartY,
+      startY: doc.lastAutoTable.finalY + 10,
       head: [[t("reports.issueCategories"), t("reports.tickets")]],
       body: report.categories.map((category) => [
-        t(`categories.${category.name}`),
+        category.name,
         category.count,
       ]),
     });
 
-    const technicianStartY = doc.lastAutoTable.finalY + 10;
-
     autoTable(doc, {
-      startY: technicianStartY,
+      startY: doc.lastAutoTable.finalY + 10,
       head: [[t("reports.technicianWorkload"), t("reports.tickets")]],
       body: report.technicians.map((technician) => [
         technician.name,
@@ -280,46 +295,70 @@ function PeriodicReports() {
     doc.save(`civicdesk-report-${selectedPeriod}.pdf`);
   };
 
+  const handleFilterChange = (field, value) => {
+    setSearchFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const resetSearch = () => {
+    setSearchFilters({
+      employeeId: "",
+      technicianId: "",
+      officeId: "",
+      status: "",
+      priority: "",
+      categoryId: "",
+      startDate: "",
+      endDate: "",
+      q: "",
+    });
+    setSearchResults([]);
+    setSearchPagination(null);
+    setSearchPage(1);
+  };
+
   return (
-    <div className="w-full">
-      <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">
+          <h1 className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
             {t("reports.title")}
           </h1>
-
-          <p className="mt-1 text-gray-500">{t("reports.description")}</p>
+          <p className="mt-1 text-sm text-gray-500">{t("reports.description")}</p>
         </div>
-
-        <div className="flex gap-3">
+        <div className="flex shrink-0 gap-2">
           <button
             onClick={exportCSV}
             disabled={loading}
-            className="rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {t("common.exportCSV")}
+            <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+            <span className="hidden sm:inline">{t("common.exportCSV")}</span>
+            <span className="sm:hidden">CSV</span>
           </button>
-
           <button
             onClick={exportPDF}
             disabled={loading}
-            className="rounded-lg bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {t("common.exportPDF")}
+            <FileText className="h-4 w-4 text-red-500" />
+            <span className="hidden sm:inline">{t("common.exportPDF")}</span>
+            <span className="sm:hidden">PDF</span>
           </button>
         </div>
       </div>
 
-      <div className="mb-6 overflow-x-auto rounded-xl bg-white p-2 shadow-md">
-        <div className="flex min-w-max gap-2">
+      {/* Period Selector */}
+      <div className="rounded-lg border border-gray-200 bg-white p-1">
+        <div className="flex gap-1 overflow-x-auto">
           {periods.map((period) => (
             <button
               key={period.value}
               onClick={() => setSelectedPeriod(period.value)}
-              className={`rounded-lg px-5 py-3 font-medium transition ${
+              className={`relative flex-1 whitespace-nowrap rounded-md px-4 py-2.5 text-sm font-medium transition focus:outline-none ${
                 selectedPeriod === period.value
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
               }`}
             >
               {t(`reports.${period.label}`)}
@@ -328,92 +367,99 @@ function PeriodicReports() {
         </div>
       </div>
 
+      {/* Content */}
       {loading ? (
+        <ReportSkeleton />
+      ) : report ? (
         <>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-5">
-            {[1, 2, 3, 4, 5].map((item) => (
-              <Skeleton key={item} className="h-28" />
-            ))}
-          </div>
-
-          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <Skeleton className="h-72" />
-            <Skeleton className="h-72" />
-            <Skeleton className="h-72" />
-            <Skeleton className="h-72" />
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-5">
+          {/* Metric Cards */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <MetricCard
               title={t("reports.totalTickets")}
               value={report.totalTickets}
+              icon={<BarChart3 className="h-4 w-4" />}
+              accentColor="blue"
             />
-
             <MetricCard
               title={t("reports.slaCompliance")}
               value={report.slaCompliance}
               suffix="%"
+              icon={<CheckCircle2 className="h-4 w-4" />}
+              accentColor="emerald"
             />
-
             <MetricCard
               title={t("reports.procurementDelays")}
               value={report.procurementDelays}
+              icon={<AlertTriangle className="h-4 w-4" />}
+              accentColor="amber"
             />
-
             <MetricCard
               title={t("reports.averageResolution")}
               value={report.averageResolution}
-              suffix=" hrs"
+              suffix="hrs"
+              icon={<Timer className="h-4 w-4" />}
+              accentColor="red"
             />
-
             <MetricCard
               title={t("reports.customerSatisfaction")}
               value={report.satisfaction}
               suffix="/5"
+              icon={<Star className="h-4 w-4" />}
+              accentColor="violet"
             />
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className="rounded-xl bg-white p-6 shadow-md">
-              <h2 className="text-xl font-bold text-gray-800">
-                {t("reports.slaCompliance")}
-              </h2>
-
-              <p className="mt-2 text-4xl font-bold text-blue-600">
+          {/* Detailed Charts */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {/* SLA Compliance */}
+            <div className="rounded-lg border border-gray-200 bg-white p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50">
+                  <TrendingUp className="h-4 w-4 text-blue-600" />
+                </div>
+                <h3 className="text-sm font-semibold text-gray-800">
+                  {t("reports.slaCompliance")}
+                </h3>
+              </div>
+              <p className="mt-3 text-3xl font-bold tracking-tight text-gray-900">
                 {report.slaCompliance}%
               </p>
-
               <ProgressBar value={report.slaCompliance} />
             </div>
 
-            <div className="rounded-xl bg-white p-6 shadow-md">
-              <h2 className="text-xl font-bold text-gray-800">
-                {t("reports.customerSatisfaction")}
-              </h2>
-
-              <div className="mt-4">
+            {/* Customer Satisfaction */}
+            <div className="rounded-lg border border-gray-200 bg-white p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50">
+                  <Star className="h-4 w-4 text-violet-600" />
+                </div>
+                <h3 className="text-sm font-semibold text-gray-800">
+                  {t("reports.customerSatisfaction")}
+                </h3>
+              </div>
+              <div className="mt-3">
                 <StarRating rating={report.satisfaction} />
               </div>
-
-              <div className="mt-5 space-y-3">
+              <div className="mt-4 space-y-2">
                 {[5, 4, 3, 2, 1].map((star) => (
-                  <div key={star} className="flex items-center gap-3">
-                    <span className="w-8 font-medium">{star} ★</span>
-
-                    <div className="h-3 flex-1 overflow-hidden rounded-full bg-gray-200">
+                  <div key={star} className="flex items-center gap-2">
+                    <span className="w-6 text-right text-xs font-medium text-gray-500">
+                      {star}
+                    </span>
+                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
                       <div
-                        className="h-full bg-yellow-400"
+                        className="h-full rounded-full bg-yellow-400"
                         style={{
                           width: `${
-                            (report.ratings[star] / report.totalTickets) * 100
+                            report.totalTickets > 0
+                              ? (report.ratings[star] / report.totalTickets) * 100
+                              : 0
                           }%`,
                         }}
                       />
                     </div>
-
-                    <span className="w-10 text-right text-sm text-gray-500">
+                    <span className="w-8 text-right text-xs text-gray-400">
                       {report.ratings[star]}
                     </span>
                   </div>
@@ -421,22 +467,27 @@ function PeriodicReports() {
               </div>
             </div>
 
-            <div className="rounded-xl bg-white p-6 shadow-md">
-              <h2 className="text-xl font-bold text-gray-800">
-                {t("reports.technicianWorkload")}
-              </h2>
-
-              <div className="mt-5 space-y-4">
+            {/* Technician Workload */}
+            <div className="rounded-lg border border-gray-200 bg-white p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50">
+                  <Users className="h-4 w-4 text-emerald-600" />
+                </div>
+                <h3 className="text-sm font-semibold text-gray-800">
+                  {t("reports.technicianWorkload")}
+                </h3>
+              </div>
+              <div className="mt-4 space-y-3">
                 {report.technicians.map((technician) => (
                   <div key={technician.name}>
-                    <div className="flex justify-between text-sm">
-                      <span className="font-medium">{technician.name}</span>
-
-                      <span className="text-gray-500">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">
+                        {technician.name}
+                      </span>
+                      <span className="text-xs text-gray-400">
                         {technician.tickets} {t("reports.tickets")}
                       </span>
                     </div>
-
                     <ProgressBar
                       value={(technician.tickets / report.totalTickets) * 100}
                     />
@@ -445,22 +496,26 @@ function PeriodicReports() {
               </div>
             </div>
 
-            <div className="rounded-xl bg-white p-6 shadow-md">
-              <h2 className="text-xl font-bold text-gray-800">
-                {t("reports.issueCategories")}
-              </h2>
-
-              <div className="mt-5 space-y-4">
+            {/* Issue Categories */}
+            <div className="rounded-lg border border-gray-200 bg-white p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50">
+                  <Tags className="h-4 w-4 text-amber-600" />
+                </div>
+                <h3 className="text-sm font-semibold text-gray-800">
+                  {t("reports.issueCategories")}
+                </h3>
+              </div>
+              <div className="mt-4 space-y-2">
                 {report.categories.map((category) => (
                   <div
                     key={category.name}
-                    className="flex items-center justify-between rounded-lg bg-gray-50 p-4"
+                    className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2.5"
                   >
-                    <span className="font-medium text-gray-700">
+                    <span className="text-sm font-medium text-gray-700">
                       {category.name}
                     </span>
-
-                    <span className="font-bold text-blue-600">
+                    <span className="text-sm font-semibold text-blue-600">
                       {category.count}
                     </span>
                   </div>
@@ -469,244 +524,254 @@ function PeriodicReports() {
             </div>
           </div>
 
-          <div className="mt-6 rounded-xl bg-white p-6 shadow-md">
-            <h2 className="text-xl font-bold text-gray-800">
-              {t("reports.procurementAnalytics")}
-            </h2>
-
-            <p className="mt-2 text-gray-500">
-              {t("reports.physicalProcurement")}
-            </p>
-
-            <div className="mt-5 flex items-center gap-5">
-              <div className="text-5xl font-bold text-red-600">
-                {report.procurementDelays}
+          {/* Procurement Analytics */}
+          <div className="rounded-lg border border-gray-200 bg-white p-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50">
+                <ShoppingCart className="h-4 w-4 text-red-600" />
               </div>
-
               <div>
-                <p className="font-medium text-gray-700">
+                <h3 className="text-sm font-semibold text-gray-800">
+                  {t("reports.procurementAnalytics")}
+                </h3>
+                <p className="text-xs text-gray-500">
+                  {t("reports.physicalProcurement")}
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center gap-4">
+              <span className="text-4xl font-bold text-red-600">
+                {report.procurementDelays}
+              </span>
+              <div>
+                <p className="text-sm font-medium text-gray-700">
                   {t("reports.awaitingPurchase")}
                 </p>
-
-                <p className="text-sm text-gray-500">
+                <p className="text-xs text-gray-400">
                   {t("reports.physicalProcurement")}
                 </p>
               </div>
             </div>
           </div>
-          <div className="mt-6 rounded-xl bg-white p-6 shadow-md">
-            <h2 className="text-xl font-bold text-gray-800">
-              Advanced Ticket Search
-            </h2>
 
-            <p className="mt-1 text-gray-500">
-              Search tickets using multiple filters.
-            </p>
-
-            <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {/* Status */}
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Status
-                </label>
-
-                <select
-                  value={searchFilters.status}
-                  onChange={(e) =>
-                    setSearchFilters({
-                      ...searchFilters,
-                      status: e.target.value,
-                    })
-                  }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                >
-                  <option value="">All Statuses</option>
-                  <option value="PENDING">Pending</option>
-                  <option value="ASSIGNED">Assigned</option>
-                  <option value="IN_PROGRESS">In Progress</option>
-                  <option value="AWAITING_PURCHASE">Awaiting Purchase</option>
-                  <option value="RESOLVED">Resolved</option>
-                  <option value="CLOSED">Closed</option>
-                </select>
-              </div>
-
-              {/* Priority */}
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Priority
-                </label>
-
-                <select
-                  value={searchFilters.priority}
-                  onChange={(e) =>
-                    setSearchFilters({
-                      ...searchFilters,
-                      priority: e.target.value,
-                    })
-                  }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                >
-                  <option value="">All Priorities</option>
-                  <option value="LOW">Low</option>
-                  <option value="MEDIUM">Medium</option>
-                  <option value="HIGH">High</option>
-                  <option value="CRITICAL">Critical</option>
-                </select>
-              </div>
-
-              {/* Start Date */}
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Start Date
-                </label>
-
-                <input
-                  type="date"
-                  value={searchFilters.startDate}
-                  onChange={(e) =>
-                    setSearchFilters({
-                      ...searchFilters,
-                      startDate: e.target.value,
-                    })
-                  }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                />
-              </div>
-
-              {/* End Date */}
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  End Date
-                </label>
-
-                <input
-                  type="date"
-                  value={searchFilters.endDate}
-                  onChange={(e) =>
-                    setSearchFilters({
-                      ...searchFilters,
-                      endDate: e.target.value,
-                    })
-                  }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                />
-              </div>
-            </div>
-
-            {/* Buttons */}
-            <div className="mt-5 flex gap-3">
-              <button
-                onClick={() => handleSearch(1)}
-                disabled={searchLoading}
-                className="rounded-lg bg-blue-600 px-5 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-              >
-                {searchLoading ? "Searching..." : "Search"}
-              </button>
-
-              <button
-                onClick={() => {
-                  setSearchFilters({
-                    employeeId: "",
-                    technicianId: "",
-                    officeId: "",
-                    status: "",
-                    priority: "",
-                    categoryId: "",
-                    startDate: "",
-                    endDate: "",
-                  });
-
-                  setSearchResults([]);
-                  setSearchPagination(null);
-                  setSearchPage(1);
-                }}
-                className="rounded-lg bg-gray-200 px-5 py-2 font-medium text-gray-700 hover:bg-gray-300"
-              >
-                Reset
-              </button>
-            </div>
-
-            {/* Search Results */}
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold text-gray-800">
-                Search Results
+          {/* Inline Search Section */}
+          <div className="rounded-lg border border-gray-200 bg-white">
+            <div className="border-b border-gray-100 px-5 py-4">
+              <h3 className="text-sm font-semibold text-gray-800">
+                {t("searchFilters.title")}
               </h3>
-
-              {searchResults.length === 0 ? (
-                <p className="mt-3 text-gray-500">No search results yet.</p>
-              ) : (
-                <div className="mt-4 overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="border-b bg-gray-50 text-left">
-                        <th className="p-3">Title</th>
-                        <th className="p-3">Status</th>
-                        <th className="p-3">Priority</th>
-                        <th className="p-3">Office</th>
-                        <th className="p-3">Category</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {searchResults.map((ticket) => (
-                        <tr key={ticket.id} className="border-b">
-                          <td className="p-3">
-                            {ticket.title ||
-                              ticket.subject ||
-                              ticket.description ||
-                              "-"}
-                          </td>
-
-                          <td className="p-3">{ticket.status}</td>
-
-                          <td className="p-3">{ticket.priority}</td>
-
-                          <td className="p-3">
-                            {ticket.office?.nameEn || "-"}
-                          </td>
-
-                          <td className="p-3">
-                            {ticket.category?.nameEn || "-"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              <p className="mt-0.5 text-xs text-gray-500">
+                {t("searchFilters.description")}
+              </p>
             </div>
+
+            <div className="p-5">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-500">
+                    {t("searchFilters.status")}
+                  </label>
+                  <select
+                    value={searchFilters.status}
+                    onChange={(e) => handleFilterChange("status", e.target.value)}
+                    className={inputClasses}
+                  >
+                    <option value="">{t("searchFilters.allStatuses")}</option>
+                    <option value="PENDING">{t("status.pending")}</option>
+                    <option value="ASSIGNED">{t("status.assigned")}</option>
+                    <option value="IN_PROGRESS">{t("status.inProgress")}</option>
+                    <option value="AWAITING_PURCHASE">{t("status.awaitingPurchase")}</option>
+                    <option value="RESOLVED">{t("status.resolved")}</option>
+                    <option value="CLOSED">{t("status.closed")}</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-500">
+                    {t("searchFilters.priority")}
+                  </label>
+                  <select
+                    value={searchFilters.priority}
+                    onChange={(e) => handleFilterChange("priority", e.target.value)}
+                    className={inputClasses}
+                  >
+                    <option value="">{t("searchFilters.allPriorities")}</option>
+                    <option value="LOW">{t("priority.low")}</option>
+                    <option value="MEDIUM">{t("priority.medium")}</option>
+                    <option value="HIGH">{t("priority.high")}</option>
+                    <option value="CRITICAL">{t("priority.critical")}</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-500">
+                    {t("searchFilters.startDate")}
+                  </label>
+                  <input
+                    type="date"
+                    value={searchFilters.startDate}
+                    onChange={(e) => handleFilterChange("startDate", e.target.value)}
+                    className={inputClasses}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-500">
+                    {t("searchFilters.endDate")}
+                  </label>
+                  <input
+                    type="date"
+                    value={searchFilters.endDate}
+                    onChange={(e) => handleFilterChange("endDate", e.target.value)}
+                    className={inputClasses}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-500">
+                    {t("searchFilters.freeTextSearch")}
+                  </label>
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      value={searchFilters.q}
+                      onChange={(e) => handleFilterChange("q", e.target.value)}
+                      placeholder={t("searchFilters.freeTextSearch")}
+                      className={`${inputClasses} pl-8`}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={() => handleSearch(1)}
+                  disabled={searchLoading}
+                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+                >
+                  <Search className="h-3.5 w-3.5" />
+                  {searchLoading ? t("common.loading") : t("searchFilters.searchTickets")}
+                </button>
+                <button
+                  onClick={resetSearch}
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  {t("common.reset")}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Search Results */}
+          <div className="rounded-lg border border-gray-200 bg-white">
+            <div className="border-b border-gray-100 px-5 py-4">
+              <h3 className="text-sm font-semibold text-gray-800">
+                {t("searchFilters.searchResults")}
+              </h3>
+            </div>
+
+            {searchLoading ? (
+              <div className="p-5">
+                <div className="space-y-3">
+                  {[1, 2, 3, 4].map((item) => (
+                    <SkeletonBlock key={item} className="h-12" />
+                  ))}
+                </div>
+              </div>
+            ) : searchResults.length === 0 ? (
+              <div className="p-5">
+                <EmptyState
+                  icon={<Search className="h-5 w-5" />}
+                  title={t("searchFilters.noTickets")}
+                  description={t("searchFilters.useFilters")}
+                />
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 bg-gray-50/80">
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        {t("searchFilters.title")}
+                      </th>
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        {t("searchFilters.status")}
+                      </th>
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        {t("searchFilters.priority")}
+                      </th>
+                      <th className="hidden px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 sm:table-cell">
+                        {t("searchFilters.office")}
+                      </th>
+                      <th className="hidden px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 sm:table-cell">
+                        {t("searchFilters.category")}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {searchResults.map((ticket) => (
+                      <tr
+                        key={ticket.id}
+                        className="transition hover:bg-gray-50/50"
+                      >
+                        <td className="max-w-[200px] truncate px-5 py-3 font-medium text-gray-800">
+                          {ticket.title || ticket.subject || ticket.description || "-"}
+                        </td>
+                        <td className="px-5 py-3">
+                          <StatusBadge status={ticket.status} />
+                        </td>
+                        <td className="px-5 py-3">
+                          <PriorityBadge priority={ticket.priority} />
+                        </td>
+                        <td className="hidden px-5 py-3 text-gray-600 sm:table-cell">
+                          {ticket.office?.nameEn || "-"}
+                        </td>
+                        <td className="hidden px-5 py-3 text-gray-600 sm:table-cell">
+                          {ticket.category?.nameEn || "-"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
             {/* Pagination */}
             {searchPagination && searchPagination.totalPages > 1 && (
-              <div className="mt-5 flex items-center justify-between">
-                <span className="text-sm text-gray-500">
-                  Page {searchPagination.page} of {searchPagination.totalPages}
+              <div className="flex items-center justify-between border-t border-gray-100 px-5 py-3">
+                <span className="text-xs text-gray-500">
+                  {t("common.page")} {searchPagination.page} / {searchPagination.totalPages}
                 </span>
-
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
                   <button
                     onClick={() => handleSearch(searchPage - 1)}
                     disabled={searchPage === 1 || searchLoading}
-                    className="rounded-lg bg-gray-200 px-4 py-2 disabled:opacity-50"
+                    className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition hover:bg-gray-50 disabled:opacity-40"
                   >
-                    Previous
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                    {t("common.previous") || "Prev"}
                   </button>
-
                   <button
                     onClick={() => handleSearch(searchPage + 1)}
-                    disabled={
-                      searchPage === searchPagination.totalPages ||
-                      searchLoading
-                    }
-                    className="rounded-lg bg-gray-200 px-4 py-2 disabled:opacity-50"
+                    disabled={searchPage === searchPagination.totalPages || searchLoading}
+                    className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition hover:bg-gray-50 disabled:opacity-40"
                   >
-                    Next
+                    {t("common.next") || "Next"}
+                    <ChevronRight className="h-3.5 w-3.5" />
                   </button>
                 </div>
               </div>
             )}
           </div>
         </>
+      ) : (
+        <EmptyState
+          icon={<BarChart3 className="h-5 w-5" />}
+          title={t("reports.noData") || "No report data available"}
+          description={t("reports.tryAnotherPeriod") || "Try selecting a different reporting period."}
+        />
       )}
     </div>
   );
