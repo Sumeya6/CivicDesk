@@ -1,10 +1,10 @@
 import { AlertCircle, CheckCircle, AlertTriangle, Info } from "lucide-react";
 
 const variants = {
-  error: { Icon: AlertCircle, className: "border-red-200 bg-red-50 text-red-800" },
-  success: { Icon: CheckCircle, className: "border-green-200 bg-green-50 text-green-800" },
-  warning: { Icon: AlertTriangle, className: "border-yellow-200 bg-yellow-50 text-yellow-800" },
-  info: { Icon: Info, className: "border-blue-200 bg-blue-50 text-blue-800" },
+  error: { Icon: AlertCircle, className: "civic-alert civic-alert-error" },
+  success: { Icon: CheckCircle, className: "civic-alert civic-alert-success" },
+  warning: { Icon: AlertTriangle, className: "civic-alert civic-alert-warning" },
+  info: { Icon: Info, className: "civic-alert civic-alert-info" },
 };
 
 export default function Alert({ type = "error", message, onClose }) {
@@ -12,11 +12,11 @@ export default function Alert({ type = "error", message, onClose }) {
   const { Icon, className } = variants[type] || variants.error;
 
   return (
-    <div className={`flex items-start gap-2 rounded-md border p-3 text-sm ${className}`} role="alert">
-      <Icon className="mt-0.5 h-4 w-4 shrink-0" />
-      <span className="flex-1">{message}</span>
+    <div className={className} role="alert">
+      <Icon style={{ marginTop: 2, flexShrink: 0, width: 16, height: 16 }} />
+      <span style={{ flex: 1 }}>{message}</span>
       {onClose && (
-        <button type="button" onClick={onClose} className="font-bold opacity-70 hover:opacity-100" aria-label="Dismiss">
+        <button type="button" onClick={onClose} style={{ fontWeight: 700, opacity: 0.7, cursor: "pointer", background: "none", border: 0, padding: 0 }} aria-label="Dismiss">
           &times;
         </button>
       )}
