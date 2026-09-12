@@ -78,7 +78,7 @@ function Register() {
       setTimeout(() => navigate("/login"), 800);
     } catch (error) {
       setSubmitError(
-        error?.response?.data?.message || t("auth.registrationFailed"),
+        error?.data?.message || error?.message || t("auth.registrationFailed"),
       );
     } finally {
       setIsSubmitting(false);

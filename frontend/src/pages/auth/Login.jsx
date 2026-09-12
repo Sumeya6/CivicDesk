@@ -37,15 +37,14 @@ function Login() {
       await login({ phoneNumber: form.phoneNumber, password: form.password });
       navigate("/dashboard");
     } catch (error) {
-      const message =
-        error?.response?.data?.message || t("auth.invalidCredentials");
+      const backendMessage = error?.data?.message || error?.message;
       setSubmitError(
-        error?.response?.status === 401 &&
-          error?.response?.data?.message === "User not found or inactive."
+        error?.status === 401 &&
+          backendMessage === "User not found or inactive."
           ? t("auth.inactiveAccount")
-          : error?.response?.status === 401
+          : error?.status === 401
             ? t("auth.invalidCredentials")
-            : message,
+            : backendMessage || t("auth.invalidCredentials"),
       );
     } finally {
       setIsSubmitting(false);

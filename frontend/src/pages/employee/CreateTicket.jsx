@@ -9,7 +9,7 @@ export default function CreateTicket() {
 
   useEffect(() => {
     if (!isOpen) {
-      navigate("/employee");
+      navigate("/dashboard");
     }
   }, [isOpen, navigate]);
 
