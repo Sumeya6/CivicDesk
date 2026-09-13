@@ -8,7 +8,8 @@
     "exportPDF": "PDF ላክ",
     "page": "ገጹ",
     "previous": "ቀደም",
-    "next": "ቀጣይ"
+    "next": "ቀጣይ",
+    "user": "ተጠቃሚ"
   },
   "auth": {
     "login": "ግባ",
@@ -42,19 +43,47 @@
     "forgotPassword": "የይለፍ ቃል ረሱ?",
     "signingIn": "በመግባት ላይ...",
     "noAccount": "መለያ የለዎትም?",
-    "registerNow": "አሁን ይመዝገቡ"
+    "registerNow": "አሁን ይመዝገቡ",
+    "showPassword": "የይለፍ ቃል አሳይ",
+    "hidePassword": "የይለፍ ቃል ደብቅ"
   },
   "navigation": {
     "dashboard": "ዳሽቦርድ",
     "requests": "ጥያቄዎች",
+    "myRequests": "ጥያቄዎቼ",
+    "newRequest": "አዲስ ጥያቄ",
+    "assignedRequests": "የተመደቡ ጥያቄዎች",
+    "tickets": "ቲኬቶች",
     "users": "ተጠቃሚዎች",
     "offices": "ቢሮዎች",
-    "reports": "ሪፖርቶች"
+    "announcements": "ማስታወቂያዎች",
+    "reports": "ሪፖርቶች",
+    "profile": "መገለጫ",
+    "logout": "ውጣ"
+  },
+  "roles": {
+    "EMPLOYEE": "ሰራተኛ",
+    "TECHNICIAN": "ቴክኒሻን",
+    "ADMIN": "አስተዳደር"
   },
   "layout": {
     "profile": "መገለጫ",
     "language": "ቋንቋ",
-    "welcome": "እንኳን ደህና መጡ"
+    "welcome": "እንኳን ደህና መጡ",
+    "changeLanguage": "ቋንቋ ቀይር"
+  },
+  "profile": {
+    "changePassword": "የይለፍ ቃል ቀይር",
+    "currentPassword": "የአሁኑ የይለፍ ቃል",
+    "newPassword": "አዲስ የይለፍ ቃል",
+    "confirmPassword": "የይለፍ ቃል አረጋግጥ",
+    "passwordMismatch": "አዲሶቹ የይለፍ ቃሎች አይመሳሰሉም።",
+    "passwordChanged": "የይለፍ ቃሉ ተቀይሯል።",
+    "passwordChangeFailed": "የይለፍ ቃሉን መቀየር አልተቻለም።",
+    "savingPassword": "በማስቀመጥ ላይ...",
+    "assignedOffices": "የተመደቡ ቢሮዎች",
+    "accountStatus": "የመለያ ሁኔታ",
+    "preferredLanguage": "የምርጫ ቋንቋ"
   },
   "admin": {
     "administration": "አስተዳደር",
@@ -197,7 +226,8 @@
     "validationError": "እባክዎ ርዕስ እና ይዘት ያስገቡ።",
     "subtitle": "ከCivicDesk የሚመጡ ዝመናዎች",
     "loading": "ማስታወቂያዎች በመጫን ላይ...",
-    "empty": "ንቁ ማስታወቂያ የለም።"
+    "empty": "ንቁ ማስታወቂያ የለም።",
+    "refresh": "ማስታወቂያዎችን አድስ"
   },
   "dashboard": {
     "welcome": "እንኳን ደህና መጡ",
