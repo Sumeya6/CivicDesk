@@ -24,10 +24,10 @@ function Navbar({ role, onMenuToggle }) {
           </button>
           <div className="min-w-0">
             <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[15px] font-semibold text-[var(--civic-blue-950)]">
-              {t("layout.welcome")}, {currentUser?.fullName ?? "User"}
+              {t("layout.welcome")}, {currentUser?.fullName ?? t("common.user")}
             </p>
             <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-semibold tracking-[0.04em] text-[var(--civic-muted)]">
-              {role}
+              {t(`roles.${role}`, role)}
             </p>
           </div>
         </div>
