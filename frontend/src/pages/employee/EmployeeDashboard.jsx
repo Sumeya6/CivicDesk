@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 import { PlusCircle, RefreshCw, CheckCircle } from "lucide-react";
 import { fetchTickets } from "../../store/ticketSlice";
 import { Pagination } from "../../components/Pagination";
@@ -15,14 +14,25 @@ import AuditTrailModal from "../../components/AuditTrailModal";
 import AnnouncementBoard from "../../components/AnnouncementBoard";
 
 function EmptyRequestPanel({ title, description }) {
-  return <section className="dashboard-panel"><div className="dashboard-panel-heading"><h2>{title}</h2></div><div className="dashboard-empty"><p>{description}</p></div></section>;
+  return (
+    <section className="dashboard-panel">
+      <div className="dashboard-panel-heading">
+        <h2>{title}</h2>
+      </div>
+      <div className="dashboard-empty">
+        <p>{description}</p>
+      </div>
+    </section>
+  );
 }
 
 function EmployeeDashboard() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { currentUser } = useAuth();
-  const { tickets, loading, error, page, totalPages } = useSelector((s) => s.tickets);
+  const { tickets, loading, error, page, totalPages } = useSelector(
+    (s) => s.tickets,
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const [showCreate, setShowCreate] = useState(false);
   const [verifyTicket, setVerifyTicket] = useState(null);
@@ -37,19 +47,20 @@ function EmployeeDashboard() {
   }, [load]);
 
   return (
-    <section className="dashboard-page" aria-labelledby="employee-dashboard-title">
+    <section
+      className="dashboard-page"
+      aria-labelledby="employee-dashboard-title"
+    >
       <header className="dashboard-welcome">
         <div>
           <p className="dashboard-eyebrow">{t("dashboard.employeeLabel")}</p>
-          <h1 id="employee-dashboard-title">{t("dashboard.welcome")}, {currentUser?.fullName ?? "User"}</h1>
+          <h1 id="employee-dashboard-title">
+            {t("dashboard.welcome")}, {currentUser?.fullName ?? t("common.user")}
+          </h1>
           <p>{t("dashboard.employeeDescription")}</p>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={load}
-            className="button-secondary"
-          >
+          <button type="button" onClick={load} className="button-secondary">
             <RefreshCw className="h-4 w-4" />
             {t("dashboard.refresh", "Refresh")}
           </button>
@@ -79,7 +90,10 @@ function EmployeeDashboard() {
 
       {!loading && tickets.length === 0 && (
         <div className="dashboard-grid dashboard-grid-two">
-          <EmptyRequestPanel title={t("dashboard.myRequests")} description={t("dashboard.requestsUnavailable")} />
+          <EmptyRequestPanel
+            title={t("dashboard.myRequests")}
+            description={t("dashboard.requestsUnavailable")}
+          />
           <AnnouncementBoard />
         </div>
       )}
@@ -107,21 +121,19 @@ function EmployeeDashboard() {
                     <td>
                       <div className="entity-name">{ticket.title}</div>
                       {ticket.description && (
-                        <div className="entity-secondary line-clamp-1">{ticket.description}</div>
+                        <div className="entity-secondary line-clamp-1">
+                          {ticket.description}
+                        </div>
                       )}
                     </td>
-                    <td>
-                      {ticket.category?.nameEn || ticket.categoryId}
-                    </td>
+                    <td>{ticket.category?.nameEn || ticket.categoryId}</td>
                     <td>
                       <PriorityBadge priority={ticket.priority} />
                     </td>
                     <td>
                       <StatusBadge status={ticket.status} />
                     </td>
-                    <td>
-                      {formatDate(ticket.createdAt)}
-                    </td>
+                    <td>{formatDate(ticket.createdAt)}</td>
                     <td>
                       <div className="flex flex-wrap gap-1">
                         {ticket.status === "RESOLVED" && (
@@ -148,7 +160,11 @@ function EmployeeDashboard() {
               </tbody>
             </table>
           </div>
-          <Pagination page={page} totalPages={totalPages} onPageChange={setCurrentPage} />
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </section>
       )}
 
@@ -157,7 +173,10 @@ function EmployeeDashboard() {
         <AnnouncementBoard />
       </div>
 
-      <CreateTicketModal isOpen={showCreate} onClose={() => setShowCreate(false)} />
+      <CreateTicketModal
+        isOpen={showCreate}
+        onClose={() => setShowCreate(false)}
+      />
       <VerifyTicketModal
         isOpen={!!verifyTicket}
         onClose={() => setVerifyTicket(null)}
