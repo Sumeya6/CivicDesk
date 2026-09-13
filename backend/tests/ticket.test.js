@@ -385,6 +385,7 @@ describe("GET /api/tickets", () => {
     expect(res.body.totalPages).toBe(1);
     expect(mockPrisma.ticket.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
+        where: { technicianId: "tech-1" },
         include: { category: true },
         orderBy: { createdAt: "desc" },
       }),
@@ -401,8 +402,27 @@ describe("GET /api/tickets", () => {
 
     expect(res.status).toBe(200);
     expect(mockPrisma.ticket.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { status: "IN_PROGRESS" } }),
+      expect.objectContaining({
+        where: { status: "IN_PROGRESS", technicianId: "tech-1" },
+      }),
     );
+  });
+
+  test("limits employee results to tickets they submitted", async () => {
+    mockPrisma.ticket.findMany.mockResolvedValue([]);
+    mockPrisma.ticket.count.mockResolvedValue(0);
+
+    const res = await request(app)
+      .get("/api/tickets")
+      .set("x-test-role", "EMPLOYEE");
+
+    expect(res.status).toBe(200);
+    expect(mockPrisma.ticket.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { employeeId: "employee-1" } }),
+    );
+    expect(mockPrisma.ticket.count).toHaveBeenCalledWith({
+      where: { employeeId: "employee-1" },
+    });
   });
 
   test("handles pagination parameters", async () => {
