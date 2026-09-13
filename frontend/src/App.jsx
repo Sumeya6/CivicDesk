@@ -1,6 +1,8 @@
+import { useSelector } from "react-redux";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AnnouncementBoard from "./components/AnnouncementBoard";
 import AppLayout from "./layouts/AppLayout";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
@@ -9,9 +11,24 @@ import Unauthorized from "./pages/auth/Unauthorized";
 import OfficeManagement from "./pages/admin/OfficeManagement";
 import UserManagement from "./pages/admin/UserManagement";
 import Announcements from "./pages/admin/Announcements";
+import TicketManagement from "./pages/admin/TicketManagement";
 import PeriodicReports from "./pages/admin/PeriodicReports";
 import DashboardRouter from "./pages/DashboardRouter";
 import CreateTicket from "./pages/employee/CreateTicket";
+import EmployeeDashboard from "./pages/employee/EmployeeDashboard";
+import Profile from "./pages/Profile";
+// import TechnicianDashboard from "./pages/technician/TechnicianDashboard";
+import AssignedRequests from "./pages/technician/AssignedRequests";
+
+function AnnouncementsAccess() {
+  const role = useSelector((state) => state.auth.role);
+
+  if (role === "ADMIN") {
+    return <Announcements />;
+  }
+
+  return <AnnouncementBoard />;
+}
 
 function App() {
   return (
@@ -35,12 +52,8 @@ function App() {
           <Route
             path="/requests"
             element={
-              <ProtectedRoute
-                allowedRoles={["EMPLOYEE", "TECHNICIAN", "ADMIN"]}
-              >
-                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                  Requests
-                </div>
+              <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
+                <EmployeeDashboard />
               </ProtectedRoute>
             }
           />
@@ -56,9 +69,15 @@ function App() {
             path="/assigned-requests"
             element={
               <ProtectedRoute allowedRoles={["TECHNICIAN"]}>
-                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                  Assigned Requests
-                </div>
+                <AssignedRequests />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tickets"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <TicketManagement />
               </ProtectedRoute>
             }
           />
@@ -81,8 +100,10 @@ function App() {
           <Route
             path="/announcements"
             element={
-              <ProtectedRoute allowedRoles={["ADMIN"]}>
-                <Announcements />
+              <ProtectedRoute
+                allowedRoles={["EMPLOYEE", "TECHNICIAN", "ADMIN"]}
+              >
+                <AnnouncementsAccess />
               </ProtectedRoute>
             }
           />
@@ -91,6 +112,16 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <PeriodicReports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute
+                allowedRoles={["EMPLOYEE", "TECHNICIAN", "ADMIN"]}
+              >
+                <Profile />
               </ProtectedRoute>
             }
           />
