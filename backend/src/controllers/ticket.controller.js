@@ -336,6 +336,11 @@ async function listTickets(req, res, next) {
       }
       where.status = status;
     }
+    if (req.user.role === Role.EMPLOYEE) {
+      where.employeeId = req.user.id;
+    } else if (req.user.role === Role.TECHNICIAN) {
+      where.technicianId = req.user.id;
+    }
 
     const [tickets, totalTickets] = await Promise.all([
       prisma.ticket.findMany({
