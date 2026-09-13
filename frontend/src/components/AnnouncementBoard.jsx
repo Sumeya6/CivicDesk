@@ -53,7 +53,7 @@ function AnnouncementBoard() {
           type="button"
           onClick={() => dispatch(fetchAnnouncements())}
           className="rounded-lg p-1.5 text-slate-400 hover:bg-gray-50 hover:text-slate-600"
-          aria-label="Refresh announcements"
+          aria-label={t("announcements.refresh")}
         >
           <RefreshCw size={14} />
         </button>
