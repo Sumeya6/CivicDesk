@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { Provider } from "react-redux";
 import { AuthProvider } from "../context/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
+import Sidebar from "../layouts/Sidebar";
+import i18n from "../i18n";
 import { store } from "../store/store";
 import { logout as resetAuthState, setCredentials } from "../store/authSlice";
 
@@ -36,6 +38,7 @@ function renderProtectedRoute(initialEntries = ["/secure"]) {
 describe("ProtectedRoute", () => {
   beforeEach(() => {
     localStorage.clear();
+    i18n.changeLanguage("en");
     store.dispatch(resetAuthState());
   });
 
@@ -85,5 +88,48 @@ describe("ProtectedRoute", () => {
     renderProtectedRoute();
 
     expect(screen.getAllByText("Unauthorized Page").length).toBeGreaterThan(0);
+  });
+
+  it("shows the technician navigation set without exposing admin pages", () => {
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <AuthProvider>
+            <Sidebar role="TECHNICIAN" />
+          </AuthProvider>
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    expect(screen.getByText("Dashboard")).toBeTruthy();
+    expect(screen.getByText("Assigned Requests")).toBeTruthy();
+    expect(screen.getByText("Announcements")).toBeTruthy();
+    expect(screen.getByText("Profile")).toBeTruthy();
+    expect(screen.getByText("Logout")).toBeTruthy();
+    expect(screen.queryByText("Users")).toBeNull();
+    expect(screen.queryByText("Tickets")).toBeNull();
+    expect(screen.queryByText("Reports")).toBeNull();
+  });
+
+  it("shows the employee navigation set without exposing admin pages", () => {
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <AuthProvider>
+            <Sidebar role="EMPLOYEE" />
+          </AuthProvider>
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    expect(screen.getByText("Dashboard")).toBeTruthy();
+    expect(screen.getByText("My Requests")).toBeTruthy();
+    expect(screen.getByText("New Request")).toBeTruthy();
+    expect(screen.getByText("Announcements")).toBeTruthy();
+    expect(screen.getByText("Profile")).toBeTruthy();
+    expect(screen.getByText("Logout")).toBeTruthy();
+    expect(screen.queryByText("Users")).toBeNull();
+    expect(screen.queryByText("Tickets")).toBeNull();
+    expect(screen.queryByText("Reports")).toBeNull();
   });
 });
