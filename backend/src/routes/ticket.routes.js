@@ -10,6 +10,7 @@ const {
   getTicket,
   listTickets,
 } = require("../controllers/ticket.controller");
+const { searchTickets } = require("../controllers/search.controller");
 const { resolveTicket } = require("../controllers/maintenance.controller");
 
 const router = Router();
@@ -17,6 +18,7 @@ router.use(authenticateUser);
 router.use(auditMiddleware);
 router.get("/", listTickets);
 router.post("/", createTicket);
+router.get("/search", searchTickets);
 router.get("/:id", getTicket);
 router.patch("/:id/assign", assignTicket);
 router.patch("/:id/request-purchase", requestPurchase);
