@@ -205,7 +205,7 @@ function Register() {
               type="button"
               className="absolute bottom-px right-px top-px flex w-[38px] items-center justify-center rounded-r-[7px] border-0 bg-transparent text-[#94a3b8] transition hover:text-[#475569]"
               onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
               tabIndex={-1}
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -245,7 +245,7 @@ function Register() {
               className="absolute bottom-px right-px top-px flex w-[38px] items-center justify-center rounded-r-[7px] border-0 bg-transparent text-[#94a3b8] transition hover:text-[#475569]"
               onClick={() => setShowConfirmPassword((v) => !v)}
               aria-label={
-                showConfirmPassword ? "Hide password" : "Show password"
+                showConfirmPassword ? t("auth.hidePassword") : t("auth.showPassword")
               }
               tabIndex={-1}
             >
