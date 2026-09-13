@@ -7,6 +7,7 @@ import {
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import i18n from "../i18n";
 import api from "../api/axios";
 import {
   changeLanguage as changeLanguageAction,
@@ -41,14 +42,16 @@ export function AuthProvider({ children }) {
         }
 
         const normalizedUser = normalizeUser(response.data?.user);
+        const resolvedLanguage =
+          storedLanguage ?? normalizedUser?.preferredLanguage ?? "AM";
         dispatch(
           setCredentials({
             currentUser: normalizedUser,
             role: normalizedUser?.role ?? null,
-            preferredLanguage:
-              storedLanguage ?? normalizedUser?.preferredLanguage ?? "AM",
+            preferredLanguage: resolvedLanguage,
           }),
         );
+        i18n.changeLanguage(resolvedLanguage.toLowerCase());
       } catch {
         if (!isMounted) {
           return;
@@ -82,6 +85,8 @@ export function AuthProvider({ children }) {
         }),
       );
 
+      i18n.changeLanguage(normalizedUser.preferredLanguage.toLowerCase());
+
       return normalizedUser;
     },
     [dispatch],
@@ -95,14 +100,22 @@ export function AuthProvider({ children }) {
     } finally {
       localStorage.removeItem("civicdesk_language");
       dispatch(logoutAction());
+      i18n.changeLanguage("am");
       navigate("/login");
     }
   }, [dispatch, navigate]);
 
   const changeLanguage = useCallback(
-    (language) => {
+    async (language) => {
+      const locale = language.toLowerCase();
+      i18n.changeLanguage(locale);
       localStorage.setItem("civicdesk_language", language);
       dispatch(changeLanguageAction(language));
+      try {
+        await api.patch("/users/me/language", { preferredLanguage: language });
+      } catch {
+        // Silently ignore backend sync errors; local state is already updated.
+      }
     },
     [dispatch],
   );
