@@ -3,12 +3,11 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 
 function LanguageToggle({ variant = "auth" }) {
-  const { i18n } = useTranslation();
+  const { t } = useTranslation();
   const { changeLanguage, preferredLanguage } = useAuth();
 
   const handleToggle = () => {
     const next = preferredLanguage === "EN" ? "AM" : "EN";
-    i18n.changeLanguage(next.toLowerCase());
     changeLanguage(next);
   };
 
@@ -19,7 +18,7 @@ function LanguageToggle({ variant = "auth" }) {
         <button
           type="button"
           className="border-0 bg-transparent p-0 text-[12.5px] font-medium text-[var(--civic-blue-800)] transition hover:text-[var(--civic-blue-950)] max-[640px]:text-xs"
-          aria-label="Change language"
+          aria-label={t("layout.changeLanguage")}
           onClick={handleToggle}
         >
           {preferredLanguage === "EN" ? "English" : "አማርኛ"}
@@ -34,7 +33,7 @@ function LanguageToggle({ variant = "auth" }) {
       <button
         type="button"
         className="border-0 bg-transparent p-0 text-[12.5px] font-medium text-[#0757c9] transition hover:text-[#0546b0]"
-        aria-label="Change language"
+        aria-label={t("layout.changeLanguage")}
         onClick={handleToggle}
       >
         English / አማርኛ
