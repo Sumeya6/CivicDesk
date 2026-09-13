@@ -8,7 +8,8 @@
     "exportPDF": "Export PDF",
     "page": "Page",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "user": "User"
   },
   "auth": {
     "login": "Login",
@@ -42,19 +43,47 @@
     "forgotPassword": "Forgot Password?",
     "signingIn": "Signing in...",
     "noAccount": "Don't have an account?",
-    "registerNow": "Register now"
+    "registerNow": "Register now",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "navigation": {
     "dashboard": "Dashboard",
     "requests": "Requests",
+    "myRequests": "My Requests",
+    "newRequest": "New Request",
+    "assignedRequests": "Assigned Requests",
+    "tickets": "Tickets",
     "users": "Users",
     "offices": "Offices",
-    "reports": "Reports"
+    "announcements": "Announcements",
+    "reports": "Reports",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "roles": {
+    "EMPLOYEE": "Employee",
+    "TECHNICIAN": "Technician",
+    "ADMIN": "Administrator"
   },
   "layout": {
     "profile": "Profile",
     "language": "Language",
-    "welcome": "Welcome"
+    "welcome": "Welcome",
+    "changeLanguage": "Change language"
+  },
+  "profile": {
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "passwordMismatch": "New passwords do not match.",
+    "passwordChanged": "Password changed successfully.",
+    "passwordChangeFailed": "Unable to change password.",
+    "savingPassword": "Saving...",
+    "assignedOffices": "Assigned Offices",
+    "accountStatus": "Account Status",
+    "preferredLanguage": "Preferred Language"
   },
   "admin": {
     "administration": "Administration",
@@ -198,7 +227,38 @@
     "validationError": "Please enter both a title and content.",
     "subtitle": "Updates from CivicDesk",
     "loading": "Loading announcements...",
-    "empty": "No active announcements."
+    "empty": "No active announcements.",
+    "refresh": "Refresh announcements"
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "employeeLabel": "Employee Workspace",
+    "employeeDescription": "Submit and track service requests from one place.",
+    "createRequest": "Create Service Request",
+    "myRequests": "My Requests",
+    "statusOverview": "Request Status Overview",
+    "recentRequests": "Recent Requests",
+    "requestsUnavailable": "Ticket service data will appear here when connected.",
+    "technicianLabel": "Technician Workspace",
+    "technicianDescription": "Track assigned work and supported offices.",
+    "serviceDesk": "Service Desk",
+    "assignedRequests": "Assigned Requests",
+    "inProgress": "In Progress",
+    "assignedOffices": "Assigned Offices",
+    "noAssignedOffices": "No assigned offices.",
+    "adminLabel": "Administration",
+    "adminTitle": "CivicDesk Overview",
+    "adminDescription": "Manage users, offices, announcements, and service work.",
+    "manageUsers": "Manage Users",
+    "manageOffices": "Manage Offices",
+    "viewReports": "View Reports",
+    "totalUsers": "Total Users",
+    "activeUsers": "Active Users",
+    "technicians": "Technicians",
+    "offices": "Offices",
+    "activeAnnouncements": "Active Announcements",
+    "quickActions": "Quick Actions",
+    "openRequests": "Open Requests"
   },
   "status": {
     "pending": "Pending",
