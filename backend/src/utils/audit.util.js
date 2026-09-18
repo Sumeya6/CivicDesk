@@ -23,12 +23,22 @@ async function resolveSystemActorId(tx) {
   });
 
   if (!systemUser) {
-    const error = new Error(
-      "System actor user is not configured. Seed or create a user with the reserved SYSTEM_ACTOR_PHONE.",
-    );
-    error.statusCode = 500;
-    error.code = "SYSTEM_ACTOR_NOT_CONFIGURED";
-    throw error;
+    // Create system user on-demand if missing (e.g., fresh DB without seed)
+    const bcrypt = require("bcryptjs");
+    const passwordHash = await bcrypt.hash("system-generated-password", 12);
+    const created = await tx.user.create({
+      data: {
+        fullName: "CivicDesk System",
+        phoneNumber: SYSTEM_ACTOR_PHONE,
+        password: passwordHash,
+        role: "ADMIN",
+        preferredLanguage: "EN",
+        isActive: true,
+      },
+      select: { id: true },
+    });
+    cachedSystemActorId = created.id;
+    return created.id;
   }
 
   cachedSystemActorId = systemUser.id;
