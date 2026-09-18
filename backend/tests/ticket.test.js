@@ -20,21 +20,32 @@ jest.mock("../src/config/db", () => ({
   prisma: mockPrisma,
   connectDB: jest.fn().mockResolvedValue(undefined),
 }));
-jest.mock("../src/middleware/auth.middleware", () => (req, res, next) => {
-  const role = req.headers["x-test-role"];
-  if (!role)
-    return res.status(401).json({ message: "Authentication required." });
-  req.user = {
-    id:
-      role === "EMPLOYEE"
-        ? "employee-1"
-        : role === "TECHNICIAN"
-          ? "tech-1"
-          : "admin-1",
-    role,
-    isActive: true,
+jest.mock("../src/middleware/auth.middleware", () => {
+  const authenticateUser = (req, res, next) => {
+    const role = req.headers["x-test-role"];
+    if (!role)
+      return res.status(401).json({ message: "Authentication required." });
+    req.user = {
+      id:
+        role === "EMPLOYEE"
+          ? "employee-1"
+          : role === "TECHNICIAN"
+            ? "tech-1"
+            : "admin-1",
+      role,
+      isActive: true,
+    };
+    return next();
   };
-  return next();
+  const authorize =
+    (...roles) =>
+    (req, res, next) => {
+      if (!req.user || !roles.includes(req.user.role)) {
+        return res.status(403).json({ message: "Forbidden." });
+      }
+      return next();
+    };
+  return { authenticateUser, authorize };
 });
 jest.mock("../src/services/assignment.service", () => ({
   assignTechnicianToTicket: jest.fn(),
@@ -109,7 +120,7 @@ describe("ticket workflow", () => {
     );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ ticket: created }),
+      expect.objectContaining({ data: created }),
     );
   });
 
@@ -174,6 +185,7 @@ describe("ticket HTTP workflow", () => {
     expect(createAuditEntry).toHaveBeenCalledWith(
       expect.objectContaining({ action: "CREATED" }),
     );
+    expect(response.body.data).toEqual(ticket);
   });
 
   test("PATCH /assign enforces admin authorization, reassignment, priority, and audit logging", async () => {
@@ -208,6 +220,7 @@ describe("ticket HTTP workflow", () => {
     expect(createAuditEntry).toHaveBeenCalledWith(
       expect.objectContaining({ action: "PRIORITY_CHANGED" }),
     );
+    expect(response.body.data).toHaveProperty("technicianId", "tech-2");
   });
 
   test("procurement accepts only in-progress tickets", async () => {
@@ -229,6 +242,7 @@ describe("ticket HTTP workflow", () => {
     expect(createAuditEntry).toHaveBeenCalledWith(
       expect.objectContaining({ action: "AWAITING_PURCHASE" }),
     );
+    expect(response.body.data).toHaveProperty("status", "AWAITING_PURCHASE");
 
     mockPrisma.ticket.findUnique.mockResolvedValue({
       id: "ticket-1",
@@ -264,6 +278,7 @@ describe("ticket HTTP workflow", () => {
         purchasedByOffice: false,
       });
     expect(resolved.status).toBe(200);
+    expect(resolved.body.data).toHaveProperty("status", "RESOLVED");
 
     mockPrisma.ticket.findUnique.mockResolvedValue({
       id: "ticket-2",
@@ -299,6 +314,7 @@ describe("ticket HTTP workflow", () => {
     expect(createAuditEntry).toHaveBeenCalledWith(
       expect.objectContaining({ action: "VERIFIED" }),
     );
+    expect(approved.body.data).toHaveProperty("status", "CLOSED");
 
     mockPrisma.ticket.findUnique.mockResolvedValue({
       id: "ticket-2",
@@ -315,6 +331,7 @@ describe("ticket HTTP workflow", () => {
       .set("x-test-role", "EMPLOYEE")
       .send({ isApproved: false, feedback: "Still failing" });
     expect(rejected.status).toBe(200);
+    expect(rejected.body.data).toHaveProperty("status", "IN_PROGRESS");
 
     mockPrisma.ticket.findUnique.mockResolvedValue({
       id: "ticket-3",
@@ -344,6 +361,7 @@ describe("ticket HTTP workflow", () => {
       .set("x-test-role", "TECHNICIAN")
       .send({ status: "IN_PROGRESS" });
     expect(valid.status).toBe(200);
+    expect(valid.body.data).toHaveProperty("status", "IN_PROGRESS");
 
     mockPrisma.ticket.findUnique.mockResolvedValue({
       id: "ticket-1",
@@ -379,10 +397,10 @@ describe("GET /api/tickets", () => {
       .set("x-test-role", "TECHNICIAN");
 
     expect(res.status).toBe(200);
-    expect(res.body.tickets).toEqual(tickets);
-    expect(res.body.totalTickets).toBe(1);
-    expect(res.body.page).toBe(1);
-    expect(res.body.totalPages).toBe(1);
+    expect(res.body.data).toEqual(tickets);
+    expect(res.body.meta.totalTickets).toBe(1);
+    expect(res.body.meta.page).toBe(1);
+    expect(res.body.meta.totalPages).toBe(1);
     expect(mockPrisma.ticket.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { technicianId: "tech-1" },
@@ -434,7 +452,7 @@ describe("GET /api/tickets", () => {
       .set("x-test-role", "TECHNICIAN");
 
     expect(res.status).toBe(200);
-    expect(res.body.page).toBe(2);
+    expect(res.body.meta.page).toBe(2);
     expect(mockPrisma.ticket.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ skip: 5, take: 5 }),
     );
@@ -470,7 +488,7 @@ describe("GET /api/categories", () => {
       .set("x-test-role", "EMPLOYEE");
 
     expect(res.status).toBe(200);
-    expect(res.body.categories).toEqual(categories);
+    expect(res.body.data).toEqual(categories);
     expect(mockPrisma.category.findMany).toHaveBeenCalledWith({
       where: { isActive: true },
       orderBy: { nameEn: "asc" },
