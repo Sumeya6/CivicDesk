@@ -136,6 +136,54 @@ const assignTechnicianOfficesRules = [
     .withMessage("Each office id must be a valid UUID."),
 ];
 
+const searchTicketsValidationRules = [
+  query("employeeId")
+    .optional()
+    .isUUID()
+    .withMessage("employeeId must be a valid UUID."),
+  query("technicianId")
+    .optional()
+    .isUUID()
+    .withMessage("technicianId must be a valid UUID."),
+  query("officeId")
+    .optional()
+    .isUUID()
+    .withMessage("officeId must be a valid UUID."),
+  query("categoryId")
+    .optional()
+    .isUUID()
+    .withMessage("categoryId must be a valid UUID."),
+  query("status")
+    .optional()
+    .isIn(["PENDING", "ASSIGNED", "IN_PROGRESS", "AWAITING_PURCHASE", "RESOLVED", "CLOSED"])
+    .withMessage("Invalid status value."),
+  query("priority")
+    .optional()
+    .isIn(["LOW", "MEDIUM", "HIGH", "CRITICAL"])
+    .withMessage("Invalid priority value."),
+  query("startDate")
+    .optional()
+    .isISO8601()
+    .withMessage("startDate must be a valid ISO 8601 date."),
+  query("endDate")
+    .optional()
+    .isISO8601()
+    .withMessage("endDate must be a valid ISO 8601 date."),
+  query("q")
+    .optional()
+    .trim()
+    .isLength({ max: 255 })
+    .withMessage("Search query must be 255 characters or less."),
+  query("page")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("page must be a positive integer."),
+  query("limit")
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage("limit must be between 1 and 100."),
+];
+
 function validate(validations) {
   return async (req, res, next) => {
     await Promise.all(validations.map((validation) => validation.run(req)));
@@ -170,4 +218,5 @@ module.exports = {
   assignTechnicianOfficesRules,
   forgotPasswordValidationRules,
   resetPasswordValidationRules,
+  searchTicketsValidationRules,
 };
