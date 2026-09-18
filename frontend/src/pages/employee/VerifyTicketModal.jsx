@@ -1,7 +1,7 @@
 import { useState, useEffect, useReducer } from "react";
 import { useDispatch } from "react-redux";
 import { verifyTicket } from "../../store/ticketSlice";
-import { Modal } from "../../components/Pagination";
+import { Modal } from "../../components/Modal";
 import Alert from "../../components/Alert";
 import { toast } from "react-toastify";
 import { Star } from "lucide-react";
