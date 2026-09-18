@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
 import { assignTicket, fetchTechnicians } from "../../store/ticketSlice";
-import { Modal } from "../../components/Pagination";
+import { Modal } from "../../components/Modal";
 import Alert from "../../components/Alert";
 import { toast } from "react-toastify";
 
