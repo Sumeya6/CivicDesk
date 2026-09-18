@@ -67,14 +67,12 @@ describe("AuthContext", () => {
   it("restores authenticated user from /auth/me on startup", async () => {
     axios.get.mockResolvedValueOnce({
       data: {
-        user: {
-          id: "1",
-          fullName: "Jane Doe",
-          role: "ADMIN",
-          preferredLanguage: "EN",
-          isActive: true,
-          office: { id: "office-1" },
-        },
+        id: "1",
+        fullName: "Jane Doe",
+        role: "ADMIN",
+        preferredLanguage: "EN",
+        isActive: true,
+        office: { id: "office-1" },
       },
     });
 
@@ -93,14 +91,12 @@ describe("AuthContext", () => {
   it("login updates authentication state", async () => {
     axios.post.mockResolvedValueOnce({
       data: {
-        user: {
-          id: "2",
-          fullName: "John Doe",
-          role: "EMPLOYEE",
-          preferredLanguage: "AM",
-          isActive: true,
-          office: { id: "office-2" },
-        },
+        id: "2",
+        fullName: "John Doe",
+        role: "EMPLOYEE",
+        preferredLanguage: "AM",
+        isActive: true,
+        office: { id: "office-2" },
       },
     });
 
@@ -125,14 +121,12 @@ describe("AuthContext", () => {
     axios.post
       .mockResolvedValueOnce({
         data: {
-          user: {
-            id: "3",
-            fullName: "Aster",
-            role: "TECHNICIAN",
-            preferredLanguage: "AM",
-            isActive: true,
-            office: { id: "office-3" },
-          },
+          id: "3",
+          fullName: "Aster",
+          role: "TECHNICIAN",
+          preferredLanguage: "AM",
+          isActive: true,
+          office: { id: "office-3" },
         },
       })
       .mockResolvedValueOnce({ data: { message: "Logout successful." } });
@@ -156,14 +150,12 @@ describe("AuthContext", () => {
   it("changeLanguage updates language", async () => {
     axios.post.mockResolvedValueOnce({
       data: {
-        user: {
-          id: "4",
-          fullName: "Aster",
-          role: "TECHNICIAN",
-          preferredLanguage: "AM",
-          isActive: true,
-          office: { id: "office-4" },
-        },
+        id: "4",
+        fullName: "Aster",
+        role: "TECHNICIAN",
+        preferredLanguage: "AM",
+        isActive: true,
+        office: { id: "office-4" },
       },
     });
 
