@@ -1,7 +1,7 @@
 const logger = require("../config/logger");
 
 function errorHandler(err, req, res, next) {
-  const statusCode = err?.statusCode || 400;
+  const statusCode = err?.statusCode || 500;
   const message = err?.message || "Internal server error.";
   const isDevelopment = process.env.NODE_ENV === "development";
 
@@ -13,7 +13,7 @@ function errorHandler(err, req, res, next) {
     });
   }
 
-  let response = { message };
+  let response = { success: false, message };
 
   if (err?.details) {
     response.errors = err.details;
@@ -25,6 +25,7 @@ function errorHandler(err, req, res, next) {
 
   if (err?.code === "P2002") {
     return res.status(409).json({
+      success: false,
       message: "Conflict. The requested resource already exists.",
       ...(isDevelopment && { stack: err.stack }),
     });
@@ -32,6 +33,7 @@ function errorHandler(err, req, res, next) {
 
   if (err?.code === "P2025") {
     return res.status(404).json({
+      success: false,
       message: "The requested resource was not found.",
       ...(isDevelopment && { stack: err.stack }),
     });
@@ -39,6 +41,7 @@ function errorHandler(err, req, res, next) {
 
   if (err?.code === "P2003" || err?.code === "P2014" || err?.code === "P2015") {
     return res.status(422).json({
+      success: false,
       message:
         "The request could not be processed due to invalid relation data.",
       ...(isDevelopment && { stack: err.stack }),
