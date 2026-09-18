@@ -5,6 +5,7 @@ const {
   requireSlaJustification,
   calculateSla,
 } = require("../services/sla.service");
+const { successResponse } = require("../utils/response");
 
 function createError(message, statusCode = 400) {
   const error = new Error(message);
@@ -100,7 +101,7 @@ async function resolveTicket(req, res, next) {
 
     return res
       .status(200)
-      .json({ message: "Ticket resolved successfully.", ticket: resolved });
+      .json(successResponse("Ticket resolved successfully.", resolved));
   } catch (error) {
     return next(error);
   }
