@@ -19,4 +19,7 @@ i18n.use(initReactI18next).init({
   },
 });
 
+// Set initial document lang attribute
+document.documentElement.lang = savedLanguage.toLowerCase() === "en" ? "en" : "am";
+
 export default i18n;
