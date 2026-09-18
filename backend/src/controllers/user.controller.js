@@ -19,6 +19,7 @@ const {
 const {
   replaceTechnicianOffices,
 } = require("../services/technicianOffice.service");
+const { successResponse, createdResponse, paginatedResponse } = require("../utils/response");
 
 async function createUserByAdmin(req, res, next) {
   try {
@@ -49,10 +50,7 @@ async function createUserByAdmin(req, res, next) {
       role,
     });
 
-    return res.status(201).json({
-      message: "User registered successfully.",
-      user,
-    });
+    return res.status(201).json(createdResponse("User registered successfully.", user));
   } catch (error) {
     return next(error);
   }
@@ -87,10 +85,7 @@ async function createTechnicianByAdmin(req, res, next) {
     });
     await replaceTechnicianOffices(user.id, [itOffice.id]);
 
-    return res.status(201).json({
-      message: "Technician created successfully.",
-      user,
-    });
+    return res.status(201).json(createdResponse("Technician created successfully.", user));
   } catch (error) {
     return next(error);
   }
@@ -131,9 +126,7 @@ async function changePassword(req, res, next) {
       data: { password: hashedPassword },
     });
 
-    return res.status(200).json({
-      message: "Password changed successfully.",
-    });
+    return res.status(200).json(successResponse("Password changed successfully."));
   } catch (error) {
     return next(error);
   }
@@ -150,10 +143,9 @@ async function listUsers(req, res, next) {
       isActive,
     });
 
-    return res.status(200).json({
-      message: "Users retrieved successfully.",
-      ...data,
-    });
+    return res
+      .status(200)
+      .json(paginatedResponse("Users retrieved successfully.", data.users, data.meta));
   } catch (error) {
     return next(error);
   }
@@ -170,10 +162,7 @@ async function getUserById(req, res, next) {
       return next(error);
     }
 
-    return res.status(200).json({
-      message: "User retrieved successfully.",
-      user,
-    });
+    return res.status(200).json(successResponse("User retrieved successfully.", user));
   } catch (error) {
     return next(error);
   }
@@ -191,7 +180,9 @@ async function getTechnicianOfficeAssignments(req, res, next) {
 async function getMyTechnicianOfficeAssignments(req, res, next) {
   try {
     const officeIds = await getTechnicianOfficeIds(req.user.id);
-    return res.status(200).json({ officeIds });
+    return res
+      .status(200)
+      .json(successResponse("Office assignments retrieved successfully.", { officeIds }));
   } catch (error) {
     return next(error);
   }
@@ -218,10 +209,9 @@ async function updateUserById(req, res, next) {
       isActive,
     });
 
-    return res.status(200).json({
-      message: "User updated successfully.",
-      user: updated,
-    });
+    return res
+      .status(200)
+      .json(successResponse("User updated successfully.", updated));
   } catch (error) {
     return next(error);
   }
@@ -234,10 +224,9 @@ async function updateUserStatusById(req, res, next) {
 
     const updated = await updateUserStatus(id, isActive);
 
-    return res.status(200).json({
-      message: "User status updated successfully.",
-      user: updated,
-    });
+    return res
+      .status(200)
+      .json(successResponse("User status updated successfully.", updated));
   } catch (error) {
     return next(error);
   }
@@ -250,10 +239,9 @@ async function updateUserRoleById(req, res, next) {
 
     const updated = await updateUserRole(id, role);
 
-    return res.status(200).json({
-      message: "User role updated successfully.",
-      user: updated,
-    });
+    return res
+      .status(200)
+      .json(successResponse("User role updated successfully.", updated));
   } catch (error) {
     return next(error);
   }
@@ -266,10 +254,9 @@ async function updatePreferredLanguageByMe(req, res, next) {
 
     const updated = await updatePreferredLanguage(id, preferredLanguage);
 
-    return res.status(200).json({
-      message: "Preferred language updated successfully.",
-      user: updated,
-    });
+    return res
+      .status(200)
+      .json(successResponse("Preferred language updated successfully.", updated));
   } catch (error) {
     return next(error);
   }
@@ -287,10 +274,9 @@ async function deleteUserById(req, res, next) {
 
     const deletedUser = await deleteUser(id);
 
-    return res.status(200).json({
-      message: "User deleted successfully.",
-      user: deletedUser,
-    });
+    return res
+      .status(200)
+      .json(successResponse("User deleted successfully.", deletedUser));
   } catch (error) {
     return next(error);
   }
@@ -323,11 +309,14 @@ async function assignTechnicianOffices(req, res, next) {
 
     await replaceTechnicianOffices(technicianId, officeIds);
 
-    return res.status(200).json({
-      message: "Technician office assignments updated successfully.",
-      technicianId,
-      officeIds,
-    });
+    return res
+      .status(200)
+      .json(
+        successResponse(
+          "Technician office assignments updated successfully.",
+          { technicianId, officeIds },
+        ),
+      );
   } catch (error) {
     return next(error);
   }
