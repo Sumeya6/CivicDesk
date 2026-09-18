@@ -1,7 +1,6 @@
 const { Router } = require("express");
 const { body, param } = require("express-validator");
-const authenticateUser = require("../middleware/auth.middleware");
-const { authorizeRoles } = require("../middleware/authorization.middleware");
+const { authenticateUser, authorize } = require("../middleware/auth.middleware");
 const { validate } = require("../utils/validators");
 const {
   listOffices,
@@ -15,7 +14,7 @@ const {
 
 const router = Router();
 
-router.get("/options", listOfficeOptions);
+router.get("/options", authenticateUser, listOfficeOptions);
 
 router.use(authenticateUser);
 
@@ -29,22 +28,22 @@ const officeValidationRules = [
     .withMessage("isActive must be a boolean."),
 ];
 
-router.get("/", authorizeRoles("ADMIN"), listOffices);
+router.get("/", authorize("ADMIN"), listOffices);
 router.get(
   "/:id",
-  authorizeRoles("ADMIN"),
+  authorize("ADMIN"),
   validate([param("id").isUUID().withMessage("Invalid office id.")]),
   getOfficeById,
 );
 router.post(
   "/",
-  authorizeRoles("ADMIN"),
+  authorize("ADMIN"),
   validate(officeValidationRules),
   createOfficeHandler,
 );
 router.put(
   "/:id",
-  authorizeRoles("ADMIN"),
+  authorize("ADMIN"),
   validate([
     param("id").isUUID().withMessage("Invalid office id."),
     ...officeValidationRules,
@@ -53,7 +52,7 @@ router.put(
 );
 router.put(
   "/:id/status",
-  authorizeRoles("ADMIN"),
+  authorize("ADMIN"),
   validate([
     param("id").isUUID().withMessage("Invalid office id."),
     body("isActive")
@@ -64,7 +63,7 @@ router.put(
 );
 router.delete(
   "/:id",
-  authorizeRoles("ADMIN"),
+  authorize("ADMIN"),
   validate([param("id").isUUID().withMessage("Invalid office id.")]),
   deleteOfficeById,
 );
