@@ -1,4 +1,6 @@
 const { prisma } = require("../config/db");
+const { successResponse } = require("../utils/response");
+const { Role, TicketStatus } = require("@prisma/client");
 
 function startOfDay(dateString) {
   const d = new Date(dateString);
@@ -34,6 +36,13 @@ async function searchTickets(req, res, next) {
     const skip = (pageNumber - 1) * limitNumber;
 
     const where = {};
+
+    // Security: restrict access based on role
+    if (req.user.role === Role.EMPLOYEE) {
+      where.employeeId = req.user.id;
+    } else if (req.user.role === Role.TECHNICIAN) {
+      where.technicianId = req.user.id;
+    }
 
     if (employeeId) {
       where.employeeId = employeeId;
@@ -114,12 +123,14 @@ async function searchTickets(req, res, next) {
       }),
     ]);
 
-    return res.status(200).json({
-      data: tickets,
-      totalCount,
-      totalPages: Math.ceil(totalCount / limitNumber),
-      currentPage: pageNumber,
-    });
+    return res.status(200).json(
+      successResponse("Tickets retrieved successfully.", {
+        data: tickets,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limitNumber),
+        currentPage: pageNumber,
+      }),
+    );
   } catch (error) {
     return next(error);
   }
