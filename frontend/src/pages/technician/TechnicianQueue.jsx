@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { fetchTickets, updateTicketStatus } from "../../store/ticketSlice";
 import { Pagination } from "../../components/Pagination";
 import StatusBadge from "../../components/StatusBadge";
 import PriorityBadge from "../../components/PriorityBadge";
+import SlaIndicator from "../../components/SlaIndicator";
 import { formatDate } from "../../components/ticketConfig";
 import { toast } from "react-toastify";
 import { RefreshCw } from "lucide-react";
@@ -17,6 +19,7 @@ const QUEUE_STATUSES = [
 ];
 
 export default function TechnicianQueue({ onRequestPurchase, onResolve, onViewAudit }) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { tickets, loading, error, page, totalPages } = useSelector((s) => s.tickets);
   const [statusFilter, setStatusFilter] = useState("");
@@ -91,13 +94,14 @@ export default function TechnicianQueue({ onRequestPurchase, onResolve, onViewAu
             <table className="workspace-table">
               <thead>
                 <tr>
-                  <th>Title</th>
-                  <th>Category</th>
-                  <th>Priority</th>
-                  <th>Status</th>
-                  <th>Device/System</th>
-                  <th>Created</th>
-                  <th>Actions</th>
+                  <th>{t("ticketTable.title")}</th>
+                  <th>{t("ticketTable.category")}</th>
+                  <th>{t("ticketTable.priority")}</th>
+                  <th>{t("ticketTable.status")}</th>
+                  <th>{t("ticketTable.sla")}</th>
+                  <th>{t("ticketTable.device")}</th>
+                  <th>{t("ticketTable.created")}</th>
+                  <th>{t("ticketTable.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -117,6 +121,9 @@ export default function TechnicianQueue({ onRequestPurchase, onResolve, onViewAu
                     </td>
                     <td>
                       <StatusBadge status={ticket.status} />
+                    </td>
+                    <td>
+                      <SlaIndicator ticket={ticket} />
                     </td>
                     <td>
                       {ticket.deviceOrSystem || "—"}

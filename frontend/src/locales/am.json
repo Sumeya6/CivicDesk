@@ -327,5 +327,25 @@
     "deleteMessage": "ይህን ነገር ለመሰረዝ እርግጠኛ ነዎት?",
     "deleteOfficeMessage": "ይህን ቢሮ ለመሰረዝ እርግጠኛ ነዎት?",
     "deleteConfirm": "ሰርዝ"
+  },
+  "sla": {
+    "onTrack": "በመንገድ ላይ",
+    "atRisk": "ድጋፍ ይፈልጋል",
+    "overdue": "ጊዜው ያለፈ",
+    "resolved": "ተፈቧል",
+    "atRiskCount": "SLA አደረಗ ውስጥ",
+    "overdueCount": "ጊዜው ያለፉ ቲኬቶች"
+  },
+  "ticketTable": {
+    "title": "ርዕስ",
+    "category": "ምድብ",
+    "priority": "ቅድሚያ",
+    "status": "ሁኔታ",
+    "sla": "SLA",
+    "device": "መሣሪያ/ስርዓት",
+    "created": "የተፈጠረ",
+    "actions": "ተግባራት",
+    "technician": "ቴክኒሻን",
+    "slaDeadline": "የSLA ጊዜ መጨረሻ"
   }
 }

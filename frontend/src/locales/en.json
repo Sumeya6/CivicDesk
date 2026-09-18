@@ -328,5 +328,25 @@
     "deleteMessage": "Are you sure you want to delete this item?",
     "deleteOfficeMessage": "Are you sure you want to delete this office?",
     "deleteConfirm": "Delete"
+  },
+  "sla": {
+    "onTrack": "On Track",
+    "atRisk": "At Risk",
+    "overdue": "Overdue",
+    "resolved": "Resolved",
+    "atRiskCount": "SLA At Risk",
+    "overdueCount": "Overdue Tickets"
+  },
+  "ticketTable": {
+    "title": "Title",
+    "category": "Category",
+    "priority": "Priority",
+    "status": "Status",
+    "sla": "SLA",
+    "device": "Device/System",
+    "created": "Created",
+    "actions": "Actions",
+    "technician": "Technician",
+    "slaDeadline": "SLA Deadline"
   }
 }

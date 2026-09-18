@@ -6,7 +6,9 @@ import { fetchTickets } from "../../store/ticketSlice";
 import { Pagination } from "../../components/Pagination";
 import StatusBadge from "../../components/StatusBadge";
 import PriorityBadge from "../../components/PriorityBadge";
+import SlaIndicator from "../../components/SlaIndicator";
 import { formatDate } from "../../components/ticketConfig";
+import { calculateSlaDeadline } from "../../utils/sla";
 import { useAuth } from "../../context/AuthContext";
 import CreateTicketModal from "./CreateTicketModal";
 import VerifyTicketModal from "./VerifyTicketModal";
@@ -107,12 +109,14 @@ function EmployeeDashboard() {
             <table className="workspace-table">
               <thead>
                 <tr>
-                  <th>Title</th>
-                  <th>Category</th>
-                  <th>Priority</th>
-                  <th>Status</th>
-                  <th>Created</th>
-                  <th>Actions</th>
+                  <th>{t("ticketTable.title")}</th>
+                  <th>{t("ticketTable.category")}</th>
+                  <th>{t("ticketTable.priority")}</th>
+                  <th>{t("ticketTable.status")}</th>
+                  <th>{t("ticketTable.technician")}</th>
+                  <th>{t("ticketTable.slaDeadline")}</th>
+                  <th>{t("ticketTable.created")}</th>
+                  <th>{t("ticketTable.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -132,6 +136,14 @@ function EmployeeDashboard() {
                     </td>
                     <td>
                       <StatusBadge status={ticket.status} />
+                    </td>
+                    <td>
+                      {ticket.technician?.fullName || (
+                        <span className="text-[var(--civic-muted)]">—</span>
+                      )}
+                    </td>
+                    <td>
+                      <SlaIndicator ticket={ticket} />
                     </td>
                     <td>{formatDate(ticket.createdAt)}</td>
                     <td>

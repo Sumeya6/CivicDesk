@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { fetchUsers } from "../../store/userSlice";
@@ -7,7 +7,9 @@ import { fetchTickets } from "../../store/ticketSlice";
 import { Pagination } from "../../components/Pagination";
 import StatusBadge from "../../components/StatusBadge";
 import PriorityBadge from "../../components/PriorityBadge";
+import SlaIndicator from "../../components/SlaIndicator";
 import { formatDate } from "../../components/ticketConfig";
+import { getSlaStatus } from "../../utils/sla";
 import AssignTechnicianModal from "./AssignTechnicianModal";
 import AuditTrailModal from "../../components/AuditTrailModal";
 import {
@@ -19,6 +21,8 @@ import {
   Wrench,
   RefreshCw,
   UserCog,
+  AlertTriangle,
+  AlertCircle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import AnnouncementBoard from "../../components/AnnouncementBoard";
@@ -37,6 +41,21 @@ function AdminDashboard() {
 
   const activeUsers = users.filter((user) => user.isActive).length;
   const technicians = users.filter((user) => user.role === "TECHNICIAN").length;
+
+  const slaSummary = useMemo(() => {
+    let atRisk = 0;
+    let overdue = 0;
+    for (const ticket of tickets) {
+      const status = getSlaStatus(
+        ticket.createdAt,
+        ticket.category?.expectedResolutionHours,
+        ticket.resolvedAt,
+      );
+      if (status === "at-risk") atRisk++;
+      if (status === "overdue") overdue++;
+    }
+    return { atRisk, overdue };
+  }, [tickets]);
 
   useEffect(() => {
     dispatch(fetchUsers());
@@ -119,6 +138,28 @@ function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      <div className="dashboard-stat-grid">
+        <div className="dashboard-stat">
+          <span className="dashboard-stat-icon">
+            <AlertTriangle size={18} />
+          </span>
+          <div>
+            <span>{t("sla.atRiskCount")}</span>
+            <strong>{slaSummary.atRisk}</strong>
+          </div>
+        </div>
+        <div className="dashboard-stat">
+          <span className="dashboard-stat-icon dashboard-stat-icon-red">
+            <AlertCircle size={18} />
+          </span>
+          <div>
+            <span>{t("sla.overdueCount")}</span>
+            <strong>{slaSummary.overdue}</strong>
+          </div>
+        </div>
+      </div>
+
       <div className="dashboard-grid dashboard-grid-two">
         <section className="dashboard-panel">
           <div className="dashboard-panel-heading">
@@ -190,13 +231,14 @@ function AdminDashboard() {
             <table className="workspace-table">
               <thead>
                 <tr>
-                  <th>Title</th>
-                  <th>Category</th>
-                  <th>Priority</th>
-                  <th>Status</th>
-                  <th>Device/System</th>
-                  <th>Created</th>
-                  <th>Actions</th>
+                  <th>{t("ticketTable.title")}</th>
+                  <th>{t("ticketTable.category")}</th>
+                  <th>{t("ticketTable.priority")}</th>
+                  <th>{t("ticketTable.status")}</th>
+                  <th>{t("ticketTable.sla")}</th>
+                  <th>{t("ticketTable.device")}</th>
+                  <th>{t("ticketTable.created")}</th>
+                  <th>{t("ticketTable.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -216,6 +258,9 @@ function AdminDashboard() {
                     </td>
                     <td>
                       <StatusBadge status={ticket.status} />
+                    </td>
+                    <td>
+                      <SlaIndicator ticket={ticket} />
                     </td>
                     <td>
                       {ticket.deviceOrSystem || "—"}
