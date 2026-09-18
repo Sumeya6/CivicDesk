@@ -79,15 +79,114 @@ const mockAnnouncement = {
 
 describe("GET /api/announcements", () => {
   beforeEach(() => {
+    verifyAccessToken.mockReset();
+    mockPrisma.user.findUnique.mockReset();
+    mockPrisma.announcement.findMany.mockReset();
     mockPrisma.announcement.findMany.mockResolvedValue([mockAnnouncement]);
   });
 
-  test("returns 200 without authentication", async () => {
-    const res = await request(app).get("/api/announcements");
+  test("returns 200 for authenticated employee", async () => {
+    verifyAccessToken.mockReturnValue({ sub: "emp-id", role: "EMPLOYEE" });
+    mockPrisma.user.findUnique.mockResolvedValue(employeeUser);
+
+    const res = await request(app)
+      .get("/api/announcements")
+      .set("Cookie", "accessToken=fake-token");
 
     expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toHaveLength(1);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.data).toHaveLength(1);
+  });
+
+  test("returns 200 for authenticated admin", async () => {
+    verifyAccessToken.mockReturnValue({ sub: "admin-id", role: "ADMIN" });
+    mockPrisma.user.findUnique.mockResolvedValue(adminUser);
+
+    const res = await request(app)
+      .get("/api/announcements")
+      .set("Cookie", "accessToken=fake-token");
+
+    expect(res.status).toBe(200);
+  });
+
+  test("returns 401 without authentication", async () => {
+    const res = await request(app).get("/api/announcements");
+    expect(res.status).toBe(401);
+  });
+});
+
+describe("GET /api/announcements/all", () => {
+  beforeEach(() => {
+    verifyAccessToken.mockReset();
+    mockPrisma.user.findUnique.mockReset();
+    mockPrisma.announcement.findMany.mockReset();
+    mockPrisma.announcement.findMany.mockResolvedValue([mockAnnouncement]);
+  });
+
+  test("returns 200 for authenticated admin", async () => {
+    verifyAccessToken.mockReturnValue({ sub: "admin-id", role: "ADMIN" });
+    mockPrisma.user.findUnique.mockResolvedValue(adminUser);
+
+    const res = await request(app)
+      .get("/api/announcements/all")
+      .set("Cookie", "accessToken=fake-token");
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.data)).toBe(true);
+  });
+
+  test("returns 200 for authenticated employee", async () => {
+    verifyAccessToken.mockReturnValue({ sub: "emp-id", role: "EMPLOYEE" });
+    mockPrisma.user.findUnique.mockResolvedValue(employeeUser);
+
+    const res = await request(app)
+      .get("/api/announcements/all")
+      .set("Cookie", "accessToken=fake-token");
+
+    expect(res.status).toBe(200);
+  });
+
+  test("returns 401 without authentication", async () => {
+    const res = await request(app).get("/api/announcements/all");
+    expect(res.status).toBe(401);
+  });
+});
+
+describe("GET /api/announcements/:id", () => {
+  beforeEach(() => {
+    verifyAccessToken.mockReset();
+    mockPrisma.user.findUnique.mockReset();
+    mockPrisma.announcement.findUnique.mockReset();
+    mockPrisma.announcement.findUnique.mockResolvedValue(mockAnnouncement);
+  });
+
+  test("returns 200 for authenticated employee", async () => {
+    verifyAccessToken.mockReturnValue({ sub: "emp-id", role: "EMPLOYEE" });
+    mockPrisma.user.findUnique.mockResolvedValue(employeeUser);
+
+    const res = await request(app)
+      .get("/api/announcements/ann-1")
+      .set("Cookie", "accessToken=fake-token");
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.id).toBe("ann-1");
+  });
+
+  test("returns 401 without authentication", async () => {
+    const res = await request(app).get("/api/announcements/ann-1");
+    expect(res.status).toBe(401);
+  });
+
+  test("returns 404 for nonexistent announcement", async () => {
+    verifyAccessToken.mockReturnValue({ sub: "emp-id", role: "EMPLOYEE" });
+    mockPrisma.user.findUnique.mockResolvedValue(employeeUser);
+    mockPrisma.announcement.findUnique.mockResolvedValue(null);
+
+    const res = await request(app)
+      .get("/api/announcements/nonexistent")
+      .set("Cookie", "accessToken=fake-token");
+
+    expect(res.status).toBe(404);
   });
 });
 
@@ -129,7 +228,7 @@ describe("POST /api/announcements", () => {
       .send({ title: "Test Announcement", content: "Content body" });
 
     expect(res.status).toBe(201);
-    expect(res.body).toHaveProperty("title", "Test Announcement");
+    expect(res.body.data).toHaveProperty("title", "Test Announcement");
   });
 
   test("uses authenticated user's id as authorId, not body authorId", async () => {
@@ -270,7 +369,7 @@ describe("PUT /api/announcements/:id", () => {
       .send({ title: "Updated" });
 
     expect(res.status).toBe(200);
-    expect(res.body.title).toBe("Updated");
+    expect(res.body.data.title).toBe("Updated");
   });
 });
 
