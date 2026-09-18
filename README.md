@@ -272,13 +272,20 @@ npm install
 
 ### Backend (`backend/.env`)
 
-| Variable       | Required | Default                 | Description                     |
-| -------------- | -------- | ----------------------- | ------------------------------- |
-| `DATABASE_URL` | Yes      | —                       | PostgreSQL connection string    |
-| `JWT_SECRET`   | Yes      | —                       | JWT signing secret              |
-| `NODE_ENV`     | No       | `development`           | Environment mode                |
-| `PORT`         | No       | `5000`                  | Server port                     |
-| `CORS_ORIGINS` | No       | `http://localhost:5173` | Comma-separated allowed origins |
+| Variable                   | Required | Default                 | Description                                  |
+| -------------------------- | -------- | ----------------------- | -------------------------------------------- |
+| `DATABASE_URL`             | Yes      | —                       | PostgreSQL connection string                 |
+| `JWT_ACCESS_TOKEN_SECRET`  | Yes      | —                       | JWT access token signing secret              |
+| `JWT_REFRESH_TOKEN_SECRET` | Yes      | —                       | JWT refresh token signing secret             |
+| `JWT_PASSWORD_RESET_SECRET`| Yes      | —                       | JWT password reset token signing secret      |
+| `NODE_ENV`                 | No       | `development`           | Environment mode                             |
+| `PORT`                     | No       | `5000`                  | Server port                                  |
+| `CORS_ORIGINS`             | No       | `http://localhost:5173` | Comma-separated allowed origins              |
+| `TWILIO_ACCOUNT_SID`       | No       | —                       | Twilio Account SID (for SMS notifications)   |
+| `TWILIO_AUTH_TOKEN`        | No       | —                       | Twilio Auth Token (for SMS notifications)    |
+| `TWILIO_FROM`              | No       | —                       | Twilio verified sender phone number (E.164)  |
+
+> **Note:** SMS notifications use Twilio in production. In local development (`NODE_ENV !== "production"`), a mock provider logs the message instead of sending real SMS — no credentials required.
 
 ### Frontend (`frontend/.env.local`)
 
@@ -309,12 +316,15 @@ npm run dev
 
 ### Backend
 
-| Script                   | Command                 | Description                   |
-| ------------------------ | ----------------------- | ----------------------------- |
-| `npm run dev`            | `nodemon src/server.js` | Development with auto-restart |
-| `npm start`              | `node src/server.js`    | Production start              |
-| `npx prisma migrate dev` | —                       | Apply database migrations     |
-| `npx prisma studio`      | —                       | Browse the database visually  |
+| Script                   | Command                 | Description                             |
+| ------------------------ | ----------------------- | --------------------------------------- |
+| `npm run dev`            | `nodemon src/server.js` | Development with auto-restart           |
+| `npm start`              | `node src/server.js`    | Production start                        |
+| `npm test`               | `jest --runInBand`      | Run all tests (unit + integration)      |
+| `npm run test:unit`      | `jest --config jest.config.js` | Unit tests only (no DB needed)    |
+| `npm run test:integration` | `jest --config jest.config.integration.js` | Integration tests (requires DB) |
+| `npx prisma migrate dev` | —                       | Apply database migrations               |
+| `npx prisma studio`      | —                       | Browse the database visually            |
 
 ### Frontend
 
@@ -322,6 +332,8 @@ npm run dev
 | ----------------- | -------------- | ------------------------ |
 | `npm run dev`     | `vite`         | Development server       |
 | `npm run build`   | `vite build`   | Production build         |
+| `npm run lint`    | `eslint .`     | Lint source files        |
+| `npm run test`    | `vitest run`   | Run component tests      |
 | `npm run preview` | `vite preview` | Preview production build |
 
 ---
@@ -383,13 +395,58 @@ Per the proposal, the system is intended to be developed and tested in a local e
 
 ## Testing
 
-**Status: Test suite not yet implemented.**
+The project has unit and integration test suites across both backend and frontend.
 
-Planned work:
+### Backend
 
-- Backend: unit tests for the assignment/SLA services and integration tests for controllers
-- Frontend: component tests for modals and dashboards
-- E2E: coverage of the full ticket lifecycle (submit → assign → resolve → close)
+Tests are split into two groups using separate Jest configs:
+
+| Suite            | Command                        | Files                                                              | Database required |
+| ---------------- | ------------------------------ | ------------------------------------------------------------------ | ----------------- |
+| **Unit tests**   | `npm run test:unit`            | `report`, `search`, `announcement`, `session`, `ticket`, `assignment` | No (all mocked)   |
+| **Integration**  | `npm run test:integration`     | `auth`, `user`, `office`                                           | Yes (PostgreSQL)  |
+| **All (default)**| `npm test`                     | Both of the above                                                  | Yes               |
+
+- Unit tests mock Prisma, auth middleware, and external dependencies — no live database needed.
+- Integration tests connect to a real PostgreSQL instance via `DATABASE_URL` in `backend/.env`.
+
+### Frontend
+
+| Command          | Framework | Description                             |
+| ---------------- | --------- | --------------------------------------- |
+| `npm run lint`   | ESLint    | Static analysis for JSX/JS             |
+| `npm run test`   | Vitest    | Component and logic tests (11 files)   |
+| `npm run build`  | Vite      | Production build (verifies no compile errors) |
+
+Frontend tests use mocked Axios calls and do not require a running backend.
+
+### Running Tests
+
+```bash
+# Backend unit tests (no database)
+cd backend
+npm run test:unit
+
+# Backend integration tests (requires PostgreSQL)
+cd backend
+npm run test:integration
+
+# All backend tests
+cd backend
+npm test
+
+# Frontend lint + tests + build
+cd frontend
+npm run lint
+npm run test
+npm run build
+```
+
+### Test Architecture
+
+- **Backend unit tests** use `jest.mock()` to replace Prisma, JWT utilities, and middleware — fast, isolated, no external dependencies.
+- **Backend integration tests** boot the real Express app and hit a live database — verify full request pipeline including auth, validation, and ORM queries.
+- **Frontend tests** use Vitest with `@testing-library/react` and mock `axios` — verify component rendering, user interactions, and API call patterns.
 
 ---
 
