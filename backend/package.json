@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "test": "jest --runInBand --testEnvironment=node --forceExit"
+    "test": "jest --runInBand --testEnvironment=node --forceExit",
+    "test:unit": "jest --config jest.config.js --runInBand --testEnvironment=node --forceExit",
+    "test:integration": "jest --config jest.config.integration.js --runInBand --testEnvironment=node --forceExit"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
