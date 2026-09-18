@@ -2,7 +2,7 @@ import { useEffect, useReducer } from "react";
 import { useDispatch } from "react-redux";
 import { useForm, Controller } from "react-hook-form";
 import { resolveTicket } from "../../store/ticketSlice";
-import { Modal } from "../../components/Pagination";
+import { Modal } from "../../components/Modal";
 import Alert from "../../components/Alert";
 import { toast } from "react-toastify";
 import { AlertTriangle } from "lucide-react";
