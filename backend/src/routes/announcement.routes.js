@@ -1,6 +1,5 @@
 const { Router } = require("express");
-const authenticateUser = require("../middleware/auth.middleware");
-const { authorize } = require("../middleware/auth.middleware");
+const { authenticateUser, authorize } = require("../middleware/auth.middleware");
 const {
   listActiveAnnouncements,
   getAnnouncements,
@@ -13,8 +12,8 @@ const {
 const router = Router();
 
 router.get("/", authenticateUser, listActiveAnnouncements);
-router.get("/all", getAnnouncements);
-router.get("/:id", getAnnouncementById);
+router.get("/all", authenticateUser, getAnnouncements);
+router.get("/:id", authenticateUser, getAnnouncementById);
 router.post("/", authenticateUser, authorize("ADMIN"), createAnnouncement);
 router.put("/:id", authenticateUser, authorize("ADMIN"), updateAnnouncement);
 router.delete("/:id", authenticateUser, authorize("ADMIN"), deleteAnnouncement);
