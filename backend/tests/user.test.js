@@ -8,6 +8,7 @@ let adminCookie;
 let adminId;
 let createdUserId;
 let createdUserPhone;
+let testOfficeId;
 
 beforeAll(async () => {
   await prisma.$connect();
@@ -18,6 +19,9 @@ beforeAll(async () => {
     .send({ phoneNumber: admin.phoneNumber, password: "Password123!" });
 
   adminCookie = loginResponse.headers["set-cookie"];
+
+  const office = await prisma.office.findFirst({ where: { isActive: true } });
+  testOfficeId = office?.id;
 });
 
 afterAll(async () => {
@@ -35,22 +39,23 @@ describe("User management routes", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.message).toBe("Users retrieved successfully.");
-    expect(response.body.meta).toBeDefined();
-    expect(Array.isArray(response.body.users)).toBe(true);
+    expect(response.body.data.meta).toBeDefined();
+    expect(Array.isArray(response.body.data.users)).toBe(true);
   });
 
   test("POST /api/auth/register creates a user for user tests", async () => {
-    createdUserPhone = `+2519110000${Math.floor(Math.random() * 10000)}`;
+    createdUserPhone = `+2519${String(Math.floor(Math.random() * 100000000)).padStart(8, "0")}`;
     const response = await request(app).post("/api/auth/register").send({
       fullName: "User Test",
       phoneNumber: createdUserPhone,
       password: "Password123!",
       preferredLanguage: "EN",
+      officeId: testOfficeId,
     });
 
     expect(response.status).toBe(201);
-    expect(response.body.user).toMatchObject({ phoneNumber: createdUserPhone });
-    createdUserId = response.body.user.id;
+    expect(response.body.data.user).toMatchObject({ phoneNumber: createdUserPhone });
+    createdUserId = response.body.data.user.id;
   });
 
   test("GET /api/users/:id returns the created user", async () => {
@@ -59,7 +64,7 @@ describe("User management routes", () => {
       .set("Cookie", adminCookie);
 
     expect(response.status).toBe(200);
-    expect(response.body.user).toMatchObject({ id: createdUserId });
+    expect(response.body.data.user).toMatchObject({ id: createdUserId });
   });
 
   test("PUT /api/users/:id updates a user", async () => {
@@ -69,7 +74,7 @@ describe("User management routes", () => {
       .send({ fullName: "Updated User" });
 
     expect(response.status).toBe(200);
-    expect(response.body.user.fullName).toBe("Updated User");
+    expect(response.body.data.user.fullName).toBe("Updated User");
   });
 
   test("PUT /api/users/:id/role updates the user role", async () => {
@@ -79,7 +84,7 @@ describe("User management routes", () => {
       .send({ role: "TECHNICIAN" });
 
     expect(response.status).toBe(200);
-    expect(response.body.user.role).toBe("TECHNICIAN");
+    expect(response.body.data.user.role).toBe("TECHNICIAN");
   });
 
   test("PATCH /api/users/me/language updates preferred language", async () => {
@@ -96,7 +101,7 @@ describe("User management routes", () => {
       .send({ preferredLanguage: "AM" });
 
     expect(patchResponse.status).toBe(200);
-    expect(patchResponse.body.user.preferredLanguage).toBe("AM");
+    expect(patchResponse.body.data.user.preferredLanguage).toBe("AM");
   });
 
   test("PUT /api/users/:id/status toggles user status", async () => {
@@ -106,7 +111,7 @@ describe("User management routes", () => {
       .send({ isActive: false });
 
     expect(response.status).toBe(200);
-    expect(response.body.user.isActive).toBe(false);
+    expect(response.body.data.user.isActive).toBe(false);
   });
 
   test("DELETE /api/users/:id deletes a user", async () => {
@@ -116,7 +121,7 @@ describe("User management routes", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.message).toBe("User deleted successfully.");
-    expect(response.body.user.id).toBe(createdUserId);
+    expect(response.body.data.user.id).toBe(createdUserId);
     createdUserId = null;
   });
 
