@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 import { requestPurchase } from "../../store/ticketSlice";
-import { Modal } from "../../components/Pagination";
+import { Modal } from "../../components/Modal";
 import Alert from "../../components/Alert";
 import { toast } from "react-toastify";
 
