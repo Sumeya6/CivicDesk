@@ -8,6 +8,9 @@ import "./index.css";
 import "./i18n";
 import App from "./App.jsx";
 import { store } from "./store/store";
+import { setAxiosStore } from "./api/axios";
+
+setAxiosStore(store);
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
