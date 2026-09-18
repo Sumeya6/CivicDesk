@@ -1,4 +1,5 @@
 const { prisma } = require("../config/db");
+const { successResponse, createdResponse } = require("../utils/response");
 
 async function listActiveAnnouncements(req, res, next) {
   try {
@@ -15,10 +16,7 @@ async function listActiveAnnouncements(req, res, next) {
       },
     });
 
-    return res.status(200).json({
-      message: "Announcements retrieved successfully.",
-      announcements,
-    });
+    return res.status(200).json(successResponse("Announcements retrieved successfully.", announcements));
   } catch (error) {
     return next(error);
   }
@@ -33,7 +31,7 @@ async function getAnnouncements(req, res, next) {
       },
     });
 
-    return res.status(200).json(announcements);
+    return res.status(200).json(successResponse("Announcements retrieved successfully.", announcements));
   } catch (error) {
     return next(error);
   }
@@ -49,12 +47,10 @@ async function getAnnouncementById(req, res, next) {
     });
 
     if (!announcement) {
-      return res.status(404).json({
-        message: "Announcement not found",
-      });
+      return res.status(404).json({ success: false, message: "Announcement not found" });
     }
 
-    return res.status(200).json(announcement);
+    return res.status(200).json(successResponse("Announcement retrieved successfully.", announcement));
   } catch (error) {
     return next(error);
   }
@@ -66,9 +62,7 @@ async function createAnnouncement(req, res, next) {
     const { title, content, isActive } = req.body;
 
     if (!title || !content) {
-      return res.status(400).json({
-        message: "Title and content are required",
-      });
+      return res.status(400).json({ success: false, message: "Title and content are required" });
     }
 
     const announcement = await prisma.announcement.create({
@@ -80,7 +74,7 @@ async function createAnnouncement(req, res, next) {
       },
     });
 
-    return res.status(201).json(announcement);
+    return res.status(201).json(createdResponse("Announcement created successfully.", announcement));
   } catch (error) {
     return next(error);
   }
@@ -97,9 +91,7 @@ async function updateAnnouncement(req, res, next) {
     });
 
     if (!existing) {
-      return res.status(404).json({
-        message: "Announcement not found",
-      });
+      return res.status(404).json({ success: false, message: "Announcement not found" });
     }
 
     const announcement = await prisma.announcement.update({
@@ -113,7 +105,7 @@ async function updateAnnouncement(req, res, next) {
       },
     });
 
-    return res.status(200).json(announcement);
+    return res.status(200).json(successResponse("Announcement updated successfully.", announcement));
   } catch (error) {
     return next(error);
   }
@@ -129,18 +121,14 @@ async function deleteAnnouncement(req, res, next) {
     });
 
     if (!existing) {
-      return res.status(404).json({
-        message: "Announcement not found",
-      });
+      return res.status(404).json({ success: false, message: "Announcement not found" });
     }
 
     await prisma.announcement.delete({
       where: { id },
     });
 
-    return res.status(200).json({
-      message: "Announcement deleted successfully",
-    });
+    return res.status(200).json(successResponse("Announcement deleted successfully."));
   } catch (error) {
     return next(error);
   }
