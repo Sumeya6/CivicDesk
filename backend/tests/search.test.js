@@ -7,20 +7,45 @@ const mockPrisma = {
     findMany: jest.fn(),
     count: jest.fn(),
   },
+  user: {
+    findUnique: jest.fn(),
+  },
 };
 
 jest.mock("../src/config/db", () => ({
   prisma: mockPrisma,
 }));
 
-const searchRoutes = require("../src/routes/search.routes");
+jest.mock("../src/utils/jwt", () => ({
+  verifyAccessToken: jest.fn(),
+  generateAccessToken: jest.fn(),
+  generateRefreshToken: jest.fn(),
+  verifyRefreshToken: jest.fn(),
+  extractBearerToken: jest.fn(),
+  getAccessTokenCookieOptions: jest.fn(),
+}));
+
+jest.mock("../src/middleware/auth.middleware", () => {
+  const authenticateUser = jest.fn((req, res, next) => {
+    req.user = { id: "user-1", role: "ADMIN" };
+    next();
+  });
+  return { authenticateUser };
+});
+
+jest.mock("../src/utils/validators", () => ({
+  validate: () => (req, res, next) => next(),
+  searchTicketsValidationRules: [],
+}));
+
+const ticketRoutes = require("../src/routes/ticket.routes");
 const errorHandler = require("../src/middleware/error.middleware");
 
 function createApp() {
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
-  app.use("/api/tickets", searchRoutes);
+  app.use("/api/tickets", ticketRoutes);
   app.use(errorHandler);
   return app;
 }
@@ -43,15 +68,18 @@ describe("GET /api/tickets/search", () => {
   });
 
   describe("response shape", () => {
-    test("returns data, totalCount, totalPages, currentPage", async () => {
+    test("returns success, message, data, meta", async () => {
       const res = await request(app).get("/api/tickets/search");
 
       expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+      expect(res.body).toHaveProperty("message");
       expect(res.body).toHaveProperty("data");
-      expect(res.body).toHaveProperty("totalCount");
-      expect(res.body).toHaveProperty("totalPages");
-      expect(res.body).toHaveProperty("currentPage");
-      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.data).toHaveProperty("data");
+      expect(res.body.data).toHaveProperty("totalCount");
+      expect(res.body.data).toHaveProperty("totalPages");
+      expect(res.body.data).toHaveProperty("currentPage");
+      expect(Array.isArray(res.body.data.data)).toBe(true);
     });
 
     test("does NOT return old pagination structure", async () => {
@@ -67,8 +95,8 @@ describe("GET /api/tickets/search", () => {
 
       const res = await request(app).get("/api/tickets/search");
 
-      expect(res.body.currentPage).toBe(1);
-      expect(res.body.totalPages).toBe(3);
+      expect(res.body.data.currentPage).toBe(1);
+      expect(res.body.data.totalPages).toBe(3);
       const findManyCall = mockPrisma.ticket.findMany.mock.calls[0][0];
       expect(findManyCall.skip).toBe(0);
       expect(findManyCall.take).toBe(10);
@@ -88,7 +116,7 @@ describe("GET /api/tickets/search", () => {
       mockPrisma.ticket.count.mockResolvedValue(25);
 
       const res = await request(app).get("/api/tickets/search?limit=10");
-      expect(res.body.totalPages).toBe(3);
+      expect(res.body.data.totalPages).toBe(3);
     });
 
     test("clamps limit to max 100", async () => {
@@ -299,10 +327,10 @@ describe("GET /api/tickets/search", () => {
 
       const res = await request(app).get("/api/tickets/search");
 
-      expect(res.body.data).toHaveLength(2);
-      expect(res.body.data[0].id).toBe("t1");
-      expect(res.body.data[1].id).toBe("t2");
-      expect(res.body.totalCount).toBe(2);
+      expect(res.body.data.data).toHaveLength(2);
+      expect(res.body.data.data[0].id).toBe("t1");
+      expect(res.body.data.data[1].id).toBe("t2");
+      expect(res.body.data.totalCount).toBe(2);
     });
   });
 });
