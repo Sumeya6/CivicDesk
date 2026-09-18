@@ -6,10 +6,11 @@ const {
   getCurrentUser,
   register,
   changePassword,
+  refreshToken,
   forgotPassword,
   resetPassword,
 } = require("../controllers/auth.controller");
-const authenticateUser = require("../middleware/auth.middleware");
+const { authenticateUser } = require("../middleware/auth.middleware");
 const {
   validate,
   loginValidationRules,
@@ -23,6 +24,7 @@ const router = Router();
 
 router.post("/login", validate(loginValidationRules), login);
 router.post("/register", validate(registerValidationRules), register);
+router.post("/refresh", refreshToken);
 router.put(
   "/change-password",
   authenticateUser,
