@@ -1,7 +1,6 @@
 const { Router } = require("express");
 const { body, param } = require("express-validator");
-const authenticateUser = require("../middleware/auth.middleware");
-const { authorizeRoles } = require("../middleware/authorization.middleware");
+const { authenticateUser, authorize } = require("../middleware/auth.middleware");
 const {
   validate,
   updateUserValidationRules,
@@ -33,33 +32,33 @@ router.use(authenticateUser);
 
 router.post(
   "/",
-  authorizeRoles("ADMIN"),
+  authorize("ADMIN"),
   validate(registerValidationRules),
   createUserByAdmin,
 );
 router.post(
   "/technicians",
-  authorizeRoles("ADMIN"),
+  authorize("ADMIN"),
   validate(createTechnicianValidationRules),
   createTechnicianByAdmin,
 );
 router.get("/me/offices", getMyTechnicianOfficeAssignments);
-router.get("/", authorizeRoles("ADMIN"), listUsers);
+router.get("/", authorize("ADMIN"), listUsers);
 router.get(
   "/:id",
-  authorizeRoles("ADMIN"),
+  authorize("ADMIN"),
   validate([param("id").isUUID().withMessage("Invalid user id.")]),
   getUserById,
 );
 router.get(
   "/:id/offices",
-  authorizeRoles("ADMIN"),
+  authorize("ADMIN"),
   validate([param("id").isUUID().withMessage("Invalid user id.")]),
   getTechnicianOfficeAssignments,
 );
 router.put(
   "/:id",
-  authorizeRoles("ADMIN"),
+  authorize("ADMIN"),
   validate([
     param("id").isUUID().withMessage("Invalid user id."),
     ...updateUserValidationRules,
@@ -68,7 +67,7 @@ router.put(
 );
 router.put(
   "/:id/status",
-  authorizeRoles("ADMIN"),
+  authorize("ADMIN"),
   validate([
     param("id").isUUID().withMessage("Invalid user id."),
     ...updateUserStatusRules,
@@ -77,7 +76,7 @@ router.put(
 );
 router.put(
   "/:id/role",
-  authorizeRoles("ADMIN"),
+  authorize("ADMIN"),
   validate([
     param("id").isUUID().withMessage("Invalid user id."),
     ...updateUserRoleRules,
@@ -86,7 +85,7 @@ router.put(
 );
 router.delete(
   "/:id",
-  authorizeRoles("ADMIN"),
+  authorize("ADMIN"),
   validate([param("id").isUUID().withMessage("Invalid user id.")]),
   deleteUserById,
 );
@@ -97,7 +96,7 @@ router.patch(
 );
 router.post(
   "/technicians/:id/offices",
-  authorizeRoles("ADMIN"),
+  authorize("ADMIN"),
   validate(assignTechnicianOfficesRules),
   assignTechnicianOffices,
 );
