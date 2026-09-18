@@ -2,6 +2,7 @@ const { prisma } = require("../config/db");
 const { Priority, Role, TicketStatus } = require("@prisma/client");
 const { assignTechnicianToTicket } = require("../services/assignment.service");
 const { createAuditEntry } = require("../utils/audit.util");
+const { successResponse, createdResponse, paginatedResponse } = require("../utils/response");
 
 const priorities = Object.values(Priority);
 const statuses = Object.values(TicketStatus);
@@ -61,9 +62,7 @@ async function createTicket(req, res, next) {
       });
       return assignTechnicianToTicket(created.id, user.officeId, tx);
     });
-    return res
-      .status(201)
-      .json({ message: "Ticket created successfully.", ticket });
+    return res.status(201).json(createdResponse("Ticket created successfully.", ticket));
   } catch (requestError) {
     return next(requestError);
   }
@@ -125,9 +124,7 @@ async function assignTicket(req, res, next) {
         });
       return result;
     });
-    return res
-      .status(200)
-      .json({ message: "Ticket assignment updated.", ticket: updated });
+    return res.status(200).json(successResponse("Ticket assignment updated.", updated));
   } catch (requestError) {
     return next(requestError);
   }
@@ -169,10 +166,7 @@ async function requestPurchase(req, res, next) {
       });
       return result;
     });
-    return res.status(200).json({
-      message: "Ticket marked as awaiting purchase.",
-      ticket: updated,
-    });
+    return res.status(200).json(successResponse("Ticket marked as awaiting purchase.", updated));
   } catch (requestError) {
     return next(requestError);
   }
@@ -220,10 +214,14 @@ async function verifyTicket(req, res, next) {
       });
       return result;
     });
-    return res.status(200).json({
-      message: isApproved ? "Ticket closed successfully." : "Ticket reopened.",
-      ticket: updated,
-    });
+    return res
+      .status(200)
+      .json(
+        successResponse(
+          isApproved ? "Ticket closed successfully." : "Ticket reopened.",
+          updated,
+        ),
+      );
   } catch (requestError) {
     return next(requestError);
   }
@@ -289,9 +287,7 @@ async function updateStatus(req, res, next) {
       });
       return result;
     });
-    return res
-      .status(200)
-      .json({ message: "Ticket status updated.", ticket: updated });
+    return res.status(200).json(successResponse("Ticket status updated.", updated));
   } catch (requestError) {
     return next(requestError);
   }
@@ -315,7 +311,7 @@ async function getTicket(req, res, next) {
       ticket.technicianId !== req.user.id
     )
       throw error("You are not authorized to view this ticket.", 403);
-    return res.status(200).json({ ticket });
+    return res.status(200).json(successResponse("Ticket retrieved successfully.", ticket));
   } catch (requestError) {
     return next(requestError);
   }
@@ -355,12 +351,15 @@ async function listTickets(req, res, next) {
 
     const totalPages = Math.ceil(totalTickets / limitNum) || 1;
 
-    return res.status(200).json({
-      tickets,
-      totalTickets,
-      page: pageNum,
-      totalPages,
-    });
+    return res
+      .status(200)
+      .json(
+        paginatedResponse("Tickets retrieved successfully.", tickets, {
+          totalTickets,
+          page: pageNum,
+          totalPages,
+        }),
+      );
   } catch (requestError) {
     return next(requestError);
   }
