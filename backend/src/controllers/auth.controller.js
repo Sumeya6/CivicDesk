@@ -5,6 +5,8 @@ const {
   generateAccessToken,
   generateRefreshToken,
   getAccessTokenCookieOptions,
+  getRefreshTokenCookieOptions,
+  verifyRefreshToken,
 } = require("../utils/jwt");
 const {
   generatePasswordResetToken,
@@ -14,6 +16,7 @@ const { findUserByPhone, createUser } = require("../services/user.service");
 const { normalizeEthiopianPhone } = require("../utils/phone");
 const notificationService = require("../services/notification.service");
 const logger = require("../config/logger");
+const { successResponse, createdResponse } = require("../utils/response");
 
 async function register(req, res, next) {
   try {
@@ -49,10 +52,7 @@ async function register(req, res, next) {
       role: "EMPLOYEE",
     });
 
-    return res.status(201).json({
-      message: "User registered successfully.",
-      user,
-    });
+    return res.status(201).json(createdResponse("User registered successfully.", user));
   } catch (error) {
     return next(error);
   }
@@ -90,9 +90,7 @@ async function changePassword(req, res, next) {
       data: { password: hashedPassword },
     });
 
-    return res.status(200).json({
-      message: "Password changed successfully.",
-    });
+    return res.status(200).json(successResponse("Password changed successfully."));
   } catch (error) {
     return next(error);
   }
@@ -124,11 +122,9 @@ async function login(req, res, next) {
     const refreshToken = generateRefreshToken(user);
 
     res.cookie("accessToken", accessToken, getAccessTokenCookieOptions());
+    res.cookie("refreshToken", refreshToken, getRefreshTokenCookieOptions());
 
-    return res.status(200).json({
-      message: "Login successful.",
-      user: safeUser,
-    });
+    return res.status(200).json(successResponse("Login successful.", safeUser));
   } catch (error) {
     return next(error);
   }
@@ -136,16 +132,16 @@ async function login(req, res, next) {
 
 function logout(req, res, next) {
   try {
-    res.clearCookie("accessToken", {
+    const clearOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-    });
+    };
+    res.clearCookie("accessToken", clearOptions);
+    res.clearCookie("refreshToken", clearOptions);
 
-    return res.status(200).json({
-      message: "Logout successful.",
-    });
+    return res.status(200).json(successResponse("Logout successful."));
   } catch (error) {
     return next(error);
   }
@@ -159,10 +155,59 @@ function getCurrentUser(req, res, next) {
       return next(error);
     }
 
-    return res.status(200).json({
-      message: "Authenticated user retrieved successfully.",
-      user: req.user,
+    return res.status(200).json(successResponse("Authenticated user retrieved successfully.", req.user));
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function refreshToken(req, res, next) {
+  try {
+    const token = req.cookies?.refreshToken;
+
+    if (!token) {
+      const error = new Error("Refresh token required.");
+      error.statusCode = 401;
+      return next(error);
+    }
+
+    let decoded;
+    try {
+      decoded = verifyRefreshToken(token);
+    } catch {
+      const error = new Error("Invalid or expired refresh token.");
+      error.statusCode = 401;
+      return next(error);
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.sub },
+      select: {
+        id: true,
+        fullName: true,
+        phoneNumber: true,
+        role: true,
+        officeId: true,
+        isActive: true,
+        preferredLanguage: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
+
+    if (!user || !user.isActive) {
+      const error = new Error("User not found or inactive.");
+      error.statusCode = 401;
+      return next(error);
+    }
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    res.cookie("accessToken", accessToken, getAccessTokenCookieOptions());
+    res.cookie("refreshToken", refreshToken, getRefreshTokenCookieOptions());
+
+    return res.status(200).json(successResponse("Token refreshed successfully.", user));
   } catch (error) {
     return next(error);
   }
@@ -174,37 +219,29 @@ async function forgotPassword(req, res, next) {
 
     const user = await findUserByPhone(phoneNumber);
 
-    // Always return a 200 to avoid user enumeration. In test/dev return token so tests can proceed.
+    const genericMessage =
+      "If an account with that phone number exists, password reset instructions have been sent.";
+
     if (!user || !user.isActive) {
-      return res.status(200).json({
-        message:
-          "If an account with that phone number exists, password reset instructions have been sent.",
-      });
+      return res.status(200).json(successResponse(genericMessage));
     }
 
     const resetToken = generatePasswordResetToken(user);
+
     if (process.env.NODE_ENV === "test") {
-      return res.status(200).json({
-        message: "Password reset token generated.",
-        resetToken,
+      return res.status(200).json(successResponse("Password reset token generated.", { resetToken }));
+    }
+
+    try {
+      await notificationService.sendPasswordReset(user, resetToken);
+    } catch (err) {
+      logger.error("Failed to send password reset SMS", {
+        err: err.message,
+        phoneNumber: user.phoneNumber,
       });
     }
 
-    // Send via configured notifier (email or sms)
-    try {
-      await notificationService.sendPasswordReset(user, resetToken);
-      return res.status(200).json({
-        message:
-          "If an account with that phone number exists, password reset instructions have been sent.",
-      });
-    } catch (err) {
-      logger.error("Failed to send password reset notification", {
-        err: err.message,
-      });
-      const error = new Error("Failed to send password reset instructions.");
-      error.statusCode = 500;
-      return next(error);
-    }
+    return res.status(200).json(successResponse(genericMessage));
   } catch (error) {
     return next(error);
   }
@@ -235,9 +272,7 @@ async function resetPassword(req, res, next) {
       data: { password: hashedPassword },
     });
 
-    return res
-      .status(200)
-      .json({ message: "Password has been reset successfully." });
+    return res.status(200).json(successResponse("Password has been reset successfully."));
   } catch (error) {
     return next(error);
   }
@@ -249,6 +284,7 @@ module.exports = {
   login,
   logout,
   getCurrentUser,
+  refreshToken,
   forgotPassword,
   resetPassword,
 };
