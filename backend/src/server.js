@@ -11,6 +11,9 @@ const { connectDB } = require("./config/db");
 const routes = require("./routes");
 const notFound = require("./middleware/notFound.middleware");
 const errorHandler = require("./middleware/error.middleware");
+const { validateSecretsForProduction } = require("./utils/jwt");
+
+validateSecretsForProduction();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
