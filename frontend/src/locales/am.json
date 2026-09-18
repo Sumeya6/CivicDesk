@@ -9,7 +9,34 @@
     "page": "ገጹ",
     "previous": "ቀደም",
     "next": "ቀጣይ",
-    "user": "ተጠቃሚ"
+    "user": "ተጠቃሚ",
+    "goHome": "ወደ መነሻ ሂድ",
+    "reload": "ገጹን አድስ",
+    "cancel": "ሰርዝ",
+    "save": "አስቀምጥ",
+    "saveChanges": "ለውጦችን አስቀምጥ",
+    "delete": "ሰርዝ",
+    "edit": "አርትዕ",
+    "close": "ዝጋ",
+    "confirm": "አረጋግጥ",
+    "back": "ቀድሞ",
+    "yes": "አዎ",
+    "no": "የለም",
+    "required": "ያስፈልጋል",
+    "optional": "አስተሳሰብ",
+    "or": "ወይም",
+    "and": "እና",
+    "of": "ከ",
+    "records": "{{count}} ቅርሶች",
+    "noData": "መረጃ የለም",
+    "tryAgain": "እንደገና ይሞክሩ",
+    "pleaseWait": "እባክዎ ይጠብቁ...",
+    "saving": "በማስቀመጥ ላይ...",
+    "deleting": "በመሰረዝ ላይ...",
+    "error": "ስህተት",
+    "success": "ተሳካ",
+    "warning": "ማሳወቂያ",
+    "info": "መረጃ"
   },
   "auth": {
     "login": "ግባ",
@@ -70,7 +97,8 @@
     "profile": "መገለጫ",
     "language": "ቋንቋ",
     "welcome": "እንኳን ደህና መጡ",
-    "changeLanguage": "ቋንቋ ቀይር"
+    "changeLanguage": "ቋንቋ ቀይር",
+    "skipToContent": "ዋና ይዘት ወደ ዋና ይዘት ይሸጡ"
   },
   "profile": {
     "changePassword": "የይለፍ ቃል ቀይር",
@@ -280,6 +308,24 @@
     "other": "ሌላ"
   },
   "errors": {
-    "searchFailed": "ፍለጋው አልተሳካም። እባክዎ እንደገና ይሞክሩ።"
+    "searchFailed": "ፍለጋው አልተሳካም። እባክዎ እንደገና ይሞክሩ።",
+    "somethingWentWrong": "ስህተት ተከስቷል",
+    "unexpectedError": "ያልተጠበቀ ስህተት ተከስቷል። እባክዎ እንደገና ይሞክሩ።",
+    "notFound": {
+      "title": "404",
+      "subtitle": "ገጹ አልተገኘም",
+      "description": "የሚፈልጉት ገጽ አልተገኘም ወይም ተወደደ።"
+    }
+  },
+  "confirmModal": {
+    "title": "አረጋግጥ",
+    "message": "እርግጠኛ ነዎት?",
+    "confirm": "አረጋግጥ",
+    "cancel": "ሰርዝ",
+    "processing": "በማስተካከል ላይ...",
+    "deleteTitle": "ሰርዝ",
+    "deleteMessage": "ይህን ነገር ለመሰረዝ እርግጠኛ ነዎት?",
+    "deleteOfficeMessage": "ይህን ቢሮ ለመሰረዝ እርግጠኛ ነዎት?",
+    "deleteConfirm": "ሰርዝ"
   }
 }
