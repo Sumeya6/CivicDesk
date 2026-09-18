@@ -57,11 +57,11 @@ function Login() {
         <h1 className="m-0 text-[21px] font-bold leading-[1.3] tracking-[-0.02em] text-[#0f172a] max-[480px]:text-[19px]">
           {t("auth.signInTitle")}
         </h1>
-        <p className="mb-[22px] mt-[7px] text-[13.5px] leading-[1.5] text-[#64748b]">
+        <p className="mb-5.5 mt-1.75 text-[13.5px] leading-normal text-[#64748b]">
           {t("auth.loginDescription")}
         </p>
       </div>
-      <form className="flex flex-col gap-[18px]" onSubmit={handleSubmit}>
+      <form className="flex flex-col gap-4.5" onSubmit={handleSubmit}>
         <div>
           <label
             className="mb-1.5 block text-[13px] font-medium text-[#334155]"
@@ -69,7 +69,7 @@ function Login() {
           >
             {t("auth.phoneNumber")}
           </label>
-          <div className="flex h-10 items-center rounded-lg border-[1.5px] border-[#d1d9e6] bg-white px-[11px] text-[#94a3b8] transition focus-within:border-[#0757c9] focus-within:shadow-[0_0_0_3px_rgb(7_87_201_/_8%)]">
+          <div className="flex h-10 items-center rounded-lg border-[1.5px] border-[#d1d9e6] bg-white px-2.75 text-[#94a3b8] transition focus-within:border-[#0757c9] focus-within:shadow-[0_0_0_3px_rgb(7_87_201/8%)]">
             <Phone size={16} />
             <input
               id="phoneNumber"
@@ -96,7 +96,7 @@ function Login() {
             {t("auth.password")}
           </label>
           <div className="relative">
-            <div className="flex h-10 items-center rounded-lg border-[1.5px] border-[#d1d9e6] bg-white px-[11px] text-[#94a3b8] transition focus-within:border-[#0757c9] focus-within:shadow-[0_0_0_3px_rgb(7_87_201_/_8%)]">
+            <div className="flex h-10 items-center rounded-lg border-[1.5px] border-[#d1d9e6] bg-white px-2.75 text-[#94a3b8] transition focus-within:border-[#0757c9] focus-within:shadow-[0_0_0_3px_rgb(7_87_201/8%)]">
               <LockKeyhole size={16} />
               <input
                 id="password"
@@ -106,14 +106,16 @@ function Login() {
                 onChange={handleChange}
                 placeholder="••••••••"
                 autoComplete="current-password"
-               className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black text-[15px]"
+                className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black text-[15px]"
               />
             </div>
             <button
               type="button"
-              className="absolute bottom-px right-px top-px flex w-[38px] items-center justify-center rounded-r-[7px] border-0 bg-transparent text-[#94a3b8] transition hover:text-[#475569]"
+              className="absolute bottom-px right-px top-px flex w-9.5 items-center justify-center rounded-r-[7px] border-0 bg-transparent text-[#94a3b8] transition hover:text-[#475569]"
               onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+              aria-label={
+                showPassword ? t("auth.hidePassword") : t("auth.showPassword")
+              }
               tabIndex={-1}
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -134,7 +136,7 @@ function Login() {
           </p>
         )}
         <button
-          className="mt-1 flex h-[42px] items-center justify-center gap-2 rounded-lg border-0 bg-[#0757c9] text-sm font-semibold text-white transition hover:bg-[#0546b0] hover:shadow-[0_4px_12px_rgb(7_87_201_/_25%)] active:translate-y-px disabled:cursor-wait disabled:opacity-65"
+          className="mt-1 flex h-10.5 items-center justify-center gap-2 rounded-lg border-0 bg-[#0757c9] text-sm font-semibold text-white transition hover:bg-[#0546b0] hover:shadow-[0_4px_12px_rgb(7_87_201/25%)] active:translate-y-px disabled:cursor-wait disabled:opacity-65"
           type="submit"
           disabled={isSubmitting}
         >
