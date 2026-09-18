@@ -1,3 +1,13 @@
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import OfficeModal from "../../components/OfficeModal";
+import ConfirmModal from "../../components/ConfirmModal";
+import {
+  deleteOffice,
+  fetchOffices,
+  updateOfficeStatus,
+} from "../../store/officeSlice";
 import {
   Building2,
   CheckCircle2,
@@ -6,15 +16,6 @@ import {
   RefreshCw,
   Trash2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useTranslation } from "react-i18next";
-import OfficeModal from "../../components/OfficeModal";
-import {
-  deleteOffice,
-  fetchOffices,
-  updateOfficeStatus,
-} from "../../store/officeSlice";
 
 function OfficeManagement() {
   const dispatch = useDispatch();
@@ -26,8 +27,7 @@ function OfficeManagement() {
   } = useSelector((state) => state.offices);
   const [modalOffice, setModalOffice] = useState(undefined);
   const [updatingId, setUpdatingId] = useState(null);
-  const [deletingId, setDeletingId] = useState(null);
-  const [officeToDelete, setOfficeToDelete] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null });
   const [deleteError, setDeleteError] = useState("");
   const activeOffices = offices.filter((office) => office.isActive).length;
 
@@ -46,18 +46,20 @@ function OfficeManagement() {
     }
   };
 
-  const confirmDelete = async () => {
-    if (!officeToDelete) return;
-
-    setDeletingId(officeToDelete.id);
+  const handleDelete = (id) => {
+    setDeleteModal({ isOpen: true, id });
     setDeleteError("");
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteModal.id) return;
     try {
-      await dispatch(deleteOffice(officeToDelete.id)).unwrap();
-      setOfficeToDelete(null);
+      setDeleteError("");
+      await dispatch(deleteOffice(deleteModal.id)).unwrap();
+      setDeleteModal({ isOpen: false, id: null });
     } catch (requestError) {
       setDeleteError(requestError);
-    } finally {
-      setDeletingId(null);
+      setDeleteModal({ isOpen: false, id: null });
     }
   };
 
@@ -199,10 +201,7 @@ function OfficeManagement() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => {
-                          setDeleteError("");
-                          setOfficeToDelete(office);
-                        }}
+                        onClick={() => handleDelete(office.id)}
                         className="table-action table-action-danger"
                       >
                         <Trash2 size={13} />
@@ -229,65 +228,19 @@ function OfficeManagement() {
           onClose={() => setModalOffice(undefined)}
         />
       )}
-      {officeToDelete && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-[rgb(11_47_107_/_38%)] p-4 max-[640px]:items-start max-[640px]:p-3"
-          role="presentation"
-          onMouseDown={(event) =>
-            event.target === event.currentTarget &&
-            deletingId === null &&
-            setOfficeToDelete(null)
-          }
-        >
-          <div
-            className="w-[min(100%,28rem)] max-h-[calc(100vh-32px)] min-w-0 overflow-x-hidden overflow-y-auto rounded-xl border border-[var(--civic-border)] bg-white shadow-[0_18px_45px_rgb(11_47_107_/_18%)] max-[640px]:max-h-[calc(100vh-24px)]"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-office-title"
-          >
-            <div className="border-b border-slate-200 px-5 py-4">
-              <h2
-                id="delete-office-title"
-                className="text-base font-semibold text-slate-900"
-              >
-                {t("admin.deleteOffice")}
-              </h2>
-            </div>
-            <div className="grid gap-4 p-5">
-              <p className="text-sm text-slate-600">
-                {t("admin.confirmDeleteOffice")}
-              </p>
-              {deleteError && (
-                <p className="text-xs text-red-600" role="alert">
-                  {deleteError}
-                </p>
-              )}
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setOfficeToDelete(null)}
-                  disabled={deletingId !== null}
-                  className="rounded-lg border border-slate-300 px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
-                >
-                  {t("admin.cancel")}
-                </button>
-                <button
-                  type="button"
-                  onClick={confirmDelete}
-                  disabled={deletingId !== null}
-                  className="rounded-lg bg-red-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-60"
-                >
-                  {deletingId !== null
-                    ? t("admin.deleting")
-                    : t("admin.delete")}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+{deleteModal.isOpen && (
+        <ConfirmModal
+          isOpen={deleteModal.isOpen}
+          onClose={() => setDeleteModal({ isOpen: false, id: null })}
+          onConfirm={handleConfirmDelete}
+          variant="danger"
+          message={t("confirmModal.deleteOfficeMessage")}
+          confirmText={t("confirmModal.deleteConfirm")}
+          cancelText={t("confirmModal.cancel")}
+        />
       )}
-    </section>
-  );
-}
+      </section>
+    );
+  }
 
 export default OfficeManagement;
