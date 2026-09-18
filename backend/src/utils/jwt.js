@@ -68,6 +68,50 @@ function getAccessTokenCookieOptions() {
   };
 }
 
+function getRefreshTokenCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: parseExpiresInToMilliseconds(getRefreshTokenExpiration()),
+    path: "/",
+  };
+}
+
+const DEVELOPMENT_ACCESS_SECRET = "development-access-secret";
+const DEVELOPMENT_REFRESH_SECRET = "development-refresh-secret";
+
+function validateSecretsForProduction() {
+  if (process.env.NODE_ENV !== "production") return;
+
+  const accessSecret = process.env.JWT_ACCESS_TOKEN_SECRET;
+  const refreshSecret = process.env.JWT_REFRESH_TOKEN_SECRET;
+
+  const errors = [];
+
+  if (!accessSecret) {
+    errors.push("JWT_ACCESS_TOKEN_SECRET is not set.");
+  } else if (accessSecret === DEVELOPMENT_ACCESS_SECRET) {
+    errors.push(
+      "JWT_ACCESS_TOKEN_SECRET must not use the development fallback value in production.",
+    );
+  }
+
+  if (!refreshSecret) {
+    errors.push("JWT_REFRESH_TOKEN_SECRET is not set.");
+  } else if (refreshSecret === DEVELOPMENT_REFRESH_SECRET) {
+    errors.push(
+      "JWT_REFRESH_TOKEN_SECRET must not use the development fallback value in production.",
+    );
+  }
+
+  if (errors.length > 0) {
+    throw new Error(
+      `Refusing to start in production: ${errors.join(" ")}`,
+    );
+  }
+}
+
 function signToken(payload, secret, expiresIn) {
   return jwt.sign(payload, secret, { expiresIn });
 }
@@ -117,7 +161,13 @@ function generatePasswordResetToken(user) {
 }
 
 function verifyPasswordResetToken(token) {
-  return verifyToken(token, getPasswordResetSecret());
+  const decoded = verifyToken(token, getPasswordResetSecret());
+  if (decoded.purpose !== "password_reset") {
+    const error = new Error("Invalid password reset token.");
+    error.statusCode = 401;
+    throw error;
+  }
+  return decoded;
 }
 
 function verifyToken(token, secret) {
@@ -169,6 +219,10 @@ module.exports = {
   verifyRefreshToken,
   extractBearerToken,
   getAccessTokenCookieOptions,
+  getRefreshTokenCookieOptions,
   generatePasswordResetToken,
   verifyPasswordResetToken,
+  getPasswordResetSecret,
+  getPasswordResetExpiration,
+  validateSecretsForProduction,
 };
