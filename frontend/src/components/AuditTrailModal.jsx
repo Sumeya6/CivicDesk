@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useRef } from "react";
 import { Clock, User, ArrowRight } from "lucide-react";
-import { Modal } from "./Pagination";
+import { Modal } from "./Modal";
 import { formatDate } from "./ticketConfig";
 import ticketApi from "../api/ticketApi";
 
