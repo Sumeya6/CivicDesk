@@ -1,4 +1,21 @@
 const { prisma } = require("../config/db");
+const { successResponse } = require("../utils/response");
+const { TicketStatus, Priority } = require("@prisma/client");
+
+const VALID_STATUSES = Object.values(TicketStatus);
+const VALID_PRIORITIES = Object.values(Priority);
+
+function startOfDay(dateString) {
+  const d = new Date(dateString);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function endOfDay(dateString) {
+  const d = new Date(dateString);
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
 
 async function getSummary(req, res, next) {
   try {
@@ -16,6 +33,7 @@ async function getSummary(req, res, next) {
 
     if (!months) {
       return res.status(400).json({
+        success: false,
         message: "Invalid period. Use 1m, 3m, 6m, 9m, or 1y.",
       });
     }
@@ -29,203 +47,204 @@ async function getSummary(req, res, next) {
       },
     };
 
-    // Get all tickets in the selected period
-    const tickets = await prisma.ticket.findMany({
-      where,
-      include: {
-        office: true,
-        category: true,
-        technician: true,
+    // Get categories with their expected resolution hours for SLA calculation
+    const categories = await prisma.category.findMany({
+      select: {
+        id: true,
+        expectedResolutionHours: true,
       },
     });
 
-    // Status counts
-    const total = tickets.length;
-
-    const pending = tickets.filter(
-      (ticket) => ticket.status === "PENDING",
-    ).length;
-
-    const inProgress = tickets.filter(
-      (ticket) => ticket.status === "IN_PROGRESS",
-    ).length;
-
-    const awaitingPurchase = tickets.filter(
-      (ticket) => ticket.status === "AWAITING_PURCHASE",
-    ).length;
-
-    const resolved = tickets.filter(
-      (ticket) => ticket.status === "RESOLVED",
-    ).length;
-
-    const closed = tickets.filter(
-      (ticket) => ticket.status === "CLOSED",
-    ).length;
-
-    // Requests by office
-    const officeMap = {};
-
-    for (const ticket of tickets) {
-      if (!ticket.office) continue;
-
-      const officeId = ticket.office.id;
-
-      if (!officeMap[officeId]) {
-        officeMap[officeId] = {
-          officeId,
-          office: ticket.office.nameEn || ticket.office.nameAm,
-          count: 0,
-        };
-      }
-
-      officeMap[officeId].count++;
-    }
-
-    const requestsByOffice = Object.values(officeMap);
-
-    // Requests by category
-    const categoryMap = {};
-
-    for (const ticket of tickets) {
-      if (!ticket.category) continue;
-
-      const categoryId = ticket.category.id;
-
-      if (!categoryMap[categoryId]) {
-        categoryMap[categoryId] = {
-          categoryId,
-          category: ticket.category.nameEn || ticket.category.nameAm,
-          count: 0,
-        };
-      }
-
-      categoryMap[categoryId].count++;
-    }
-
-    const requestsByCategory = Object.values(categoryMap);
-
-    // Technician workload
-    const technicianMap = {};
-
-    for (const ticket of tickets) {
-      if (!ticket.technician) continue;
-
-      const technicianId = ticket.technician.id;
-
-      if (!technicianMap[technicianId]) {
-        technicianMap[technicianId] = {
-          technicianId,
-          technician:
-            ticket.technician.fullName ||
-            ticket.technician.name ||
-            ticket.technician.email,
-          count: 0,
-        };
-      }
-
-      technicianMap[technicianId].count++;
-    }
-
-    const technicianWorkload = Object.values(technicianMap);
-
-    // Resolution time
-    const resolvedTickets = tickets.filter(
-      (ticket) =>
-        (ticket.status === "RESOLVED" || ticket.status === "CLOSED") &&
-        ticket.resolvedAt,
+    const categorySlaMap = new Map(
+      categories.map((c) => [c.id, c.expectedResolutionHours]),
     );
 
-    let averageResolutionTimeHours = 0;
+    // Parallel aggregations using Prisma
+    const [
+      statusCounts,
+      officeCounts,
+      categoryCounts,
+      technicianWorkload,
+      resolvedTickets,
+      ticketsWithSla,
+      ticketsWithRating,
+      ratingDistribution,
+    ] = await Promise.all([
+      // Status counts
+      prisma.ticket.groupBy({
+        by: ["status"],
+        where,
+        _count: { status: true },
+      }),
 
+      // Requests by office
+      prisma.ticket.groupBy({
+        by: ["officeId"],
+        where,
+        _count: { officeId: true },
+      }),
+
+      // Requests by category
+      prisma.ticket.groupBy({
+        by: ["categoryId"],
+        where,
+        _count: { categoryId: true },
+      }),
+
+      // Technician workload
+      prisma.ticket.groupBy({
+        by: ["technicianId"],
+        where: { ...where, technicianId: { not: null } },
+        _count: { technicianId: true },
+      }),
+
+      // Resolved/closed tickets for resolution time
+      prisma.ticket.findMany({
+        where: {
+          ...where,
+          status: { in: [TicketStatus.RESOLVED, TicketStatus.CLOSED] },
+          resolvedAt: { not: null },
+        },
+        select: { createdAt: true, resolvedAt: true },
+      }),
+
+      // Tickets with SLA (have resolvedAt)
+      prisma.ticket.findMany({
+        where: {
+          ...where,
+          resolvedAt: { not: null },
+        },
+        select: {
+          createdAt: true,
+          resolvedAt: true,
+          categoryId: true,
+        },
+      }),
+
+      // Tickets with ratings
+      prisma.ticket.findMany({
+        where: {
+          ...where,
+          rating: { not: null },
+        },
+        select: { rating: true },
+      }),
+
+      // Rating distribution
+      prisma.ticket.groupBy({
+        by: ["rating"],
+        where: {
+          ...where,
+          rating: { not: null },
+        },
+        _count: { rating: true },
+      }),
+    ]);
+
+    // Process status counts
+    const statusMap = { PENDING: 0, ASSIGNED: 0, IN_PROGRESS: 0, AWAITING_PURCHASE: 0, RESOLVED: 0, CLOSED: 0 };
+    for (const sc of statusCounts) {
+      statusMap[sc.status] = sc._count.status;
+    }
+
+    // Requests by office - join with office names
+    const officeIds = officeCounts.map((oc) => oc.officeId);
+    const offices = await prisma.office.findMany({
+      where: { id: { in: officeIds } },
+      select: { id: true, nameAm: true, nameEn: true },
+    });
+    const officeMap = new Map(offices.map((o) => [o.id, o.nameEn || o.nameAm]));
+    const requestsByOffice = officeCounts.map((oc) => ({
+      officeId: oc.officeId,
+      office: officeMap.get(oc.officeId) || "Unknown",
+      count: oc._count.officeId,
+    }));
+
+    // Requests by category - join with category names
+    const categoryIds = categoryCounts.map((cc) => cc.categoryId);
+    const categoryNames = await prisma.category.findMany({
+      where: { id: { in: categoryIds } },
+      select: { id: true, nameAm: true, nameEn: true },
+    });
+    const categoryNameMap = new Map(categoryNames.map((c) => [c.id, c.nameEn || c.nameAm]));
+    const requestsByCategory = categoryCounts.map((cc) => ({
+      categoryId: cc.categoryId,
+      category: categoryNameMap.get(cc.categoryId) || "Unknown",
+      count: cc._count.categoryId,
+    }));
+
+    // Technician workload - join with technician names
+    const technicianIds = technicianWorkload.map((tw) => tw.technicianId).filter(Boolean);
+    const technicians = await prisma.user.findMany({
+      where: { id: { in: technicianIds } },
+      select: { id: true, fullName: true },
+    });
+    const technicianNameMap = new Map(technicians.map((t) => [t.id, t.fullName]));
+    const workload = technicianWorkload.map((tw) => ({
+      technicianId: tw.technicianId,
+      technician: technicianNameMap.get(tw.technicianId) || "Unknown",
+      count: tw._count.technicianId,
+    }));
+
+    // Average resolution time
+    let averageResolutionTimeHours = 0;
     if (resolvedTickets.length > 0) {
       const totalResolutionHours = resolvedTickets.reduce((sum, ticket) => {
         const created = new Date(ticket.createdAt);
         const resolvedDate = new Date(ticket.resolvedAt);
-
         const hours = (resolvedDate - created) / (1000 * 60 * 60);
-
         return sum + hours;
       }, 0);
-
-      averageResolutionTimeHours =
-        totalResolutionHours / resolvedTickets.length;
+      averageResolutionTimeHours = totalResolutionHours / resolvedTickets.length;
     }
 
-    // SLA percentage
+    // SLA percentage using category-specific expectedResolutionHours
     let slaPercentage = 0;
-
-    const ticketsWithSla = tickets.filter((ticket) => ticket.resolvedAt);
-
     if (ticketsWithSla.length > 0) {
       const slaMet = ticketsWithSla.filter((ticket) => {
         const created = new Date(ticket.createdAt);
         const resolvedDate = new Date(ticket.resolvedAt);
-
         const resolutionHours = (resolvedDate - created) / (1000 * 60 * 60);
 
-        // 24-hour SLA target
-        return resolutionHours <= 24;
+        const expectedHours = categorySlaMap.get(ticket.categoryId) || 24;
+        return resolutionHours <= expectedHours;
       }).length;
 
       slaPercentage = (slaMet / ticketsWithSla.length) * 100;
     }
 
-    // Satisfaction rating
-    // Satisfaction rating
-    const ticketsWithRating = tickets.filter(
-      (ticket) => ticket.rating !== null && ticket.rating !== undefined,
-    );
-
+    // Average satisfaction rating
     let averageSatisfactionRating = 0;
-
-    const ratingDistribution = {
-      5: 0,
-      4: 0,
-      3: 0,
-      2: 0,
-      1: 0,
-    };
+    const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
 
     if (ticketsWithRating.length > 0) {
-      const totalRating = ticketsWithRating.reduce(
-        (sum, ticket) => sum + Number(ticket.rating),
-        0,
-      );
-
+      const totalRating = ticketsWithRating.reduce((sum, t) => sum + Number(t.rating), 0);
       averageSatisfactionRating = totalRating / ticketsWithRating.length;
 
-      for (const ticket of ticketsWithRating) {
-        const rating = Number(ticket.rating);
-
-        if (rating >= 1 && rating <= 5) {
-          ratingDistribution[rating]++;
-        }
+      for (const rd of ratingDistribution) {
+        distribution[rd.rating] = rd._count.rating;
       }
     }
-    return res.status(200).json({
-      period,
-      startDate,
 
-      total,
-      pending,
-      inProgress,
-      awaitingPurchase,
-      resolved,
-      closed,
-
-      requestsByOffice,
-      requestsByCategory,
-
-      technicianWorkload,
-
-      slaPercentage: Number(slaPercentage.toFixed(2)),
-
-      averageResolutionTimeHours: Number(averageResolutionTimeHours.toFixed(2)),
-
-      averageSatisfactionRating: Number(averageSatisfactionRating.toFixed(2)),
-
-      ratingDistribution,
-    });
+    return res.status(200).json(
+      successResponse("Report summary retrieved successfully.", {
+        period,
+        startDate,
+        total: statusMap.PENDING + statusMap.ASSIGNED + statusMap.IN_PROGRESS + statusMap.AWAITING_PURCHASE + statusMap.RESOLVED + statusMap.CLOSED,
+        pending: statusMap.PENDING,
+        inProgress: statusMap.IN_PROGRESS,
+        awaitingPurchase: statusMap.AWAITING_PURCHASE,
+        resolved: statusMap.RESOLVED,
+        closed: statusMap.CLOSED,
+        requestsByOffice,
+        requestsByCategory,
+        technicianWorkload: workload,
+        slaPercentage: Number(slaPercentage.toFixed(2)),
+        averageResolutionTimeHours: Number(averageResolutionTimeHours.toFixed(2)),
+        averageSatisfactionRating: Number(averageSatisfactionRating.toFixed(2)),
+        ratingDistribution: distribution,
+      }),
+    );
   } catch (error) {
     return next(error);
   }
