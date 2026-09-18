@@ -36,8 +36,8 @@ describe("Office management routes", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.message).toBe("Offices retrieved successfully.");
-    expect(response.body.meta).toBeDefined();
-    expect(Array.isArray(response.body.offices)).toBe(true);
+    expect(response.body.data.meta).toBeDefined();
+    expect(Array.isArray(response.body.data.offices)).toBe(true);
   });
 
   test("POST /api/offices creates an office", async () => {
@@ -52,8 +52,8 @@ describe("Office management routes", () => {
       });
 
     expect(response.status).toBe(201);
-    expect(response.body.office).toMatchObject({ nameEn: "Test Office" });
-    createdOfficeId = response.body.office.id;
+    expect(response.body.data.office).toMatchObject({ nameEn: "Test Office" });
+    createdOfficeId = response.body.data.office.id;
   });
 
   test("GET /api/offices/:id returns the created office", async () => {
@@ -62,7 +62,7 @@ describe("Office management routes", () => {
       .set("Cookie", adminCookie);
 
     expect(response.status).toBe(200);
-    expect(response.body.office).toMatchObject({ id: createdOfficeId });
+    expect(response.body.data.office).toMatchObject({ id: createdOfficeId });
   });
 
   test("PUT /api/offices/:id updates an office", async () => {
@@ -76,7 +76,7 @@ describe("Office management routes", () => {
       });
 
     expect(response.status).toBe(200);
-    expect(response.body.office.nameEn).toBe("Updated Test Office");
+    expect(response.body.data.office.nameEn).toBe("Updated Test Office");
   });
 
   test("PUT /api/offices/:id/status updates office status", async () => {
@@ -86,7 +86,7 @@ describe("Office management routes", () => {
       .send({ isActive: false });
 
     expect(response.status).toBe(200);
-    expect(response.body.office.isActive).toBe(false);
+    expect(response.body.data.office.isActive).toBe(false);
   });
 
   test("DELETE /api/offices/:id deletes an empty office", async () => {
@@ -100,14 +100,14 @@ describe("Office management routes", () => {
         isActive: true,
       });
 
-    deletableOfficeId = createResponse.body.office.id;
+    deletableOfficeId = createResponse.body.data.office.id;
     const response = await request(app)
       .delete(`/api/offices/${deletableOfficeId}`)
       .set("Cookie", adminCookie);
 
     expect(response.status).toBe(200);
     expect(response.body.message).toBe("Office deleted successfully.");
-    expect(response.body.office.id).toBe(deletableOfficeId);
+    expect(response.body.data.office.id).toBe(deletableOfficeId);
     deletableOfficeId = null;
   });
 
