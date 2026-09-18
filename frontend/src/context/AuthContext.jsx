@@ -41,7 +41,7 @@ export function AuthProvider({ children }) {
           return;
         }
 
-        const normalizedUser = normalizeUser(response.data?.user);
+        const normalizedUser = normalizeUser(response.data);
         const resolvedLanguage =
           storedLanguage ?? normalizedUser?.preferredLanguage ?? "AM";
         dispatch(
@@ -70,7 +70,7 @@ export function AuthProvider({ children }) {
   const login = useCallback(
     async ({ phoneNumber, password }) => {
       const response = await api.post("/auth/login", { phoneNumber, password });
-      const normalizedUser = normalizeUser(response.data?.user);
+      const normalizedUser = normalizeUser(response.data);
 
       localStorage.setItem(
         "civicdesk_language",
