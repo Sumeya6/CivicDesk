@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Search, Ticket, RefreshCw } from "lucide-react";
 import api from "../../api/axios";
@@ -19,20 +19,11 @@ function TicketManagement() {
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState("");
 
-  const queryParams = useMemo(() => ({ page, limit: pageSize }), [page]);
-
-  const loadTickets = async (currentPage = page, overrides = {}) => {
+  async function fetchTickets(currentPage, overrides = {}) {
     try {
       setLoading(true);
       setError("");
-
-      const params = {
-        ...queryParams,
-        ...overrides,
-        page: currentPage,
-        limit: pageSize,
-      };
-
+      const params = { page: currentPage, limit: pageSize, ...overrides };
       const { data } = await api.get("/tickets/search", { params });
       setResults(data.data ?? []);
       setTotalPages(Math.max(data.totalPages ?? 1, 1));
@@ -44,25 +35,46 @@ function TicketManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
-    loadTickets(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const { data } = await api.get("/tickets/search", {
+          params: { page: 1, limit: pageSize },
+        });
+        if (!cancelled) {
+          setResults(data.data ?? []);
+          setTotalPages(Math.max(data.totalPages ?? 1, 1));
+          setPage(data.currentPage ?? 1);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setResults([]);
+          setTotalPages(1);
+          setError(err.message || t("searchFilters.unableToSearch"));
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [t]);
 
   const handleResults = (tickets) => {
     if (!Array.isArray(tickets)) {
       setResults([]);
       return;
     }
-
     setResults(tickets);
     setTotalPages((previous) => Math.max(previous, 1));
   };
 
   const handleRefresh = () => {
-    loadTickets(page);
+    fetchTickets(page);
   };
 
   return (
@@ -173,7 +185,7 @@ function TicketManagement() {
               <Pagination
                 page={page}
                 totalPages={totalPages}
-                onPageChange={(nextPage) => loadTickets(nextPage)}
+                onPageChange={(nextPage) => fetchTickets(nextPage)}
               />
             )}
           </>
