@@ -100,7 +100,7 @@ describe("PeriodicReports", () => {
 
     const { container } = render(<PeriodicReports />);
 
-    const skeletons = container.querySelectorAll(".animate-pulse");
+    const skeletons = container.querySelectorAll(".civic-skeleton");
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
