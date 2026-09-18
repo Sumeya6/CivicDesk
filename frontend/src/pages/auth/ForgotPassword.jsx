@@ -1,10 +1,11 @@
-import { ArrowRight, Phone } from "lucide-react";
+import { ArrowRight, Phone, ArrowRight as NavArrow } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AuthShell from "../../components/auth/AuthShell";
 import api from "../../api/axios";
 
 function ForgotPassword() {
+  const navigate = useNavigate();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -22,7 +23,7 @@ function ForgotPassword() {
       const response = await api.post("/auth/forgot-password", { phoneNumber });
       setMessage(
         response.data?.message ||
-          "If an account exists, reset instructions have been sent.",
+          "If an account exists, a reset code has been sent via SMS. Use the code at the reset password page.",
       );
     } catch (requestError) {
       setError(
@@ -32,6 +33,10 @@ function ForgotPassword() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const goToResetPassword = () => {
+    navigate("/reset-password");
   };
 
   return (
@@ -70,9 +75,19 @@ function ForgotPassword() {
           </p>
         )}
         {message && (
-          <p className="mt-1 text-[12.5px] leading-[1.4] text-green-600">
-            {message}
-          </p>
+          <div className="flex flex-col gap-2">
+            <p className="mt-1 text-[12.5px] leading-[1.4] text-green-600">
+              {message}
+            </p>
+            <button
+              type="button"
+              onClick={goToResetPassword}
+              className="flex h-[42px] items-center justify-center gap-2 rounded-lg border-[1.5px] border-[#0757c9] bg-white text-sm font-semibold text-[#0757c9] transition hover:bg-[#0757c9] hover:text-white"
+            >
+              Go to Reset Password
+              <NavArrow size={16} />
+            </button>
+          </div>
         )}
         <button
           className="mt-1 flex h-[42px] items-center justify-center gap-2 rounded-lg border-0 bg-[#0757c9] text-sm font-semibold text-white transition hover:bg-[#0546b0] hover:shadow-[0_4px_12px_rgb(7_87_201_/_25%)] disabled:cursor-wait disabled:opacity-65"
