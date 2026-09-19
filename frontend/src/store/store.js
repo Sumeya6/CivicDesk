@@ -4,6 +4,7 @@ import userReducer from "./userSlice";
 import officeReducer from "./officeSlice";
 import announcementReducer from "./announcementSlice";
 import ticketReducer from "./ticketSlice";
+import assetReducer from "./assetSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,5 +13,6 @@ export const store = configureStore({
     offices: officeReducer,
     announcements: announcementReducer,
     tickets: ticketReducer,
+    assets: assetReducer,
   },
 });

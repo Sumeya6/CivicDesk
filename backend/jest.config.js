@@ -7,5 +7,6 @@ module.exports = {
     "**/tests/session.test.js",
     "**/tests/ticket.test.js",
     "**/tests/assignment.test.js",
+    "**/tests/asset.test.js",
   ],
 };

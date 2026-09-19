@@ -93,6 +93,18 @@ The system is designed for organizations with multiple offices and a shared tech
 - Admin-published organization-wide notices (scheduled maintenance, downtime, software updates)
 - Visible across Employee, Technician, and Admin dashboards
 
+### Asset Management
+
+- Full IT asset registry: computers, printers, phones, network devices, furniture, and other equipment
+- Unique asset tags for identification (e.g. "IT-001")
+- Asset lifecycle tracking: Active → Maintenance → Retired → Archived
+- Office and optional employee assignment
+- Purchase date and warranty expiry tracking
+- Link assets to service requests (tickets) for full maintenance history
+- Employee view: see assets assigned to you and their ticket history
+- Technician view: see assets in your assigned offices
+- Admin: full CRUD, search/filter by tag/name/serial, archive assets
+
 ### Internationalization
 
 - Full Amharic (አማርኛ) and English UI coverage
@@ -105,9 +117,9 @@ The system is designed for organizations with multiple offices and a shared tech
 
 | Role              | Identifier   | Capabilities                                                                                                                                                           |
 | ----------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Employee**      | `EMPLOYEE`   | Register/login, submit service requests, track request status, view maintenance history                                                                                |
-| **Technician**    | `TECHNICIAN` | Receive assigned requests (one or more offices), update progress, log maintenance notes, view work history and personal performance                                    |
-| **Administrator** | `ADMIN`      | Manage users, technicians, and offices; configure categories and SLAs; monitor technician performance; generate reports; publish announcements; manage system settings |
+| **Employee**      | `EMPLOYEE`   | Register/login, submit service requests, track request status, view maintenance history, view assigned assets                                                           |
+| **Technician**    | `TECHNICIAN` | Receive assigned requests (one or more offices), update progress, log maintenance notes, view work history, view assets in assigned offices                             |
+| **Administrator** | `ADMIN`      | Manage users, technicians, offices, and assets; configure categories and SLAs; monitor technician performance; generate reports; publish announcements; manage system settings |
 
 ---
 
@@ -182,19 +194,61 @@ Request → CORS → JWT Verify → Role Authorization (RBAC)
 
 The system is modeled around the following core Prisma entities:
 
+> **Migration:** Run `npx prisma migrate deploy` (production) or `npx prisma migrate dev` (development) to apply all migrations including the Asset Management tables.
+
 ### Core Business
 
 - `User` — accounts with role, office assignment, active status, and preferred language
 - `Office` — organizational office units (active/inactive)
 - `TechnicianOffice` — many-to-many mapping between technicians and offices
 - `Category` — issue categories (Hardware / Software / Networking) with expected resolution time
-- `Ticket` — service requests with priority, status, device/system, and SLA fields
+- `Ticket` — service requests with priority, status, device/system, SLA fields, and optional `assetId` foreign key linking to an `Asset`
 - `MaintenanceNote` — diagnosis, work performed, parts replaced, recommendations per ticket
 - `Announcement` — organization-wide notices published by Admins
+- `Asset` — IT assets (computers, printers, phones, etc.) tracked by asset tag, with office assignment, optional employee assignment, and linked ticket history
 
 ### Logging
 
 - `AuditLog` — immutable record of every ticket lifecycle event (actor, action, timestamp, before/after value)
+
+### Asset Management Enums
+
+| Enum          | Values                                                      | Description                          |
+| ------------- | ----------------------------------------------------------- | ------------------------------------ |
+| `AssetType`   | `COMPUTER`, `PRINTER`, `NETWORK_DEVICE`, `PHONE`, `FURNITURE`, `OTHER` | Category of IT asset                 |
+| `AssetStatus` | `ACTIVE`, `MAINTENANCE`, `RETIRED`, `ARCHIVED`              | Lifecycle status of the asset        |
+
+### Asset Model
+
+```
+Asset
+├── id              UUID (PK)
+├── assetTag        String (unique)     — e.g. "IT-001"
+├── name            String              — human-readable name
+├── assetType       AssetType (enum)
+├── serialNumber    String?             — manufacturer serial number
+├── status          AssetStatus (enum)  — default: ACTIVE
+├── officeId        UUID (FK → Office)
+├── employeeId      UUID? (FK → User)   — assigned employee (nullable)
+├── purchaseDate    DateTime?
+├── warrantyExpiry  DateTime?
+├── notes           String?
+├── createdAt       DateTime
+├── updatedAt       DateTime
+│
+├── → office        Office (required)
+├── → employee      User? (optional, SET NULL on delete)
+└── → tickets       Ticket[] (linked via Ticket.assetId)
+```
+
+**Relations:**
+- Each `Asset` belongs to one `Office` (required).
+- Each `Asset` may be assigned to one `Employee` (optional).
+- Each `Asset` may have many linked `Tickets` (via `Ticket.assetId`).
+- Deleting an `Office` that has assets is blocked (`onDelete: Restrict`).
+- Deleting an `Employee` assigned to assets sets their `employeeId` to NULL (`onDelete: SetNull`).
+
+**Indexes:** `officeId`, `employeeId`, `status`, `assetTag`
 
 ---
 
@@ -235,6 +289,46 @@ The system is modeled around the following core Prisma entities:
 | GET      | `/reports/summary?period=1m\|3m\|6m\|9m\|1y` | Periodic analytics summary     |
 | GET/POST | `/announcements`                             | List / publish announcements   |
 | DELETE   | `/announcements/:id`                         | Remove an announcement (Admin) |
+
+### Assets
+
+| Method | Endpoint                  | Description                                  | Roles                       |
+| ------ | ------------------------- | -------------------------------------------- | --------------------------- |
+| GET    | `/assets`                 | List all assets (paginated, filterable)      | ADMIN                       |
+| GET    | `/assets/my`              | List assets assigned to the current employee | EMPLOYEE, TECHNICIAN, ADMIN |
+| GET    | `/assets/technician`      | List assets in technician's assigned offices | TECHNICIAN                  |
+| GET    | `/assets/:id`             | Get asset detail with ticket history         | ADMIN, EMPLOYEE, TECHNICIAN |
+| POST   | `/assets`                 | Create a new asset                           | ADMIN                       |
+| PUT    | `/assets/:id`             | Update an asset                              | ADMIN                       |
+| PATCH  | `/assets/:id/archive`     | Archive an asset (soft-delete)               | ADMIN                       |
+
+**Query parameters for `GET /assets`:**
+
+| Parameter  | Type   | Description                                    |
+| ---------- | ------ | ---------------------------------------------- |
+| `page`     | number | Page number (default: 1)                       |
+| `pageSize` | number | Items per page (default: 20)                   |
+| `search`   | string | Search by assetTag, name, or serialNumber      |
+| `status`   | string | Filter by status (ACTIVE, MAINTENANCE, RETIRED, ARCHIVED) |
+| `officeId` | string | Filter by office UUID                          |
+| `employeeId` | string | Filter by assigned employee UUID             |
+| `assetType` | string | Filter by type (COMPUTER, PRINTER, etc.)      |
+
+**Response envelope:**
+
+All asset endpoints follow the standard CivicDesk response envelope:
+```json
+{
+  "success": true,
+  "message": "Assets retrieved successfully.",
+  "data": [ ... ],
+  "meta": { "total": 42, "page": 1, "pageSize": 20, "pageCount": 3 }
+}
+```
+
+**Ticket-Asset Linking:**
+
+When creating or viewing a ticket, an optional `assetId` field links the ticket to an asset. This allows tracking all service requests against a specific piece of equipment. The `GET /assets/:id` endpoint includes a `tickets` array with linked service request history.
 
 ---
 
@@ -344,26 +438,29 @@ npm run dev
 isrms/
 ├── backend/                          # Express API
 │   ├── src/
-│   │   ├── controllers/              # auth, user, office, ticket, maintenance, report, search, announcement
+│   │   ├── controllers/              # auth, user, office, ticket, maintenance, report, search, announcement, asset
 │   │   ├── middleware/               # auth.middleware (JWT + RBAC)
-│   │   ├── services/                 # assignment.service (auto-workload logic)
-│   │   ├── routes/                   # auth, user, office, ticket, report, announcement routes
+│   │   ├── services/                 # assignment.service, asset.service
+│   │   ├── routes/                   # auth, user, office, ticket, report, announcement, asset routes
 │   │   ├── prisma/                   # schema.prisma, migrations
 │   │   └── server.js                 # Entry point
+│   ├── tests/                        # Jest unit + integration tests (including asset.test.js)
 │   └── .env.example
 │
 ├── frontend/                         # React.js SPA
 │   ├── src/
 │   │   ├── pages/
 │   │   │   ├── auth/                 # Login, Register
-│   │   │   ├── admin/                # OfficeManagement, UserManagement, PeriodicReports
-│   │   │   ├── employee/             # CreateTicketModal
+│   │   │   ├── admin/                # OfficeManagement, UserManagement, PeriodicReports, AssetManagement
+│   │   │   ├── employee/             # CreateTicketModal, AssetDetail
 │   │   │   └── technician/           # TechnicianQueue, TicketResolveModal
-│   │   ├── components/               # TechnicianAssignmentModal, AnnouncementBoard, AuditTrailModal, AdvancedFilterBar
+│   │   ├── components/               # TechnicianAssignmentModal, AnnouncementBoard, AuditTrailModal, AdvancedFilterBar, AssetModal
 │   │   ├── context/                  # AuthContext, LanguageContext
-│   │   ├── store/                    # Redux slices (auth, user, office, ticket, announcement)
+│   │   ├── store/                    # Redux slices (auth, user, office, ticket, announcement, asset)
+│   │   ├── api/                      # axios, ticketApi, assetApi
 │   │   ├── locales/                  # en.json, am.json
-│   │   └── layouts/                  # AppLayout
+│   │   ├── layouts/                  # AppLayout, Sidebar
+│   │   └── __tests__/                # Vitest component tests (including AssetManagement.test.jsx)
 │   └── .env.example
 │
 └── .gitignore
@@ -403,7 +500,7 @@ Tests are split into two groups using separate Jest configs:
 
 | Suite            | Command                        | Files                                                              | Database required |
 | ---------------- | ------------------------------ | ------------------------------------------------------------------ | ----------------- |
-| **Unit tests**   | `npm run test:unit`            | `report`, `search`, `announcement`, `session`, `ticket`, `assignment` | No (all mocked)   |
+| **Unit tests**   | `npm run test:unit`            | `report`, `search`, `announcement`, `session`, `ticket`, `assignment`, `asset` | No (all mocked)   |
 | **Integration**  | `npm run test:integration`     | `auth`, `user`, `office`                                           | Yes (PostgreSQL)  |
 | **All (default)**| `npm test`                     | Both of the above                                                  | Yes               |
 
@@ -415,7 +512,7 @@ Tests are split into two groups using separate Jest configs:
 | Command          | Framework | Description                             |
 | ---------------- | --------- | --------------------------------------- |
 | `npm run lint`   | ESLint    | Static analysis for JSX/JS             |
-| `npm run test`   | Vitest    | Component and logic tests (11 files)   |
+| `npm run test`   | Vitest    | Component and logic tests (13 files)   |
 | `npm run build`  | Vite      | Production build (verifies no compile errors) |
 
 Frontend tests use mocked Axios calls and do not require a running backend.
@@ -470,7 +567,7 @@ npm run build
 
 ### Phase 4 — Future Enhancements
 
-- [ ] Asset Management Module
+- [x] Asset Management Module
 - [ ] QR Code-Based Device Reporting
 - [ ] Email / SMS Notifications
 - [ ] Preventive Maintenance Scheduling

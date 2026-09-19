@@ -40,6 +40,22 @@ enum TicketStatus {
   CLOSED
 }
 
+enum AssetStatus {
+  ACTIVE
+  MAINTENANCE
+  RETIRED
+  ARCHIVED
+}
+
+enum AssetType {
+  COMPUTER
+  PRINTER
+  NETWORK_DEVICE
+  PHONE
+  FURNITURE
+  OTHER
+}
+
 model Office {
   id        String   @id @default(uuid()) @db.Uuid
   code      String   @unique
@@ -52,6 +68,7 @@ model Office {
   users             User[]
   tickets           Ticket[]
   technicianOffices TechnicianOffice[]
+  assets            Asset[]
 }
 
 model User {
@@ -72,6 +89,7 @@ model User {
   technicianOffices    TechnicianOffice[] @relation("TechnicianOfficeTechnician")
   createdAnnouncements Announcement[]
   auditLogs            AuditLog[]         @relation("AuditLogActor")
+  assignedAssets       Asset[]            @relation("AssetEmployee")
 
   @@index([officeId])
 }
@@ -109,6 +127,7 @@ model Ticket {
   description      String       @db.Text
   categoryId       String       @db.Uuid
   deviceOrSystem   String?      @db.Text
+  assetId          String?      @db.Uuid
   priority         Priority?
   status           TicketStatus @default(PENDING)
   employeeId       String       @db.Uuid
@@ -117,8 +136,8 @@ model Ticket {
   rating           Int?
   feedback         String?      @db.Text
   isApproved       Boolean?
-  requiresPurchase Boolean      @default(false) // True if parts/items must be bought
-  purchaseDetails  String?      @db.Text // Specifications of required item
+  requiresPurchase Boolean      @default(false)
+  purchaseDetails  String?      @db.Text
   slaExceeded      Boolean      @default(false)
   slaJustification String?      @db.Text
   createdAt        DateTime     @default(now())
@@ -126,17 +145,19 @@ model Ticket {
   closedAt         DateTime?
   updatedAt        DateTime     @updatedAt
 
-  category        Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  employee        User             @relation("EmployeeTickets", fields: [employeeId], references: [id], onDelete: Restrict)
-  technician      User?            @relation("TechnicianTickets", fields: [technicianId], references: [id], onDelete: SetNull)
-  office          Office           @relation(fields: [officeId], references: [id], onDelete: Restrict)
-  maintenanceNote MaintenanceNote?
-  auditLogs       AuditLog[]
+  asset            Asset?           @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  category         Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  employee         User             @relation("EmployeeTickets", fields: [employeeId], references: [id], onDelete: Restrict)
+  technician       User?            @relation("TechnicianTickets", fields: [technicianId], references: [id], onDelete: SetNull)
+  office           Office           @relation(fields: [officeId], references: [id], onDelete: Restrict)
+  maintenanceNote  MaintenanceNote?
+  auditLogs        AuditLog[]
 
   @@index([officeId])
   @@index([status])
   @@index([createdAt])
   @@index([technicianId])
+  @@index([assetId])
 }
 
 model MaintenanceNote {
@@ -180,4 +201,29 @@ model Announcement {
   author User @relation(fields: [authorId], references: [id], onDelete: Restrict)
 
   @@index([authorId])
+}
+
+model Asset {
+  id              String      @id @default(uuid()) @db.Uuid
+  assetTag        String      @unique
+  name            String      @db.Text
+  assetType       AssetType
+  serialNumber    String?     @db.Text
+  status          AssetStatus @default(ACTIVE)
+  officeId        String      @db.Uuid
+  employeeId      String?     @db.Uuid
+  purchaseDate    DateTime?
+  warrantyExpiry  DateTime?
+  notes           String?     @db.Text
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  office   Office      @relation(fields: [officeId], references: [id], onDelete: Restrict)
+  employee User?       @relation("AssetEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
+  tickets  Ticket[]
+
+  @@index([officeId])
+  @@index([employeeId])
+  @@index([status])
+  @@index([assetTag])
 }

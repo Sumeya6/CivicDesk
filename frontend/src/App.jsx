@@ -34,6 +34,10 @@ const AnnouncementBoard = React.lazy(
 const PeriodicReports = React.lazy(
   () => import("./pages/admin/PeriodicReports"),
 );
+const AssetManagement = React.lazy(
+  () => import("./pages/admin/AssetManagement"),
+);
+const AssetDetail = React.lazy(() => import("./pages/employee/AssetDetail"));
 const Profile = React.lazy(() => import("./pages/Profile"));
 
 function LoadingFallback() {
@@ -139,6 +143,22 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["ADMIN"]}>
                     <PeriodicReports />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/assets"
+                element={
+                  <ProtectedRoute allowedRoles={["ADMIN"]}>
+                    <AssetManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/assets/:id"
+                element={
+                  <ProtectedRoute allowedRoles={["ADMIN", "EMPLOYEE", "TECHNICIAN"]}>
+                    <AssetDetail />
                   </ProtectedRoute>
                 }
               />

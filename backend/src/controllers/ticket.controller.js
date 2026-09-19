@@ -21,7 +21,7 @@ function authorize(req, roles) {
 async function createTicket(req, res, next) {
   try {
     authorize(req, [Role.EMPLOYEE, Role.ADMIN]);
-    const { title, description, categoryId, deviceOrSystem, priority } =
+    const { title, description, categoryId, deviceOrSystem, priority, assetId } =
       req.body;
     if (!title?.trim() || !description?.trim() || !categoryId)
       throw error("Title, description, and category are required.", 422);
@@ -41,6 +41,16 @@ async function createTicket(req, res, next) {
     if (!category?.isActive)
       throw error("Category not found or inactive.", 422);
 
+    if (assetId) {
+      const asset = await prisma.asset.findUnique({
+        where: { id: assetId },
+        select: { id: true, officeId: true, status: true },
+      });
+      if (!asset) throw error("Asset not found.", 404);
+      if (asset.status === "ARCHIVED" || asset.status === "RETIRED")
+        throw error("Cannot assign a retired or archived asset.", 422);
+    }
+
     const ticket = await prisma.$transaction(async (tx) => {
       const created = await tx.ticket.create({
         data: {
@@ -48,6 +58,7 @@ async function createTicket(req, res, next) {
           description: description.trim(),
           categoryId,
           deviceOrSystem: deviceOrSystem?.trim() || null,
+          assetId: assetId || null,
           priority: priority || Priority.MEDIUM,
           employeeId: req.user.id,
           officeId: user.officeId,
@@ -299,6 +310,7 @@ async function getTicket(req, res, next) {
       where: { id: req.params.id },
       include: {
         category: true,
+        asset: true,
         maintenanceNote: true,
         auditLogs: { orderBy: { createdAt: "asc" } },
       },
