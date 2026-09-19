@@ -73,20 +73,20 @@ beforeEach(() => {
   axios.get.mockImplementation((url, config) => {
     if (url === "/offices")
       return Promise.resolve({
-        data: { offices, meta: { total: offices.length } },
+        data: { success: true, message: "Offices retrieved.", data: offices, meta: { total: offices.length } },
       });
     if (url === "/users" && config?.params?.role === "TECHNICIAN")
       return Promise.resolve({
-        data: { users: [users[1]], meta: { total: 1 } },
+        data: { success: true, message: "Users retrieved.", data: [users[1]], meta: { total: 1 } },
       });
-    return Promise.resolve({ data: { users, meta: { total: users.length } } });
+    return Promise.resolve({ data: { success: true, message: "Users retrieved.", data: users, meta: { total: users.length } } });
   });
-  axios.put.mockResolvedValue({ data: { user: users[0] } });
+  axios.put.mockResolvedValue({ data: { success: true, message: "User updated.", data: users[0] } });
   axios.post.mockResolvedValue({
-    data: { user: { ...users[0], id: "new-user" } },
+    data: { success: true, message: "User created.", data: { ...users[0], id: "new-user" } },
   });
   axios.delete.mockResolvedValue({
-    data: { user: users[0] },
+    data: { success: true, message: "User deleted.", data: users[0] },
   });
 });
 

@@ -67,12 +67,16 @@ describe("AuthContext", () => {
   it("restores authenticated user from /auth/me on startup", async () => {
     axios.get.mockResolvedValueOnce({
       data: {
-        id: "1",
-        fullName: "Jane Doe",
-        role: "ADMIN",
-        preferredLanguage: "EN",
-        isActive: true,
-        office: { id: "office-1" },
+        success: true,
+        message: "User retrieved.",
+        data: {
+          id: "1",
+          fullName: "Jane Doe",
+          role: "ADMIN",
+          preferredLanguage: "EN",
+          isActive: true,
+          office: { id: "office-1" },
+        },
       },
     });
 
@@ -91,12 +95,16 @@ describe("AuthContext", () => {
   it("login updates authentication state", async () => {
     axios.post.mockResolvedValueOnce({
       data: {
-        id: "2",
-        fullName: "John Doe",
-        role: "EMPLOYEE",
-        preferredLanguage: "AM",
-        isActive: true,
-        office: { id: "office-2" },
+        success: true,
+        message: "Login successful.",
+        data: {
+          id: "2",
+          fullName: "John Doe",
+          role: "EMPLOYEE",
+          preferredLanguage: "AM",
+          isActive: true,
+          office: { id: "office-2" },
+        },
       },
     });
 
@@ -121,15 +129,19 @@ describe("AuthContext", () => {
     axios.post
       .mockResolvedValueOnce({
         data: {
-          id: "3",
-          fullName: "Aster",
-          role: "TECHNICIAN",
-          preferredLanguage: "AM",
-          isActive: true,
-          office: { id: "office-3" },
+          success: true,
+          message: "Login successful.",
+          data: {
+            id: "3",
+            fullName: "Aster",
+            role: "TECHNICIAN",
+            preferredLanguage: "AM",
+            isActive: true,
+            office: { id: "office-3" },
+          },
         },
       })
-      .mockResolvedValueOnce({ data: { message: "Logout successful." } });
+      .mockResolvedValueOnce({ data: { success: true, message: "Logout successful." } });
 
     renderWithProvider();
     const loginButton = screen.getAllByRole("button", { name: /login/i })[0];
@@ -150,12 +162,16 @@ describe("AuthContext", () => {
   it("changeLanguage updates language", async () => {
     axios.post.mockResolvedValueOnce({
       data: {
-        id: "4",
-        fullName: "Aster",
-        role: "TECHNICIAN",
-        preferredLanguage: "AM",
-        isActive: true,
-        office: { id: "office-4" },
+        success: true,
+        message: "Login successful.",
+        data: {
+          id: "4",
+          fullName: "Aster",
+          role: "TECHNICIAN",
+          preferredLanguage: "AM",
+          isActive: true,
+          office: { id: "office-4" },
+        },
       },
     });
 

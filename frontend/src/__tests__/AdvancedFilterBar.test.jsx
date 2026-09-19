@@ -13,19 +13,23 @@ vi.mock("../api/axios", () => ({
 import api from "../api/axios";
 
 const mockSearchData = {
-  data: [
-    {
-      id: "t1",
-      title: "Test ticket",
-      status: "PENDING",
-      priority: "HIGH",
-      office: { nameEn: "IT" },
-      category: { nameEn: "Hardware" },
-    },
-  ],
-  totalCount: 1,
-  totalPages: 1,
-  currentPage: 1,
+  success: true,
+  message: "Tickets found.",
+  data: {
+    data: [
+      {
+        id: "t1",
+        title: "Test ticket",
+        status: "PENDING",
+        priority: "HIGH",
+        office: { nameEn: "IT" },
+        category: { nameEn: "Hardware" },
+      },
+    ],
+    totalCount: 1,
+    totalPages: 1,
+    currentPage: 1,
+  },
 };
 
 describe("AdvancedFilterBar", () => {
@@ -262,7 +266,7 @@ describe("AdvancedFilterBar", () => {
     fireEvent.submit(screen.getByText("Search Tickets").closest("form"));
 
     await waitFor(() => {
-      expect(mockOnResults).toHaveBeenCalledWith(mockSearchData.data);
+      expect(mockOnResults).toHaveBeenCalledWith(mockSearchData.data.data);
     });
   });
 

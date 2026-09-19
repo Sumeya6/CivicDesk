@@ -12,43 +12,51 @@ vi.mock("../api/axios", () => ({
 
 import api from "../api/axios";
 
-const mockReportData = {
-  total: 25,
-  slaPercentage: 80,
-  awaitingPurchase: 3,
-  averageResolutionTimeHours: 12.5,
-  averageSatisfactionRating: 4.2,
-  technicianWorkload: [
-    { technicianId: "t1", technician: "Alice", count: 10 },
-    { technicianId: "t2", technician: "Bob", count: 8 },
-  ],
-  requestsByCategory: [
-    { categoryId: "c1", category: "Hardware", count: 12 },
-    { categoryId: "c2", category: "Software", count: 8 },
-  ],
-  ratingDistribution: { 5: 10, 4: 8, 3: 5, 2: 2, 1: 0 },
+const mockReportEnvelope = {
+  success: true,
+  message: "Report retrieved.",
+  data: {
+    total: 25,
+    slaPercentage: 80,
+    awaitingPurchase: 3,
+    averageResolutionTimeHours: 12.5,
+    averageSatisfactionRating: 4.2,
+    technicianWorkload: [
+      { technicianId: "t1", technician: "Alice", count: 10 },
+      { technicianId: "t2", technician: "Bob", count: 8 },
+    ],
+    requestsByCategory: [
+      { categoryId: "c1", category: "Hardware", count: 12 },
+      { categoryId: "c2", category: "Software", count: 8 },
+    ],
+    ratingDistribution: { 5: 10, 4: 8, 3: 5, 2: 2, 1: 0 },
+  },
 };
 
-const mockSearchData = {
-  data: [
-    {
-      id: "t1",
-      title: "Printer issue",
-      status: "PENDING",
-      priority: "HIGH",
-      office: { nameEn: "IT" },
-      category: { nameEn: "Hardware" },
-    },
-  ],
-  totalCount: 1,
-  totalPages: 1,
-  currentPage: 1,
+const mockSearchEnvelope = {
+  success: true,
+  message: "Tickets found.",
+  data: {
+    data: [
+      {
+        id: "t1",
+        title: "Printer issue",
+        status: "PENDING",
+        priority: "HIGH",
+        office: { nameEn: "IT" },
+        category: { nameEn: "Hardware" },
+      },
+    ],
+    totalCount: 1,
+    totalPages: 1,
+    currentPage: 1,
+  },
 };
 
 describe("PeriodicReports", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    api.get.mockResolvedValue({ data: mockReportData });
+    api.get.mockResolvedValue({ data: mockReportEnvelope });
   });
 
   test("renders the page title", async () => {
@@ -171,7 +179,7 @@ describe("PeriodicReports", () => {
   });
 
   test("search triggers API call with filters", async () => {
-    api.get.mockResolvedValueOnce({ data: mockReportData });
+    api.get.mockResolvedValueOnce({ data: mockReportEnvelope });
 
     render(<PeriodicReports />);
 
@@ -179,7 +187,7 @@ describe("PeriodicReports", () => {
       expect(api.get).toHaveBeenCalledTimes(1);
     });
 
-    api.get.mockResolvedValueOnce({ data: mockSearchData });
+    api.get.mockResolvedValueOnce({ data: mockSearchEnvelope });
 
     fireEvent.click(screen.getByText("Search Tickets"));
 
@@ -191,7 +199,7 @@ describe("PeriodicReports", () => {
   });
 
   test("search results display in table", async () => {
-    api.get.mockResolvedValueOnce({ data: mockReportData });
+    api.get.mockResolvedValueOnce({ data: mockReportEnvelope });
 
     render(<PeriodicReports />);
 
@@ -199,7 +207,7 @@ describe("PeriodicReports", () => {
       expect(api.get).toHaveBeenCalledTimes(1);
     });
 
-    api.get.mockResolvedValueOnce({ data: mockSearchData });
+    api.get.mockResolvedValueOnce({ data: mockSearchEnvelope });
 
     fireEvent.click(screen.getByText("Search Tickets"));
 
@@ -209,7 +217,7 @@ describe("PeriodicReports", () => {
   });
 
   test("reset clears search filters", async () => {
-    api.get.mockResolvedValueOnce({ data: mockReportData });
+    api.get.mockResolvedValueOnce({ data: mockReportEnvelope });
 
     render(<PeriodicReports />);
 
@@ -217,7 +225,7 @@ describe("PeriodicReports", () => {
       expect(api.get).toHaveBeenCalledTimes(1);
     });
 
-    api.get.mockResolvedValueOnce({ data: mockSearchData });
+    api.get.mockResolvedValueOnce({ data: mockSearchEnvelope });
     fireEvent.click(screen.getByText("Search Tickets"));
 
     await waitFor(() => {

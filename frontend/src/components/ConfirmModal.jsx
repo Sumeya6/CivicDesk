@@ -13,11 +13,12 @@ export default function ConfirmModal({
   variant = "danger",
   loading = false,
 }) {
-  if (!isOpen) return null;
   const { t } = useTranslation();
 
+  if (!isOpen) return null;
+
   const isDanger = variant === "danger";
-  const confirmIcon = isDanger ? AlertTriangle : Check;
+  const ConfirmIcon = isDanger ? AlertTriangle : Check;
 
   const modalTitle = title || t("confirmModal.title");
   const modalMessage = message || t("confirmModal.message");
@@ -27,19 +28,19 @@ export default function ConfirmModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={modalTitle} maxWidth="max-w-md">
-      <div className="p-5 space-y-4">
+      <div className="flex flex-col gap-4 p-5">
         <div className="flex items-start gap-3">
           <div
-            className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-              isDanger ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
+            className={`shrink-0 flex h-10 w-10 items-center justify-center rounded-full ${
+              isDanger ? "bg-[var(--civic-error-bg)] text-[var(--civic-error)]" : "bg-[var(--civic-success-bg)] text-[var(--civic-success)]"
             }`}
             aria-hidden="true"
           >
-            <confirmIcon size={20} />
+            <ConfirmIcon size={20} />
           </div>
-          <p className="text-sm text-slate-700 pt-0.5">{modalMessage}</p>
+          <p className="text-[var(--civic-font-size-base)] text-[var(--civic-text)] pt-2">{modalMessage}</p>
         </div>
-        <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+        <div className="flex justify-end gap-2 border-t border-[var(--civic-border)] pt-4">
           <button
             type="button"
             onClick={onClose}
@@ -52,7 +53,7 @@ export default function ConfirmModal({
             type="button"
             onClick={onConfirm}
             disabled={loading}
-            className={`button-primary ${isDanger ? "bg-red-600 hover:bg-red-700" : ""}`}
+            className={`button-primary ${isDanger ? "!bg-[var(--civic-error)] hover:!bg-[#9c1e14] !border-[var(--civic-error)]" : ""}`}
           >
             {loading ? processingText : confirmLabel}
           </button>

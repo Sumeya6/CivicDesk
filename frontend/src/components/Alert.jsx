@@ -13,10 +13,15 @@ export default function Alert({ type = "error", message, onClose }) {
 
   return (
     <div className={className} role="alert">
-      <Icon style={{ marginTop: 2, flexShrink: 0, width: 16, height: 16 }} />
-      <span style={{ flex: 1 }}>{message}</span>
+      <Icon className="mt-0.5 h-4 w-4 shrink-0" />
+      <span className="flex-1">{message}</span>
       {onClose && (
-        <button type="button" onClick={onClose} style={{ fontWeight: 700, opacity: 0.7, cursor: "pointer", background: "none", border: 0, padding: 0 }} aria-label="Dismiss">
+        <button
+          type="button"
+          onClick={onClose}
+          className="shrink-0 rounded p-0.5 font-bold opacity-70 transition hover:opacity-100"
+          aria-label="Dismiss"
+        >
           &times;
         </button>
       )}

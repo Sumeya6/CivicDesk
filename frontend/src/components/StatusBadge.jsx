@@ -12,7 +12,7 @@ const statusBadgeClass = {
 export default function StatusBadge({ status }) {
   const { t } = useTranslation();
 
-  if (!status) return <span style={{ color: "#94a3b8" }}>-</span>;
+  if (!status) return <span className="text-[var(--civic-muted)]">-</span>;
 
   const cls = statusBadgeClass[status] || "civic-badge civic-badge-closed";
   const label = t(`status.${status.toLowerCase()}`, status);

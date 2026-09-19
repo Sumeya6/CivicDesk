@@ -1,8 +1,9 @@
 import { useFocusTrap } from "../hooks/useFocusTrap";
 
 export function Modal({ isOpen, onClose, title, children, maxWidth = "max-w-lg" }) {
+  const modalRef = useFocusTrap(isOpen);
+
   if (!isOpen) return null;
-  const modalRef = useFocusTrap(true);
 
   return (
     <div
@@ -13,7 +14,7 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = "max-w-lg" 
     >
       <div
         className="civic-modal-dialog"
-        style={maxWidth === "max-w-xl" ? { maxWidth: "36rem" } : { maxWidth: "32rem" }}
+        style={maxWidth === "max-w-xl" ? { maxWidth: "36rem" } : maxWidth === "max-w-md" ? { maxWidth: "28rem" } : { maxWidth: "32rem" }}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"

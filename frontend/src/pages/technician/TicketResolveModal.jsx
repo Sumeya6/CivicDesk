@@ -95,10 +95,10 @@ export default function TicketResolveModal({ isOpen, onClose, ticket }) {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {ui.apiError && <Alert type="error" message={ui.apiError} onClose={() => uiDispatch({ type: "CLEAR_ERROR" })} />}
 
-        <div style={{ border: "1px solid var(--civic-border)", background: "#f7fafc", borderRadius: 8, padding: 12, fontSize: 14 }}>
-          <p className="font-medium" style={{ color: "var(--civic-text)" }}>{ticket.title}</p>
+        <div className="rounded-lg border border-[var(--civic-border)] bg-[#f7fafc] p-3 text-[14px]">
+          <p className="font-medium text-[var(--civic-text)]">{ticket.title}</p>
           {ticket.description && (
-            <p className="mt-1 line-clamp-2" style={{ color: "var(--civic-muted)" }}>{ticket.description}</p>
+            <p className="mt-1 line-clamp-2 text-[var(--civic-muted)]">{ticket.description}</p>
           )}
         </div>
 
@@ -111,7 +111,7 @@ export default function TicketResolveModal({ isOpen, onClose, ticket }) {
 
         <div>
           <label htmlFor="diagnosis" className="civic-label">
-            Diagnosis <span className="text-red-500">*</span>
+            Diagnosis <span className="text-[var(--civic-error)]">*</span>
           </label>
           <textarea
             id="diagnosis"
@@ -119,12 +119,12 @@ export default function TicketResolveModal({ isOpen, onClose, ticket }) {
             {...register("diagnosis", { required: "Diagnosis is required" })}
             className="civic-textarea"
           />
-          {errors.diagnosis && <p className="mt-1 text-xs text-red-600">{errors.diagnosis.message}</p>}
+          {errors.diagnosis && <p className="mt-1 text-xs text-[var(--civic-error)]">{errors.diagnosis.message}</p>}
         </div>
 
         <div>
           <label htmlFor="workPerformed" className="civic-label">
-            Work Performed <span className="text-red-500">*</span>
+            Work Performed <span className="text-[var(--civic-error)]">*</span>
           </label>
           <textarea
             id="workPerformed"
@@ -132,7 +132,7 @@ export default function TicketResolveModal({ isOpen, onClose, ticket }) {
             {...register("workPerformed", { required: "Work performed is required" })}
             className="civic-textarea"
           />
-          {errors.workPerformed && <p className="mt-1 text-xs text-red-600">{errors.workPerformed.message}</p>}
+          {errors.workPerformed && <p className="mt-1 text-xs text-[var(--civic-error)]">{errors.workPerformed.message}</p>}
         </div>
 
         <div>
@@ -169,11 +169,11 @@ export default function TicketResolveModal({ isOpen, onClose, ticket }) {
                 type="checkbox"
                 checked={field.value}
                 onChange={field.onChange}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 rounded border-[var(--civic-border)] text-[var(--civic-blue-600)] focus:ring-[var(--civic-blue-600)]"
               />
             )}
           />
-          <label htmlFor="purchasedByOffice" className="text-sm" style={{ color: "var(--civic-text)" }}>
+          <label htmlFor="purchasedByOffice" className="text-[var(--civic-font-size-base)] text-[var(--civic-text)]">
             Parts were purchased by office
           </label>
         </div>
@@ -181,7 +181,7 @@ export default function TicketResolveModal({ isOpen, onClose, ticket }) {
         {ticket.slaExceeded && (
           <div>
             <label htmlFor="slaJustification" className="civic-label">
-              SLA Justification <span className="text-red-500">*</span>
+              SLA Justification <span className="text-[var(--civic-error)]">*</span>
             </label>
             <textarea
               id="slaJustification"
@@ -191,17 +191,17 @@ export default function TicketResolveModal({ isOpen, onClose, ticket }) {
               className={`civic-textarea ${
                 ui.slaJustText.trim().length > 0 || !ticket.slaExceeded
                   ? ""
-                  : "border-red-300 focus:border-red-500 focus:ring-red-500"
+                  : "border-[var(--civic-error-border)] focus:border-[var(--civic-error)] focus:ring-[var(--civic-error)]"
               }`}
               placeholder="Explain why this ticket exceeded the SLA window"
             />
             {ticket.slaExceeded && ui.slaJustText.trim().length === 0 && (
-              <p className="mt-1 text-xs text-red-600">SLA justification is required for overdue tickets</p>
+              <p className="mt-1 text-xs text-[var(--civic-error)]">SLA justification is required for overdue tickets</p>
             )}
           </div>
         )}
 
-        <div className="flex justify-end gap-2 border-t pt-4" style={{ borderColor: "var(--civic-border)" }}>
+        <div className="flex justify-end gap-2 border-t border-[var(--civic-border)] pt-4">
           <button
             type="button"
             onClick={handleClose}

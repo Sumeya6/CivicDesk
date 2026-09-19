@@ -10,15 +10,17 @@ function Navbar({ role, onMenuToggle }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="fixed left-72 right-0 top-0 z-30 border-b border-[var(--civic-border)] bg-white px-4 py-3 shadow-[0_2px_10px_rgb(11_47_107_/_4%)] max-[1023px]:left-0 lg:px-6">
-      <div className="flex items-center justify-between gap-2.5">
+    <header className="fixed left-72 right-0 top-0 z-30 border-b border-[var(--civic-border)] bg-white px-4 py-3 shadow-[var(--civic-shadow-sm)] max-[1023px]:left-0 lg:px-6">
+      <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <button
-            className="app-menu-button rounded-lg p-2 hover:bg-slate-100 lg:hidden"
+            className="flex items-center justify-center rounded-lg p-2 text-[var(--civic-text)] transition hover:bg-[var(--civic-cyan-50)] lg:hidden"
             onClick={() => {
-              setMobileOpen((value) => !value);
+              setMobileOpen((v) => !v);
               onMenuToggle?.();
             }}
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
           >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -26,17 +28,18 @@ function Navbar({ role, onMenuToggle }) {
             <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[15px] font-semibold text-[var(--civic-blue-950)]">
               {t("layout.welcome")}, {currentUser?.fullName ?? t("common.user")}
             </p>
-            <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-semibold tracking-[0.04em] text-[var(--civic-muted)]">
+            <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-semibold tracking-[0.04em] text-[var(--civic-muted)]">
               {t(`roles.${role}`, role)}
             </p>
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-3 max-[640px]:gap-1.5">
+        <div className="flex shrink-0 items-center gap-2 max-[640px]:gap-1.5">
           <LanguageToggle variant="navbar" />
           <button
             onClick={logout}
-            className="rounded-lg bg-[var(--civic-blue-800)] px-3 py-2 text-sm font-medium text-white transition hover:bg-[var(--civic-blue-950)] hover:shadow-[0_4px_10px_rgb(11_47_107_/_16%)] max-[640px]:px-2.5 max-[640px]:py-[7px]"
+            className="rounded-lg bg-[var(--civic-blue-800)] px-3 py-2 text-sm font-medium text-white transition hover:bg-[var(--civic-blue-950)] hover:shadow-[var(--civic-shadow-md)] max-[640px]:px-2.5 max-[640px]:py-[7px] max-[640px]:text-[12px]"
+            aria-label={t("auth.logout")}
           >
             {t("auth.logout")}
           </button>

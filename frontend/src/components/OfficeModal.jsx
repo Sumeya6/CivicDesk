@@ -1,8 +1,8 @@
-import { X } from "lucide-react";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { createOffice, updateOffice } from "../store/officeSlice";
+import { Modal } from "./Modal";
 
 function OfficeModal({ office, onClose }) {
   const dispatch = useDispatch();
@@ -36,93 +36,68 @@ function OfficeModal({ office, onClose }) {
     }
   };
 
+  const modalTitle = office ? t("admin.editOffice") : t("admin.addOffice");
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-[rgb(11_47_107_/_38%)] p-4 max-[640px]:items-start max-[640px]:p-3"
-      role="presentation"
-      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
-    >
-      <div
-        className="w-[min(100%,32rem)] max-h-[calc(100vh-32px)] min-w-0 overflow-x-hidden overflow-y-auto rounded-xl border border-[var(--civic-border)] bg-white shadow-[0_18px_45px_rgb(11_47_107_/_18%)] max-[640px]:max-h-[calc(100vh-24px)]"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="office-modal-title"
-      >
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3">
-          <h2
-            id="office-modal-title"
-            className="text-base font-semibold text-slate-900"
-          >
-            {office ? t("admin.editOffice") : t("admin.addOffice")}
-          </h2>
+    <Modal isOpen={true} onClose={onClose} title={modalTitle}>
+      <form className="flex flex-col gap-3.5 p-5" onSubmit={handleSubmit}>
+        <label className="civic-label">
+          {t("admin.officeCode")}
+          <input
+            className="civic-input"
+            value={form.code}
+            onChange={(event) =>
+              setForm({ ...form, code: event.target.value })
+            }
+          />
+        </label>
+        <label className="civic-label">
+          {t("admin.nameAm")}
+          <input
+            className="civic-input"
+            value={form.nameAm}
+            onChange={(event) =>
+              setForm({ ...form, nameAm: event.target.value })
+            }
+          />
+        </label>
+        <label className="civic-label">
+          {t("admin.nameEn")}
+          <input
+            className="civic-input"
+            value={form.nameEn}
+            onChange={(event) =>
+              setForm({ ...form, nameEn: event.target.value })
+            }
+          />
+        </label>
+        {error && (
+          <div className="civic-alert civic-alert-error" role="alert">
+            <span className="flex-1">{error}</span>
+          </div>
+        )}
+        <div className="flex justify-end gap-2 pt-1">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-            aria-label="Close modal"
+            className="button-secondary"
           >
-            <X size={18} />
+            {t("admin.cancel")}
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="button-primary"
+          >
+            {saving
+              ? t("admin.saving")
+              : office
+                ? t("admin.saveChanges")
+                : t("admin.addOffice")}
           </button>
         </div>
-        <form className="space-y-3.5 p-5" onSubmit={handleSubmit}>
-          <label className="block text-xs font-medium text-slate-600">
-            {t("admin.officeCode")}
-            <input
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              value={form.code}
-              onChange={(event) =>
-                setForm({ ...form, code: event.target.value })
-              }
-            />
-          </label>
-          <label className="block text-xs font-medium text-slate-600">
-            {t("admin.nameAm")}
-            <input
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              value={form.nameAm}
-              onChange={(event) =>
-                setForm({ ...form, nameAm: event.target.value })
-              }
-            />
-          </label>
-          <label className="block text-xs font-medium text-slate-600">
-            {t("admin.nameEn")}
-            <input
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              value={form.nameEn}
-              onChange={(event) =>
-                setForm({ ...form, nameEn: event.target.value })
-              }
-            />
-          </label>
-          {error && (
-            <p className="text-xs text-red-600" role="alert">
-              {error}
-            </p>
-          )}
-          <div className="flex justify-end gap-2 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg border border-slate-300 px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-            >
-              {t("admin.cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
-            >
-              {saving
-                ? t("admin.saving")
-                : office
-                  ? t("admin.saveChanges")
-                  : t("admin.addOffice")}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
 }
 

@@ -151,10 +151,10 @@ function PeriodicReports() {
       params.limit = 10;
 
       const { data } = await api.get("/tickets/search", { params });
-      setSearchResults(data.data);
+      setSearchResults(data.data?.data ?? []);
       setSearchPagination({
-        page: data.currentPage,
-        totalPages: data.totalPages,
+        page: data.data?.currentPage,
+        totalPages: data.data?.totalPages,
       });
       setSearchPage(page);
     } catch (error) {
@@ -173,21 +173,22 @@ function PeriodicReports() {
         const { data } = await api.get("/reports/summary", {
           params: { period: selectedPeriod },
         });
+        const reportData = data.data;
         setReport({
-          totalTickets: data.total,
-          slaCompliance: data.slaPercentage,
-          procurementDelays: data.awaitingPurchase,
-          averageResolution: data.averageResolutionTimeHours,
-          satisfaction: data.averageSatisfactionRating,
-          technicians: data.technicianWorkload.map((technician) => ({
+          totalTickets: reportData.total,
+          slaCompliance: reportData.slaPercentage,
+          procurementDelays: reportData.awaitingPurchase,
+          averageResolution: reportData.averageResolutionTimeHours,
+          satisfaction: reportData.averageSatisfactionRating,
+          technicians: reportData.technicianWorkload.map((technician) => ({
             name: technician.technician,
             tickets: technician.count,
           })),
-          categories: data.requestsByCategory.map((category) => ({
+          categories: reportData.requestsByCategory.map((category) => ({
             name: category.category,
             count: category.count,
           })),
-          ratings: data.ratingDistribution,
+          ratings: reportData.ratingDistribution,
         });
       } catch (error) {
         console.error("Error fetching report:", error);

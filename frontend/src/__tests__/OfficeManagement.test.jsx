@@ -20,7 +20,9 @@ beforeEach(() => {
   vi.clearAllMocks();
   axios.get.mockResolvedValue({
     data: {
-      offices: [
+      success: true,
+      message: "Offices retrieved.",
+      data: [
         {
           id: "1",
           code: "AR-01",
@@ -32,7 +34,9 @@ beforeEach(() => {
       meta: { total: 1 },
     },
   });
-  axios.delete.mockResolvedValue({ data: { office: { id: "1" } } });
+  axios.delete.mockResolvedValue({
+    data: { success: true, message: "Office deleted.", data: { id: "1" } },
+  });
 });
 
 describe("OfficeManagement", () => {

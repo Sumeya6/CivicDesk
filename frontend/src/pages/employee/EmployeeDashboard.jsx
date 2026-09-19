@@ -8,7 +8,6 @@ import StatusBadge from "../../components/StatusBadge";
 import PriorityBadge from "../../components/PriorityBadge";
 import SlaIndicator from "../../components/SlaIndicator";
 import { formatDate } from "../../components/ticketConfig";
-import { calculateSlaDeadline } from "../../utils/sla";
 import { useAuth } from "../../context/AuthContext";
 import CreateTicketModal from "./CreateTicketModal";
 import VerifyTicketModal from "./VerifyTicketModal";
@@ -86,7 +85,7 @@ function EmployeeDashboard() {
       {loading && (
         <div className="table-state">
           <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-          Loading tickets…
+          {t("common.loading")}
         </div>
       )}
 

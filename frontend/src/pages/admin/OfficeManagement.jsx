@@ -28,7 +28,7 @@ function OfficeManagement() {
   const [modalOffice, setModalOffice] = useState(undefined);
   const [updatingId, setUpdatingId] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null });
-  const [deleteError, setDeleteError] = useState("");
+  const [, setDeleteError] = useState("");
   const activeOffices = offices.filter((office) => office.isActive).length;
 
   useEffect(() => {

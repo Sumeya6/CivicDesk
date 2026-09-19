@@ -17,14 +17,14 @@ function StarRating({ value, onChange }) {
           role="radio"
           aria-checked={value === star}
           aria-label={`${star} star${star > 1 ? "s" : ""}`}
-          className="p-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+          className="p-0.5 focus:outline-none focus:ring-2 focus:ring-[var(--civic-blue-600)] rounded"
           onMouseEnter={() => setHovered(star)}
           onMouseLeave={() => setHovered(0)}
           onClick={() => onChange(star)}
         >
           <Star
             className={`h-7 w-7 transition-colors ${
-              star <= (hovered || value) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+              star <= (hovered || value) ? "fill-amber-400 text-amber-400" : "text-[var(--civic-border)]"
             }`}
           />
         </button>
@@ -102,10 +102,10 @@ export default function VerifyTicketModal({ isOpen, onClose, ticket }) {
       <div className="space-y-4">
         {form.apiError && <Alert type="error" message={form.apiError} onClose={() => formDispatch({ type: "CLEAR_ERROR" })} />}
 
-        <div style={{ border: "1px solid var(--civic-border)", background: "#f7fafc", borderRadius: 8, padding: 12, fontSize: 14 }}>
-          <p className="font-medium" style={{ color: "var(--civic-text)" }}>{ticket.title}</p>
+        <div className="rounded-lg border border-[var(--civic-border)] bg-[#f7fafc] p-3 text-[14px]">
+          <p className="font-medium text-[var(--civic-text)]">{ticket.title}</p>
           {ticket.description && (
-            <p className="mt-1 line-clamp-2" style={{ color: "var(--civic-muted)" }}>{ticket.description}</p>
+            <p className="mt-1 line-clamp-2 text-[var(--civic-muted)]">{ticket.description}</p>
           )}
         </div>
 
@@ -114,14 +114,14 @@ export default function VerifyTicketModal({ isOpen, onClose, ticket }) {
             <button
               type="button"
               onClick={() => formDispatch({ type: "SET_MODE", value: "approve" })}
-              className="flex-1 rounded-md border border-green-300 bg-green-50 py-2.5 text-sm font-medium text-green-700 hover:bg-green-100"
+              className="flex-1 rounded-lg border border-[var(--civic-success-border)] bg-[var(--civic-success-bg)] py-2.5 text-sm font-medium text-[var(--civic-success)] hover:bg-[var(--civic-success-bg)] hover:opacity-80"
             >
               Approve Resolution
             </button>
             <button
               type="button"
               onClick={() => formDispatch({ type: "SET_MODE", value: "reject" })}
-              className="flex-1 rounded-md border border-red-300 bg-red-50 py-2.5 text-sm font-medium text-red-700 hover:bg-red-100"
+              className="flex-1 rounded-lg border border-[var(--civic-error-border)] bg-[var(--civic-error-bg)] py-2.5 text-sm font-medium text-[var(--civic-error)] hover:bg-[var(--civic-error-bg)] hover:opacity-80"
             >
               Reject Resolution
             </button>
@@ -132,14 +132,14 @@ export default function VerifyTicketModal({ isOpen, onClose, ticket }) {
           <div className="space-y-4">
             <div>
               <label className="civic-label">
-                Rating <span className="text-red-500">*</span>
+                Rating <span className="text-[var(--civic-error)]">*</span>
               </label>
               <StarRating
                 value={form.rating}
                 onChange={(v) => formDispatch({ type: "SET_RATING", value: v })}
               />
               {form.rating === 0 && form.submitting && (
-                <p className="mt-1 text-xs text-red-600">Please select a rating</p>
+                <p className="mt-1 text-xs text-[var(--civic-error)]">Please select a rating</p>
               )}
             </div>
 
@@ -156,7 +156,7 @@ export default function VerifyTicketModal({ isOpen, onClose, ticket }) {
               />
             </div>
 
-            <div className="flex justify-end gap-2 border-t pt-4" style={{ borderColor: "var(--civic-border)" }}>
+            <div className="flex justify-end gap-2 border-t border-[var(--civic-border)] pt-4">
               <button
                 type="button"
                 onClick={() => formDispatch({ type: "SET_MODE", value: null })}
@@ -191,7 +191,7 @@ export default function VerifyTicketModal({ isOpen, onClose, ticket }) {
               />
             </div>
 
-            <div className="flex justify-end gap-2 border-t pt-4" style={{ borderColor: "var(--civic-border)" }}>
+            <div className="flex justify-end gap-2 border-t border-[var(--civic-border)] pt-4">
               <button
                 type="button"
                 onClick={() => formDispatch({ type: "SET_MODE", value: null })}

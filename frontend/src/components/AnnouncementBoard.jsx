@@ -29,22 +29,22 @@ function AnnouncementBoard() {
 
   return (
     <section
-      className="announcement-board rounded-xl border border-slate-200 bg-white"
+      className="announcement-board rounded-xl border border-[var(--civic-border)] bg-white"
       aria-labelledby="announcements-title"
     >
-      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+      <div className="flex items-center justify-between border-b border-[var(--civic-border)] px-4 py-3">
         <div className="flex items-center gap-2.5">
-          <span className="rounded-lg bg-slate-100 p-1.5 text-slate-600">
+          <span className="rounded-lg bg-[var(--civic-cyan-50)] p-1.5 text-[var(--civic-blue-800)]">
             <Bell size={15} />
           </span>
           <div>
             <h2
               id="announcements-title"
-              className="text-sm font-semibold text-slate-900"
+              className="text-[var(--civic-font-size-base)] font-semibold text-[var(--civic-blue-950)]"
             >
               {t("announcements.title")}
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-[12px] text-[var(--civic-muted)]">
               {t("announcements.subtitle")}
             </p>
           </div>
@@ -52,42 +52,42 @@ function AnnouncementBoard() {
         <button
           type="button"
           onClick={() => dispatch(fetchAnnouncements())}
-          className="rounded-lg p-1.5 text-slate-400 hover:bg-gray-50 hover:text-slate-600"
+          className="rounded-lg p-1.5 text-[var(--civic-muted)] transition hover:bg-[var(--civic-cyan-50)] hover:text-[var(--civic-blue-800)]"
           aria-label={t("announcements.refresh")}
         >
           <RefreshCw size={14} />
         </button>
       </div>
-      <div className="divide-y divide-slate-100">
+      <div className="divide-y divide-[var(--civic-border)]">
         {status === "loading" && items.length === 0 && (
-          <p className="px-4 py-6 text-xs text-slate-500">
+          <p className="px-4 py-6 text-[12px] text-[var(--civic-muted)]">
             {t("announcements.loading")}
           </p>
         )}
         {error && (
-          <p className="px-4 py-3 text-xs text-red-600" role="alert">
+          <p className="px-4 py-3 text-[12px] text-[var(--civic-error)]" role="alert">
             {error}
           </p>
         )}
         {status !== "loading" && !error && items.length === 0 && (
-          <p className="px-4 py-6 text-xs text-slate-500">
+          <p className="px-4 py-6 text-[12px] text-[var(--civic-muted)]">
             {t("announcements.empty")}
           </p>
         )}
         {items.map((announcement) => (
           <article key={announcement.id} className="px-4 py-3">
             <div className="flex items-start justify-between gap-3">
-              <h3 className="text-sm font-medium text-slate-900">
+              <h3 className="text-[var(--civic-font-size-base)] font-medium text-[var(--civic-text)]">
                 {getTitle(announcement)}
               </h3>
               <time
-                className="shrink-0 text-[11px] text-slate-400"
+                className="shrink-0 text-[11px] text-[var(--civic-muted)]"
                 dateTime={announcement.createdAt}
               >
                 {new Date(announcement.createdAt).toLocaleDateString()}
               </time>
             </div>
-            <p className="mt-1 text-xs leading-5 text-slate-600">
+            <p className="mt-1 text-[12px] leading-5 text-[var(--civic-muted)]">
               {getContent(announcement)}
             </p>
           </article>

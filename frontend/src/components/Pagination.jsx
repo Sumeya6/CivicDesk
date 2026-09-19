@@ -19,11 +19,10 @@ export function Pagination({ page, totalPages, onPageChange }) {
         type="button"
         onClick={() => onPageChange(page - 1)}
         disabled={page <= 1}
-        className="civic-pagination-btn"
-        style={{ gap: 4 }}
+        className="civic-pagination-btn gap-1"
       >
-        <ChevronLeft style={{ width: 16, height: 16 }} />
-        Previous
+        <ChevronLeft className="h-4 w-4" />
+        <span className="max-[480px]:hidden">Previous</span>
       </button>
       <div className="civic-pagination-pages">
         {pages.map((p) => (
@@ -33,7 +32,6 @@ export function Pagination({ page, totalPages, onPageChange }) {
             onClick={() => onPageChange(p)}
             className="civic-pagination-btn"
             aria-current={p === page ? "page" : undefined}
-            style={p === page ? { borderColor: "var(--civic-blue-800)", background: "var(--civic-blue-800)", color: "#fff" } : undefined}
           >
             {p}
           </button>
@@ -43,11 +41,10 @@ export function Pagination({ page, totalPages, onPageChange }) {
         type="button"
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages}
-        className="civic-pagination-btn"
-        style={{ gap: 4 }}
+        className="civic-pagination-btn gap-1"
       >
-        Next
-        <ChevronRight style={{ width: 16, height: 16 }} />
+        <span className="max-[480px]:hidden">Next</span>
+        <ChevronRight className="h-4 w-4" />
       </button>
     </nav>
   );

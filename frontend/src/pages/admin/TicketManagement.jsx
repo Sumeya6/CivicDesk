@@ -25,9 +25,9 @@ function TicketManagement() {
       setError("");
       const params = { page: currentPage, limit: pageSize, ...overrides };
       const { data } = await api.get("/tickets/search", { params });
-      setResults(data.data ?? []);
-      setTotalPages(Math.max(data.totalPages ?? 1, 1));
-      setPage(data.currentPage ?? currentPage);
+      setResults(data.data?.data ?? []);
+      setTotalPages(Math.max(data.data?.totalPages ?? 1, 1));
+      setPage(data.data?.currentPage ?? currentPage);
     } catch (err) {
       setResults([]);
       setTotalPages(1);
@@ -47,9 +47,9 @@ function TicketManagement() {
           params: { page: 1, limit: pageSize },
         });
         if (!cancelled) {
-          setResults(data.data ?? []);
-          setTotalPages(Math.max(data.totalPages ?? 1, 1));
-          setPage(data.currentPage ?? 1);
+          setResults(data.data?.data ?? []);
+          setTotalPages(Math.max(data.data?.totalPages ?? 1, 1));
+          setPage(data.data?.currentPage ?? 1);
         }
       } catch (err) {
         if (!cancelled) {

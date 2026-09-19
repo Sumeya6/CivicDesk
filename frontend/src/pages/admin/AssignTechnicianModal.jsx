@@ -74,10 +74,10 @@ export default function AssignTechnicianModal({ isOpen, onClose, ticket }) {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {apiError && <Alert type="error" message={apiError} onClose={() => setApiError(null)} />}
 
-        <div style={{ border: "1px solid var(--civic-border)", background: "#f7fafc", borderRadius: 8, padding: 12, fontSize: 14 }}>
-          <p className="font-medium" style={{ color: "var(--civic-text)" }}>{ticket.title}</p>
+        <div className="rounded-lg border border-[var(--civic-border)] bg-[#f7fafc] p-3 text-[14px]">
+          <p className="font-medium text-[var(--civic-text)]">{ticket.title}</p>
           {ticket.description && (
-            <p className="mt-1 line-clamp-2" style={{ color: "var(--civic-muted)" }}>{ticket.description}</p>
+            <p className="mt-1 line-clamp-2 text-[var(--civic-muted)]">{ticket.description}</p>
           )}
         </div>
 
@@ -116,7 +116,7 @@ export default function AssignTechnicianModal({ isOpen, onClose, ticket }) {
           </select>
         </div>
 
-        <div className="flex justify-end gap-2 border-t pt-4" style={{ borderColor: "var(--civic-border)" }}>
+        <div className="flex justify-end gap-2 border-t border-[var(--civic-border)] pt-4">
           <button
             type="button"
             onClick={handleClose}

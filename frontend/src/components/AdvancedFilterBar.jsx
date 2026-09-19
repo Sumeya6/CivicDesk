@@ -32,7 +32,7 @@ const filterKeyMap = {
 function FilterGroup({ icon, label, children }) {
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+      <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider text-[var(--civic-muted)]">
         {icon}
         <span>{label}</span>
       </div>
@@ -91,7 +91,7 @@ function AdvancedFilterBar({ onResults, onLoading }) {
         params: payload,
       });
 
-      onResults?.(response.data.data || []);
+      onResults?.(response.data.data?.data || []);
     } catch (err) {
       console.error("Ticket search failed:", err);
 
@@ -146,7 +146,7 @@ function AdvancedFilterBar({ onResults, onLoading }) {
             </FilterField>
           </FilterGroup>
 
-          <div className="border-t border-gray-100" />
+          <div className="border-t border-[var(--civic-border)]" />
 
           <FilterGroup
             icon={<Users className="h-3.5 w-3.5" />}
@@ -187,7 +187,7 @@ function AdvancedFilterBar({ onResults, onLoading }) {
             </FilterField>
           </FilterGroup>
 
-          <div className="border-t border-gray-100" />
+          <div className="border-t border-[var(--civic-border)]" />
 
           <FilterGroup
             icon={<Tag className="h-3.5 w-3.5" />}
@@ -240,11 +240,11 @@ function AdvancedFilterBar({ onResults, onLoading }) {
             </FilterField>
           </FilterGroup>
 
-          <div className="border-t border-gray-100" />
+          <div className="border-t border-[var(--civic-border)]" />
 
           <FilterField label={t("searchFilters.freeTextSearch")} htmlFor="q">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--civic-muted)]" />
               <input
                 id="q"
                 name="q"
@@ -259,13 +259,13 @@ function AdvancedFilterBar({ onResults, onLoading }) {
         </div>
 
         {error && (
-          <div className="mt-4 flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2.5 text-sm text-red-700">
+          <div className="civic-alert civic-alert-error mt-4" role="alert">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{error}</span>
+            <span className="flex-1">{error}</span>
           </div>
         )}
 
-        <div className="mt-4 flex items-center gap-2 border-t pt-4" style={{ borderColor: "var(--civic-border)" }}>
+        <div className="mt-4 flex items-center gap-2 border-t border-[var(--civic-border)] pt-4">
           <button
             type="submit"
             className="button-primary inline-flex items-center gap-2"

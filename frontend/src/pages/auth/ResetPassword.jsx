@@ -1,10 +1,12 @@
 import { ArrowRight, Lock, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import AuthShell from "../../components/auth/AuthShell";
 import api from "../../api/axios";
 
 function ResetPassword() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const urlToken = searchParams.get("token");
@@ -33,7 +35,7 @@ function ResetPassword() {
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t("auth.passwordMismatch"));
       return;
     }
 
@@ -65,26 +67,26 @@ function ResetPassword() {
   return (
     <AuthShell>
       <div>
-        <h1 className="m-0 text-[21px] font-bold leading-[1.3] tracking-[-0.02em] text-[#0f172a]">
+        <h1 className="m-0 text-[var(--civic-font-size-xl)] font-bold leading-[1.3] tracking-[-0.02em] text-[var(--civic-text)]">
           Reset Password
         </h1>
-        <p className="mb-5.5 mt-1.75 text-[13.5px] leading-normal text-[#64748b]">
+        <p className="mb-5 mt-2 text-[var(--civic-font-size-md)] leading-[1.5] text-[var(--civic-muted)]">
           {urlToken
             ? "Enter your new password below."
             : "Enter the reset code you received via SMS and your new password."}
         </p>
       </div>
-      <form className="flex flex-col gap-4.5" onSubmit={handleSubmit}>
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         {showTokenInput && (
           <div>
             <label
-              className="mb-1.5 block text-[13px] font-medium text-[#334155]"
+              className="mb-1.5 block text-[var(--civic-font-size-base)] font-medium text-[var(--civic-text)]"
               htmlFor="token"
             >
               Reset Code
             </label>
-            <div className="flex h-10 items-center rounded-lg border-[1.5px] border-[#d1d9e6] bg-white px-2.75 text-[#94a3b8] transition focus-within:border-[#0757c9] focus-within:shadow-[0_0_0_3px_rgb(7_87_201/8%)]">
-              <Lock size={16} className="mr-3" />
+            <div className="flex h-10 items-center rounded-lg border border-[var(--civic-border)] bg-white px-3 text-[var(--civic-muted)] transition focus-within:border-[var(--civic-blue-600)] focus-within:shadow-[var(--civic-focus-ring)]">
+              <Lock size={16} className="shrink-0" />
               <input
                 id="token"
                 type="text"
@@ -92,21 +94,21 @@ function ResetPassword() {
                 onChange={(event) => setToken(event.target.value)}
                 placeholder="Enter reset code from SMS"
                 autoComplete="one-time-code"
-                className="flex-1 bg-transparent outline-none text-[#0f172a] placeholder:text-[#94a3b8] text-center tracking-widest"
+                className="flex-1 bg-transparent pl-2 text-center text-[15px] text-[var(--civic-text)] tracking-widest outline-none placeholder:text-[var(--civic-muted)]"
               />
             </div>
           </div>
         )}
         <div>
           <label
-            className="mb-1.5 block text-[13px] font-medium text-[#334155]"
+            className="mb-1.5 block text-[var(--civic-font-size-base)] font-medium text-[var(--civic-text)]"
             htmlFor="newPassword"
           >
             New Password
           </label>
           <div className="relative">
-            <div className="flex h-10 items-center rounded-lg border-[1.5px] border-[#d1d9e6] bg-white px-2.75 text-[#94a3b8] transition focus-within:border-[#0757c9] focus-within:shadow-[0_0_0_3px_rgb(7_87_201/8%)]">
-              <Lock size={16} className="mr-3" />
+            <div className="flex h-10 items-center rounded-lg border border-[var(--civic-border)] bg-white px-3 text-[var(--civic-muted)] transition focus-within:border-[var(--civic-blue-600)] focus-within:shadow-[var(--civic-focus-ring)]">
+              <Lock size={16} className="shrink-0" />
               <input
                 id="newPassword"
                 type={showPassword ? "text" : "password"}
@@ -114,27 +116,28 @@ function ResetPassword() {
                 onChange={(event) => setNewPassword(event.target.value)}
                 placeholder="Enter new password"
                 autoComplete="new-password"
-                className="flex-1 bg-transparent outline-none text-[#0f172a] placeholder:text-[#94a3b8]"
+                className="flex-1 border-0 bg-transparent pl-2 text-[15px] text-[var(--civic-text)] outline-none placeholder:text-[var(--civic-muted)]"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="text-[#94a3b8] hover:text-[#0f172a]"
+                className="mr-1 flex items-center justify-center rounded p-1 text-[var(--civic-muted)] transition hover:text-[var(--civic-text)]"
+                aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
         </div>
         <div>
           <label
-            className="mb-1.5 block text-[13px] font-medium text-[#334155]"
+            className="mb-1.5 block text-[var(--civic-font-size-base)] font-medium text-[var(--civic-text)]"
             htmlFor="confirmPassword"
           >
             Confirm New Password
           </label>
-          <div className="flex h-10 items-center rounded-lg border-[1.5px] border-[#d1d9e6] bg-white px-2.75 text-[#94a3b8] transition focus-within:border-[#0757c9] focus-within:shadow-[0_0_0_3px_rgb(7_87_201/8%)]">
-            <Lock size={16} className="mr-3" />
+          <div className="flex h-10 items-center rounded-lg border border-[var(--civic-border)] bg-white px-3 text-[var(--civic-muted)] transition focus-within:border-[var(--civic-blue-600)] focus-within:shadow-[var(--civic-focus-ring)]">
+            <Lock size={16} className="shrink-0" />
             <input
               id="confirmPassword"
               type={showPassword ? "text" : "password"}
@@ -142,43 +145,45 @@ function ResetPassword() {
               onChange={(event) => setConfirmPassword(event.target.value)}
               placeholder="Confirm new password"
               autoComplete="new-password"
-              className="flex-1 bg-transparent outline-none text-[#0f172a] placeholder:text-[#94a3b8]"
+              className="flex-1 border-0 bg-transparent pl-2 text-[15px] text-[var(--civic-text)] outline-none placeholder:text-[var(--civic-muted)]"
             />
           </div>
         </div>
         {error && (
-          <p className="mt-1 text-[12.5px] leading-[1.4] text-red-600">
-            {error}
-          </p>
+          <div className="civic-alert civic-alert-error" role="alert">
+            <span className="flex-1">{error}</span>
+          </div>
         )}
         {message && (
-          <p className="mt-1 text-[12.5px] leading-[1.4] text-green-600">
-            {message}
-          </p>
+          <div className="civic-alert civic-alert-success" role="status">
+            <span className="flex-1">{message}</span>
+          </div>
         )}
         <button
-          className="mt-1 flex h-10.5 items-center justify-center gap-2 rounded-lg border-0 bg-[#0757c9] text-sm font-semibold text-white transition hover:bg-[#0546b0] hover:shadow-[0_4px_12px_rgb(7_87_201/25%)] disabled:cursor-wait disabled:opacity-65"
+          className="mt-1 flex h-10 items-center justify-center gap-2 rounded-lg border-0 bg-[var(--civic-blue-800)] text-sm font-semibold text-white transition hover:bg-[var(--civic-blue-950)] hover:shadow-[var(--civic-shadow-md)] disabled:cursor-wait disabled:opacity-65"
           type="submit"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Resetting..." : "Reset Password"}
+          {isSubmitting ? t("common.loading") : "Reset Password"}
           <ArrowRight size={16} />
         </button>
       </form>
       {!urlToken && (
-        <p className="mt-3 text-center text-[12.5px] text-[#64748b]">
+        <p className="mt-3 text-center text-[12px] text-[var(--civic-muted)]">
           Have a reset link with a token?{" "}
           <button
             type="button"
             onClick={() => setShowTokenInput(false)}
-            className="text-[#0757c9] hover:underline"
+            className="text-[var(--civic-blue-700)] hover:text-[var(--civic-blue-800)] hover:underline"
           >
             Use token from URL instead
           </button>
         </p>
       )}
-      <div className="mt-5 border-t border-[#e5eaf1] pt-4 text-center text-[13px] text-[#64748b]">
-        <Link to="/login">Back to Sign In</Link>
+      <div className="mt-5 border-t border-[var(--civic-border)] pt-4 text-center text-[13px] text-[var(--civic-muted)]">
+        <Link to="/login" className="text-[var(--civic-blue-700)] hover:text-[var(--civic-blue-800)] hover:underline">
+          {t("common.back")} {t("auth.signIn")}
+        </Link>
       </div>
     </AuthShell>
   );

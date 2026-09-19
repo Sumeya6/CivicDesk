@@ -1,17 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { createTicket, fetchCategories } from "../../store/ticketSlice";
+import { fetchMyAssets } from "../../store/assetSlice";
 import { Modal } from "../../components/Modal";
 import Alert from "../../components/Alert";
-import { useState } from "react";
 import { toast } from "react-toastify";
 
 const PRIORITIES = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 
 export default function CreateTicketModal({ isOpen, onClose }) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const categories = useSelector((s) => s.tickets.categories);
+  const myAssets = useSelector((s) => s.assets.myAssets);
   const [submitting, setSubmitting] = useState(false);
   const [apiError, setApiError] = useState(null);
 
@@ -26,6 +29,7 @@ export default function CreateTicketModal({ isOpen, onClose }) {
       description: "",
       categoryId: "",
       deviceOrSystem: "",
+      assetId: "",
       priority: "MEDIUM",
     },
   });
@@ -33,6 +37,7 @@ export default function CreateTicketModal({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen) {
       dispatch(fetchCategories());
+      dispatch(fetchMyAssets());
     }
   }, [isOpen, dispatch]);
 
@@ -40,12 +45,14 @@ export default function CreateTicketModal({ isOpen, onClose }) {
     setSubmitting(true);
     setApiError(null);
     try {
-      const result = await dispatch(createTicket(values)).unwrap();
-      toast.success(result?.message || "Ticket created successfully");
+      const payload = { ...values };
+      if (!payload.assetId) delete payload.assetId;
+      const result = await dispatch(createTicket(payload)).unwrap();
+      toast.success(result?.message || t("createTicket.success"));
       reset();
       onClose();
     } catch (err) {
-      setApiError(err?.message || "Failed to create ticket");
+      setApiError(err?.message || t("createTicket.failed"));
     } finally {
       setSubmitting(false);
     }
@@ -58,70 +65,91 @@ export default function CreateTicketModal({ isOpen, onClose }) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Create Ticket">
+    <Modal isOpen={isOpen} onClose={handleClose} title={t("createTicket.title")}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {apiError && <Alert type="error" message={apiError} onClose={() => setApiError(null)} />}
 
         <div>
           <label htmlFor="title" className="civic-label">
-            Title <span className="text-red-500">*</span>
+            {t("createTicket.titleLabel")} <span className="text-[var(--civic-error)]">*</span>
           </label>
           <input
             id="title"
             type="text"
-            {...register("title", { required: "Title is required" })}
+            placeholder={t("createTicket.titlePlaceholder")}
+            {...register("title", { required: t("createTicket.titleRequired") })}
             className="civic-input"
           />
-          {errors.title && <p className="mt-1 text-xs text-red-600">{errors.title.message}</p>}
+          {errors.title && <p className="mt-1 text-xs text-[var(--civic-error)]">{errors.title.message}</p>}
         </div>
 
         <div>
           <label htmlFor="description" className="civic-label">
-            Description <span className="text-red-500">*</span>
+            {t("createTicket.descriptionLabel")} <span className="text-[var(--civic-error)]">*</span>
           </label>
           <textarea
             id="description"
             rows={3}
-            {...register("description", { required: "Description is required" })}
+            placeholder={t("createTicket.descriptionPlaceholder")}
+            {...register("description", { required: t("createTicket.descriptionRequired") })}
             className="civic-textarea"
           />
-          {errors.description && <p className="mt-1 text-xs text-red-600">{errors.description.message}</p>}
+          {errors.description && <p className="mt-1 text-xs text-[var(--civic-error)]">{errors.description.message}</p>}
         </div>
 
         <div>
           <label htmlFor="categoryId" className="civic-label">
-            Category <span className="text-red-500">*</span>
+            {t("createTicket.categoryLabel")} <span className="text-[var(--civic-error)]">*</span>
           </label>
           <select
             id="categoryId"
-            {...register("categoryId", { required: "Category is required" })}
+            {...register("categoryId", { required: t("createTicket.categoryRequired") })}
             className="civic-select"
           >
-            <option value="">Select a category</option>
+            <option value="">{t("createTicket.categoryPlaceholder")}</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.nameEn}
               </option>
             ))}
           </select>
-          {errors.categoryId && <p className="mt-1 text-xs text-red-600">{errors.categoryId.message}</p>}
+          {errors.categoryId && <p className="mt-1 text-xs text-[var(--civic-error)]">{errors.categoryId.message}</p>}
         </div>
 
         <div>
           <label htmlFor="deviceOrSystem" className="civic-label">
-            Device / System
+            {t("createTicket.deviceLabel")}
           </label>
           <input
             id="deviceOrSystem"
             type="text"
+            placeholder={t("createTicket.devicePlaceholder")}
             {...register("deviceOrSystem")}
             className="civic-input"
           />
         </div>
 
         <div>
+          <label htmlFor="assetId" className="civic-label">
+            {t("createTicket.assetLabel")}
+          </label>
+          <select
+            id="assetId"
+            {...register("assetId")}
+            className="civic-select"
+          >
+            <option value="">{t("createTicket.assetPlaceholder")}</option>
+            {myAssets.map((asset) => (
+              <option key={asset.id} value={asset.id}>
+                {asset.assetTag} - {asset.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
           <label htmlFor="priority" className="civic-label">
-            Priority
+            {t("createTicket.priorityLabel")}
           </label>
           <select
             id="priority"
@@ -136,20 +164,20 @@ export default function CreateTicketModal({ isOpen, onClose }) {
           </select>
         </div>
 
-        <div className="flex justify-end gap-2 border-t pt-4" style={{ borderColor: "var(--civic-border)" }}>
+        <div className="flex justify-end gap-2 border-t border-[var(--civic-border)] pt-4">
           <button
             type="button"
             onClick={handleClose}
             className="button-secondary"
           >
-            Cancel
+            {t("createTicket.cancel")}
           </button>
           <button
             type="submit"
             disabled={submitting}
             className="button-primary"
           >
-            {submitting ? "Submitting…" : "Create Ticket"}
+            {submitting ? t("createTicket.submitting") : t("createTicket.submit")}
           </button>
         </div>
       </form>

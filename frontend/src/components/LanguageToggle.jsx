@@ -17,11 +17,11 @@ function LanguageToggle({ variant = "auth" }) {
 
   if (variant === "navbar") {
     return (
-      <div className="flex h-8 items-center gap-1.5 rounded-[7px] border border-(--civic-border) bg-(--civic-cyan-50) px-2.75 text-[12.5px] font-medium text-(--civic-muted) max-[640px]:h-7.5 max-[640px]:px-2.25">
+      <div className="flex h-8 items-center gap-1.5 rounded-lg border border-[var(--civic-border)] bg-[var(--civic-cyan-50)] px-3 text-[12.5px] font-medium text-[var(--civic-muted)] max-[640px]:h-7 max-[640px]:px-2">
         <Globe2 size={15} />
         <button
           type="button"
-          className="border-0 bg-transparent p-0 text-[12.5px] font-medium text-(--civic-blue-800) transition hover:text-(--civic-blue-950) max-[640px]:text-xs"
+          className="border-0 bg-transparent p-0 text-[12.5px] font-medium text-[var(--civic-blue-800)] transition hover:text-[var(--civic-blue-950)] max-[640px]:text-xs"
           aria-label={t("layout.changeLanguage")}
           onClick={handleToggle}
         >
@@ -32,11 +32,11 @@ function LanguageToggle({ variant = "auth" }) {
   }
 
   return (
-    <div className="flex h-7.5 items-center gap-1.5 shrink-0 rounded-[7px] border border-[#d1d9e6] bg-[#f8fafc] px-2.75 text-[12.5px] font-medium text-[#475569]">
+    <div className="flex h-7 items-center gap-1.5 shrink-0 rounded-lg border border-[var(--civic-border)] bg-[var(--civic-cyan-50)] px-3 text-[12.5px] font-medium text-[var(--civic-muted)]">
       <Globe2 size={15} />
       <button
         type="button"
-        className="border-0 bg-transparent p-0 text-[12.5px] font-medium text-[#0757c9] transition hover:text-[#0546b0]"
+        className="border-0 bg-transparent p-0 text-[12.5px] font-medium text-[var(--civic-blue-800)] transition hover:text-[var(--civic-blue-950)]"
         aria-label={t("layout.changeLanguage")}
         onClick={handleToggle}
       >

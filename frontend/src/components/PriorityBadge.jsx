@@ -10,7 +10,7 @@ const priorityBadgeClass = {
 export default function PriorityBadge({ priority }) {
   const { t } = useTranslation();
 
-  if (!priority) return <span style={{ color: "#94a3b8" }}>-</span>;
+  if (!priority) return <span className="text-[var(--civic-muted)]">-</span>;
 
   const cls = priorityBadgeClass[priority] || "civic-badge civic-badge-closed";
   const label = t(`priority.${priority.toLowerCase()}`, priority);

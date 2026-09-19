@@ -88,23 +88,23 @@ function Register() {
   return (
     <AuthShell>
       <div>
-        <h1 className="m-0 text-[21px] font-bold leading-[1.3] tracking-[-0.02em] text-[#0f172a] max-[480px]:text-[19px]">
+        <h1 className="m-0 text-[var(--civic-font-size-xl)] font-bold leading-[1.3] tracking-[-0.02em] text-[var(--civic-text)] max-[480px]:text-[var(--civic-font-size-lg)]">
           {t("auth.createAccount")}
         </h1>
-        <p className="mb-[22px] mt-[7px] text-[13.5px] leading-[1.5] text-[#64748b]">
+        <p className="mb-5 mt-2 text-[var(--civic-font-size-md)] leading-[1.5] text-[var(--civic-muted)]">
           {t("auth.registerDescription")}
         </p>
       </div>
-      <form className="flex flex-col gap-[15px]" onSubmit={handleSubmit}>
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <div>
           <label
-            className="mb-1.5 block text-[13px] font-medium text-[#334155]"
+            className="mb-1.5 block text-[var(--civic-font-size-base)] font-medium text-[var(--civic-text)]"
             htmlFor="fullName"
           >
             {t("auth.fullName")}
           </label>
-          <div className="flex h-10 items-center rounded-lg border-[1.5px] border-[#d1d9e6] bg-white px-[11px] text-[#94a3b8] transition focus-within:border-[#0757c9] focus-within:shadow-[0_0_0_3px_rgb(7_87_201_/_8%)]">
-            <UserRound size={16} />
+          <div className="flex h-10 items-center rounded-lg border border-[var(--civic-border)] bg-white px-3 text-[var(--civic-muted)] transition focus-within:border-[var(--civic-blue-600)] focus-within:shadow-[var(--civic-focus-ring)]">
+            <UserRound size={16} className="shrink-0" />
             <input
               id="fullName"
               name="fullName"
@@ -112,24 +112,24 @@ function Register() {
               onChange={handleChange}
               placeholder="Abebe Welde"
               autoComplete="name"
-              className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black  text-[15px]"
+              className="flex-1 border-0 bg-transparent pl-2 text-[15px] text-[var(--civic-text)] outline-none placeholder:text-[var(--civic-muted)]"
             />
           </div>
           {errors.fullName && (
-            <p className="mt-1 text-[12.5px] leading-[1.4] text-red-600">
+            <p className="mt-1 text-[12px] leading-[1.4] text-[var(--civic-error)]" role="alert">
               {errors.fullName}
             </p>
           )}
         </div>
         <div>
           <label
-            className="mb-1.5 block text-[13px] font-medium text-[#334155]"
+            className="mb-1.5 block text-[var(--civic-font-size-base)] font-medium text-[var(--civic-text)]"
             htmlFor="phoneNumber"
           >
             {t("auth.phoneNumber")}
           </label>
-          <div className="flex h-10 items-center rounded-lg border-[1.5px] border-[#d1d9e6] bg-white px-[11px] text-[#94a3b8] transition focus-within:border-[#0757c9] focus-within:shadow-[0_0_0_3px_rgb(7_87_201_/_8%)]">
-            <Phone size={16} />
+          <div className="flex h-10 items-center rounded-lg border border-[var(--civic-border)] bg-white px-3 text-[var(--civic-muted)] transition focus-within:border-[var(--civic-blue-600)] focus-within:shadow-[var(--civic-focus-ring)]">
+            <Phone size={16} className="shrink-0" />
             <input
               id="phoneNumber"
               name="phoneNumber"
@@ -138,30 +138,30 @@ function Register() {
               onChange={handleChange}
               placeholder="+251 912345678"
               autoComplete="tel"
-              className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black text-[15px]"
+              className="flex-1 border-0 bg-transparent pl-2 text-[15px] text-[var(--civic-text)] outline-none placeholder:text-[var(--civic-muted)]"
             />
           </div>
           {errors.phoneNumber && (
-            <p className="mt-1 text-[12.5px] leading-[1.4] text-red-600">
+            <p className="mt-1 text-[12px] leading-[1.4] text-[var(--civic-error)]" role="alert">
               {errors.phoneNumber}
             </p>
           )}
         </div>
         <div>
           <label
-            className="mb-1.5 block text-[13px] font-medium text-[#334155]"
+            className="mb-1.5 block text-[var(--civic-font-size-base)] font-medium text-[var(--civic-text)]"
             htmlFor="officeId"
           >
             {t("auth.office")}
           </label>
-          <div className="relative flex h-10 items-center rounded-lg border-[1.5px] border-[#d1d9e6] bg-white px-[11px] pr-[5px] text-[#94a3b8] transition focus-within:border-[#0757c9] focus-within:shadow-[0_0_0_3px_rgb(7_87_201_/_8%)]">
-            <Building2 size={16} />
+          <div className="relative flex h-10 items-center rounded-lg border border-[var(--civic-border)] bg-white px-3 pr-2 text-[var(--civic-muted)] transition focus-within:border-[var(--civic-blue-600)] focus-within:shadow-[var(--civic-focus-ring)]">
+            <Building2 size={16} className="shrink-0" />
             <select
               id="officeId"
               name="officeId"
               value={form.officeId}
               onChange={handleChange}
-              className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black text-[12px]"
+              className="flex-1 border-0 bg-transparent pl-2 text-[var(--civic-text)] text-[13px] outline-none"
             >
               <option value="">
                 {officesStatus === "loading"
@@ -176,20 +176,25 @@ function Register() {
             </select>
             <ChevronDown
               size={16}
-              className="pointer-events-none absolute right-[11px] top-1/2 h-4 w-4 -translate-y-1/2 text-[#94a3b8]"
+              className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--civic-muted)]"
             />
           </div>
+          {errors.officeId && (
+            <p className="mt-1 text-[12px] leading-[1.4] text-[var(--civic-error)]" role="alert">
+              {errors.officeId}
+            </p>
+          )}
         </div>
         <div>
           <label
-            className="mb-1.5 block text-[13px] font-medium text-[#334155]"
+            className="mb-1.5 block text-[var(--civic-font-size-base)] font-medium text-[var(--civic-text)]"
             htmlFor="password"
           >
             {t("auth.password")}
           </label>
           <div className="relative">
-            <div className="flex h-10 items-center rounded-lg border-[1.5px] border-[#d1d9e6] bg-white px-[11px] text-[#94a3b8] transition focus-within:border-[#0757c9] focus-within:shadow-[0_0_0_3px_rgb(7_87_201_/_8%)]">
-              <LockKeyhole size={16} />
+            <div className="flex h-10 items-center rounded-lg border border-[var(--civic-border)] bg-white px-3 text-[var(--civic-muted)] transition focus-within:border-[var(--civic-blue-600)] focus-within:shadow-[var(--civic-focus-ring)]">
+              <LockKeyhole size={16} className="shrink-0" />
               <input
                 id="password"
                 name="password"
@@ -198,12 +203,12 @@ function Register() {
                 onChange={handleChange}
                 placeholder="••••••••"
                 autoComplete="new-password"
-                className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black text-[15px]"
+                className="flex-1 border-0 bg-transparent pl-2 text-[15px] text-[var(--civic-text)] outline-none placeholder:text-[var(--civic-muted)]"
               />
             </div>
             <button
               type="button"
-              className="absolute bottom-px right-px top-px flex w-[38px] items-center justify-center rounded-r-[7px] border-0 bg-transparent text-[#94a3b8] transition hover:text-[#475569]"
+              className="absolute bottom-px right-px top-px flex w-10 items-center justify-center rounded-r-lg border-0 bg-transparent text-[var(--civic-muted)] transition hover:text-[var(--civic-text)]"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
               tabIndex={-1}
@@ -211,25 +216,25 @@ function Register() {
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
-          <p className="mt-1.5 mx-0.5 text-xs leading-[1.4] text-[#94a3b8]">
+          <p className="mt-1 text-[12px] leading-[1.4] text-[var(--civic-muted)]">
             {t("auth.passwordHint")}
           </p>
           {errors.password && (
-            <p className="mt-1 text-[12.5px] leading-[1.4] text-red-600">
+            <p className="mt-1 text-[12px] leading-[1.4] text-[var(--civic-error)]" role="alert">
               {errors.password}
             </p>
           )}
         </div>
         <div>
           <label
-            className="mb-1.5 block text-[13px] font-medium text-[#334155]"
+            className="mb-1.5 block text-[var(--civic-font-size-base)] font-medium text-[var(--civic-text)]"
             htmlFor="confirmPassword"
           >
             {t("auth.confirmPassword")}
           </label>
           <div className="relative">
-            <div className="flex h-10 items-center rounded-lg border-[1.5px] border-[#d1d9e6] bg-white px-[11px] text-[#94a3b8] transition focus-within:border-[#0757c9] focus-within:shadow-[0_0_0_3px_rgb(7_87_201_/_8%)]">
-              <LockKeyhole size={16} />
+            <div className="flex h-10 items-center rounded-lg border border-[var(--civic-border)] bg-white px-3 text-[var(--civic-muted)] transition focus-within:border-[var(--civic-blue-600)] focus-within:shadow-[var(--civic-focus-ring)]">
+              <LockKeyhole size={16} className="shrink-0" />
               <input
                 id="confirmPassword"
                 name="confirmPassword"
@@ -237,12 +242,12 @@ function Register() {
                 value={form.confirmPassword}
                 onChange={handleChange}
                 autoComplete="new-password"
-                className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black text-[15px]"
+                className="flex-1 border-0 bg-transparent pl-2 text-[15px] text-[var(--civic-text)] outline-none placeholder:text-[var(--civic-muted)]"
               />
             </div>
             <button
               type="button"
-              className="absolute bottom-px right-px top-px flex w-[38px] items-center justify-center rounded-r-[7px] border-0 bg-transparent text-[#94a3b8] transition hover:text-[#475569]"
+              className="absolute bottom-px right-px top-px flex w-10 items-center justify-center rounded-r-lg border-0 bg-transparent text-[var(--civic-muted)] transition hover:text-[var(--civic-text)]"
               onClick={() => setShowConfirmPassword((v) => !v)}
               aria-label={
                 showConfirmPassword ? t("auth.hidePassword") : t("auth.showPassword")
@@ -253,23 +258,23 @@ function Register() {
             </button>
           </div>
           {errors.confirmPassword && (
-            <p className="mt-1 text-[12.5px] leading-[1.4] text-red-600">
+            <p className="mt-1 text-[12px] leading-[1.4] text-[var(--civic-error)]" role="alert">
               {errors.confirmPassword}
             </p>
           )}
         </div>
         {submitError && (
-          <p className="mt-1 text-[12.5px] leading-[1.4] text-red-600">
-            {submitError}
-          </p>
+          <div className="civic-alert civic-alert-error" role="alert">
+            <span className="flex-1">{submitError}</span>
+          </div>
         )}
         {successMessage && (
-          <p className="mt-1 text-[12.5px] leading-[1.4] text-green-600">
-            {successMessage}
-          </p>
+          <div className="civic-alert civic-alert-success" role="status">
+            <span className="flex-1">{successMessage}</span>
+          </div>
         )}
         <button
-          className="mt-1 flex h-[42px] items-center justify-center gap-2 rounded-lg border-0 bg-[#0757c9] text-sm font-semibold text-white transition hover:bg-[#0546b0] hover:shadow-[0_4px_12px_rgb(7_87_201_/_25%)] disabled:cursor-wait disabled:opacity-65"
+          className="mt-1 flex h-10 items-center justify-center gap-2 rounded-lg border-0 bg-[var(--civic-blue-800)] text-sm font-semibold text-white transition hover:bg-[var(--civic-blue-950)] hover:shadow-[var(--civic-shadow-md)] disabled:cursor-wait disabled:opacity-65"
           type="submit"
           disabled={isSubmitting}
         >
@@ -277,13 +282,16 @@ function Register() {
           <ArrowRight size={16} />
         </button>
       </form>
-      <div className="mt-[18px] border-t border-[#e5eaf1] pt-3.5 text-center text-xs leading-[1.6] text-[#94a3b8]">
-        {t("auth.termsPrefix")} <a href="#terms" className="text-[#0757c9] hover:underline">
+      <div className="mt-4 border-t border-[var(--civic-border)] pt-3.5 text-center text-[12px] leading-[1.6] text-[var(--civic-muted)]">
+        {t("auth.termsPrefix")}{" "}
+        <a href="#terms" className="text-[var(--civic-blue-700)] hover:text-[var(--civic-blue-800)] hover:underline">
           {t("auth.terms")}
         </a>{" "}
-        {t("auth.and")} <a href="#privacy" className="text-[#0757c9] hover:underline">
+        {t("auth.and")}{" "}
+        <a href="#privacy" className="text-[var(--civic-blue-700)] hover:text-[var(--civic-blue-800)] hover:underline">
           {t("auth.privacy")}
-        </a>.
+        </a>
+        .
       </div>
       <div className="hidden">
         {t("auth.haveAccount")} <Link to="/login">{t("auth.signIn")}</Link>

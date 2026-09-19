@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Home, Search, Link2 } from "lucide-react";
+import { Home, Search, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function NotFound() {
@@ -7,30 +7,30 @@ export default function NotFound() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-(--civic-page) p-4"
+      className="flex min-h-screen items-center justify-center bg-[var(--civic-page)] p-4"
       role="main"
     >
-      <div className="w-full max-w-md text-center p-8 rounded-xl border border-(--civic-border) bg-white shadow-lg">
-        <div className="mx-auto h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center">
-          <Search className="h-8 w-8 text-slate-400" aria-hidden="true" />
+      <div className="w-full max-w-sm rounded-xl border border-[var(--civic-border)] bg-white p-8 text-center shadow-[var(--civic-shadow-lg)]">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#f1f6fb]">
+          <Search className="h-7 w-7 text-[var(--civic-muted)]" aria-hidden="true" />
         </div>
-        <h1 className="mt-4 text-3xl font-bold text-(--civic-text)">
+        <h1 className="text-[var(--civic-font-size-4xl)] font-bold text-[var(--civic-blue-950)]">
           {t("errors.notFound.title") ?? "404"}
         </h1>
-        <p className="mt-2 text-lg text-(--civic-muted)">
+        <p className="mt-2 text-[var(--civic-font-size-lg)] text-[var(--civic-muted)]">
           {t("errors.notFound.subtitle") ?? "Page not found"}
         </p>
-        <p className="mt-4 text-(--civic-muted)">
+        <p className="mt-2 text-[var(--civic-font-size-base)] text-[var(--civic-muted)]">
           {t("errors.notFound.description") ??
             "The page you're looking for doesn't exist or has been moved."}
         </p>
         <div className="mt-6 flex flex-col gap-2">
-          <Link to="/" className="button-primary">
-            <Home className="h-4 w-4 mr-2" />
+          <Link to="/" className="button-primary justify-center no-underline">
+            <Home className="h-4 w-4" />
             {t("common.goHome") ?? "Go Home"}
           </Link>
-          <Link to="/dashboard" className="button-secondary">
-            <Link2 className="h-4 w-4 mr-2" />
+          <Link to="/dashboard" className="button-secondary justify-center no-underline">
+            <ArrowLeft className="h-4 w-4" />
             {t("navigation.dashboard") ?? "Dashboard"}
           </Link>
         </div>

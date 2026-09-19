@@ -51,18 +51,18 @@ export default function RequestPurchaseModal({ isOpen, onClose, ticket }) {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {apiError && <Alert type="error" message={apiError} onClose={() => setApiError(null)} />}
 
-        <div style={{ border: "1px solid var(--civic-border)", background: "#f7fafc", borderRadius: 8, padding: 12, fontSize: 14 }}>
-          <p className="font-medium" style={{ color: "var(--civic-text)" }}>{ticket.title}</p>
+        <div className="rounded-lg border border-[var(--civic-border)] bg-[#f7fafc] p-3 text-[14px]">
+          <p className="font-medium text-[var(--civic-text)]">{ticket.title}</p>
           {ticket.description && (
-            <p className="mt-1 line-clamp-2" style={{ color: "var(--civic-muted)" }}>{ticket.description}</p>
+            <p className="mt-1 line-clamp-2 text-[var(--civic-muted)]">{ticket.description}</p>
           )}
         </div>
 
         <div>
           <label htmlFor="purchaseDetails" className="civic-label">
-            Purchase Details <span className="text-red-500">*</span>
+            Purchase Details <span className="text-[var(--civic-error)]">*</span>
           </label>
-          <p className="mb-2 text-xs" style={{ color: "var(--civic-muted)" }}>
+          <p className="mb-2 text-[12px] text-[var(--civic-muted)]">
             Describe the hardware, parts, or materials required.
           </p>
           <textarea
@@ -76,11 +76,11 @@ export default function RequestPurchaseModal({ isOpen, onClose, ticket }) {
             placeholder="e.g. Replacement toner cartridge for HP LaserJet Pro"
           />
           {errors.purchaseDetails && (
-            <p className="mt-1 text-xs text-red-600">{errors.purchaseDetails.message}</p>
+            <p className="mt-1 text-xs text-[var(--civic-error)]">{errors.purchaseDetails.message}</p>
           )}
         </div>
 
-        <div className="flex justify-end gap-2 border-t pt-4" style={{ borderColor: "var(--civic-border)" }}>
+        <div className="flex justify-end gap-2 border-t border-[var(--civic-border)] pt-4">
           <button
             type="button"
             onClick={handleClose}

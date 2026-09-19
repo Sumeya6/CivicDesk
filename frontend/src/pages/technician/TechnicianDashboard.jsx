@@ -144,7 +144,7 @@ function TechnicianDashboard() {
         <section className="dashboard-panel">
           <div className="dashboard-panel-heading">
             <h2>{t("dashboard.assignedOffices")}</h2>
-            <MapPin size={18} />
+            <MapPin size={18} className="text-[var(--civic-muted)]" />
           </div>
           <div className="dashboard-list-empty">
             {assignedOffices.length > 0 ? (
@@ -165,52 +165,50 @@ function TechnicianDashboard() {
       <section className="dashboard-panel">
         <div className="dashboard-panel-heading">
           <h2>{t("dashboard.recentRequests")}</h2>
-          <Link to="/assigned-requests" className="button-secondary" style={{ textDecoration: "none", fontSize: "12.5px" }}>
+          <Link to="/assigned-requests" className="button-secondary no-underline text-[12.5px]">
             {t("dashboard.assignedRequests")} <ArrowRight size={14} />
           </Link>
         </div>
         {loading ? (
-          <div className="table-state">Loading...</div>
+          <div className="table-state">{t("common.loading")}</div>
         ) : recentTickets.length === 0 ? (
           <div className="dashboard-empty">
             <p>{t("dashboard.requestsUnavailable")}</p>
           </div>
         ) : (
-          <div className="content-surface" style={{ border: "none", borderRadius: 0 }}>
-            <div className="table-scroll">
-              <table className="workspace-table">
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                    <th>Created</th>
+          <div className="table-scroll">
+            <table className="workspace-table">
+              <thead>
+                <tr>
+                  <th>{t("ticketTable.title")}</th>
+                  <th>{t("ticketTable.priority")}</th>
+                  <th>{t("ticketTable.status")}</th>
+                  <th>{t("ticketTable.created")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentTickets.map((ticket) => (
+                  <tr key={ticket.id}>
+                    <td>
+                      <div className="entity-name">{ticket.title}</div>
+                    </td>
+                    <td>
+                      <PriorityBadge priority={ticket.priority} />
+                    </td>
+                    <td>
+                      <StatusBadge status={ticket.status} />
+                    </td>
+                    <td>{formatDate(ticket.createdAt)}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {recentTickets.map((ticket) => (
-                    <tr key={ticket.id}>
-                      <td>
-                        <div className="entity-name">{ticket.title}</div>
-                      </td>
-                      <td>
-                        <PriorityBadge priority={ticket.priority} />
-                      </td>
-                      <td>
-                        <StatusBadge status={ticket.status} />
-                      </td>
-                      <td>{formatDate(ticket.createdAt)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </section>
 
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <Link to="/assigned-requests" className="dashboard-primary-action">
+      <div className="flex justify-center">
+        <Link to="/assigned-requests" className="dashboard-primary-action no-underline">
           {t("dashboard.assignedRequests")} <ArrowRight size={16} />
         </Link>
       </div>

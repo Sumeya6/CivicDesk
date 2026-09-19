@@ -216,7 +216,7 @@ function AdminDashboard() {
         {loading && (
           <div className="table-state">
             <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-            Loading tickets…
+            {t("common.loading")}
           </div>
         )}
 

@@ -1,4 +1,4 @@
-import { Check, X } from "lucide-react";
+import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -6,6 +6,7 @@ import {
   assignTechnicianOffices,
   fetchTechnicianOffices,
 } from "../store/userSlice";
+import { Modal } from "./Modal";
 
 function TechnicianAssignmentModal({ technician, offices, onClose }) {
   const dispatch = useDispatch();
@@ -64,105 +65,76 @@ function TechnicianAssignmentModal({ technician, offices, onClose }) {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-[rgb(11_47_107_/_38%)] p-4 max-[640px]:items-start max-[640px]:p-3"
-      role="presentation"
-      onMouseDown={(event) =>
-        event.target === event.currentTarget && onClose(false)
-      }
-    >
-      <div
-        className="w-[min(100%,32rem)] max-h-[calc(100vh-32px)] min-w-0 overflow-x-hidden overflow-y-auto rounded-xl border border-[var(--civic-border)] bg-white shadow-[0_18px_45px_rgb(11_47_107_/_18%)] max-[640px]:max-h-[calc(100vh-24px)]"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="assignment-modal-title"
-      >
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3">
-          <div>
-            <h2
-              id="assignment-modal-title"
-              className="text-base font-semibold text-slate-900"
-            >
-              {t("admin.officeAssignment")}
-            </h2>
-            <p className="text-xs text-slate-500">{technician.fullName}</p>
+    <Modal isOpen={true} onClose={() => onClose(false)} title={t("admin.officeAssignment")}>
+      <div className="px-5 pt-1">
+        <p className="text-[12px] text-[var(--civic-muted)]">{technician.fullName}</p>
+      </div>
+      <form className="p-5" onSubmit={handleSubmit}>
+        <p className="mb-2 text-[12px] font-medium text-[var(--civic-text)]">
+          {t("admin.selectOffices")}
+        </p>
+        <div className="max-h-64 space-y-1.5 overflow-y-auto rounded-lg border border-[var(--civic-border)] p-2">
+          {loadingAssignments && (
+            <p className="p-3 text-[12px] text-[var(--civic-muted)]">
+              {t("admin.loadingAssignments")}
+            </p>
+          )}
+          {!loadingAssignments && offices.length === 0 && (
+            <p className="p-3 text-[12px] text-[var(--civic-muted)]">
+              {t("admin.noOffices")}
+            </p>
+          )}
+          {offices.map((office) => {
+            const selected = selectedOfficeIds.includes(office.id);
+            return (
+              <button
+                key={office.id}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => toggleOffice(office.id)}
+                className={`flex min-h-[44px] w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${selected ? "bg-[var(--civic-blue-800)] text-white" : "text-[var(--civic-text)] hover:bg-[var(--civic-cyan-50)]"}`}
+              >
+                <span className="flex flex-col">
+                  <span className="font-medium">{office.nameEn}</span>
+                  <span
+                    className={`text-[12px] ${selected ? "text-slate-300" : "text-[var(--civic-muted)]"}`}
+                  >
+                    {office.nameAm}
+                  </span>
+                </span>
+                {selected && <Check size={16} className="shrink-0" />}
+              </button>
+            );
+          })}
+        </div>
+        {error && (
+          <div className="civic-alert civic-alert-error mt-2" role="alert">
+            <span className="flex-1">{error}</span>
           </div>
+        )}
+        {success && (
+          <div className="civic-alert civic-alert-success mt-2" role="status">
+            <span className="flex-1">{success}</span>
+          </div>
+        )}
+        <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"
             onClick={() => onClose(false)}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-            aria-label="Close modal"
+            className="button-secondary"
           >
-            <X size={18} />
+            {t("admin.cancel")}
+          </button>
+          <button
+            type="submit"
+            disabled={saving || loadingAssignments}
+            className="button-primary"
+          >
+            {saving ? t("admin.saving") : t("admin.saveAssignments")}
           </button>
         </div>
-        <form className="p-5" onSubmit={handleSubmit}>
-          <p className="mb-2 text-xs font-medium text-slate-600">
-            {t("admin.selectOffices")}
-          </p>
-          <div className="max-h-64 space-y-1.5 overflow-y-auto rounded-lg border border-slate-200 p-2">
-            {loadingAssignments && (
-              <p className="p-3 text-xs text-slate-500">
-                {t("admin.loadingAssignments")}
-              </p>
-            )}
-            {!loadingAssignments && offices.length === 0 && (
-              <p className="p-3 text-xs text-slate-500">
-                {t("admin.noOffices")}
-              </p>
-            )}
-            {offices.map((office) => {
-              const selected = selectedOfficeIds.includes(office.id);
-              return (
-                <button
-                  key={office.id}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => toggleOffice(office.id)}
-                  className={`flex min-h-[44px] w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${selected ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-50"}`}
-                >
-                  <span className="flex flex-col">
-                    <span className="font-medium">{office.nameEn}</span>
-                    <span
-                      className={`text-xs ${selected ? "text-slate-300" : "text-slate-400"}`}
-                    >
-                      {office.nameAm}
-                    </span>
-                  </span>
-                  {selected && <Check size={16} className="shrink-0" />}
-                </button>
-              );
-            })}
-          </div>
-          {error && (
-            <p className="mt-2 text-xs text-red-600" role="alert">
-              {error}
-            </p>
-          )}
-          {success && (
-            <p className="mt-2 text-xs text-emerald-700" role="status">
-              {success}
-            </p>
-          )}
-          <div className="mt-4 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => onClose(false)}
-              className="rounded-lg border border-slate-300 px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-            >
-              {t("admin.cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={saving || loadingAssignments}
-              className="rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
-            >
-              {saving ? t("admin.saving") : t("admin.saveAssignments")}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
 }
 

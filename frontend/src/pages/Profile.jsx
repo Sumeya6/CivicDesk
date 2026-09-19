@@ -104,51 +104,51 @@ function Profile() {
 
       <div className="content-surface">
         <div className="space-y-4 p-6">
-          <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div className="flex items-center gap-4 rounded-xl border border-[var(--civic-border)] bg-[#f7fafc] p-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--civic-blue-800)] text-lg font-semibold text-white">
               {currentUser?.fullName?.charAt(0)?.toUpperCase() ?? "U"}
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-lg font-semibold text-[var(--civic-text)]">
                 {currentUser?.fullName ?? t("common.user")}
               </h2>
-              <p className="text-xs text-slate-500">{roleLabel}</p>
+              <p className="text-[12px] text-[var(--civic-muted)]">{roleLabel}</p>
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+            <div className="rounded-xl border border-[var(--civic-border)] bg-white p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--civic-muted)]">
                 {t("auth.phoneNumber")}
               </p>
-              <p className="mt-2 text-sm font-medium text-slate-800">
+              <p className="mt-2 text-[13px] font-medium text-[var(--civic-text)]">
                 {currentUser?.phoneNumber ?? "-"}
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+            <div className="rounded-xl border border-[var(--civic-border)] bg-white p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--civic-muted)]">
                 {t("admin.role")}
               </p>
-              <p className="mt-2 text-sm font-medium text-slate-800">
+              <p className="mt-2 text-[13px] font-medium text-[var(--civic-text)]">
                 {roleLabel}
               </p>
             </div>
           </div>
 
           {(role === "EMPLOYEE" || role === "ADMIN") && officeName && (
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+            <div className="rounded-xl border border-[var(--civic-border)] bg-white p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--civic-muted)]">
                 {t("auth.office")}
               </p>
-              <p className="mt-2 text-sm font-medium text-slate-800">
+              <p className="mt-2 text-[13px] font-medium text-[var(--civic-text)]">
                 {officeName}
               </p>
             </div>
           )}
 
           {role === "TECHNICIAN" && (
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+            <div className="rounded-xl border border-[var(--civic-border)] bg-white p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--civic-muted)]">
                 {t("profile.assignedOffices")}
               </p>
               {assignedOffices.length > 0 ? (
@@ -163,7 +163,7 @@ function Profile() {
                   ))}
                 </div>
               ) : (
-                <p className="mt-2 text-xs text-slate-500">
+                <p className="mt-2 text-[12px] text-[var(--civic-muted)]">
                   {t("dashboard.noAssignedOffices")}
                 </p>
               )}
@@ -171,24 +171,24 @@ function Profile() {
           )}
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+            <div className="rounded-xl border border-[var(--civic-border)] bg-white p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--civic-muted)]">
                 {t("profile.accountStatus")}
               </p>
               <p className="mt-2">
                 <span
                   className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                     isActive
-                      ? "bg-green-50 text-green-700"
-                      : "bg-slate-100 text-slate-600"
+                      ? "bg-[var(--civic-success-bg)] text-[var(--civic-success)]"
+                      : "bg-[#f0f4f7] text-[var(--civic-muted)]"
                   }`}
                 >
                   {isActive ? t("admin.active") : t("admin.inactive")}
                 </span>
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+            <div className="rounded-xl border border-[var(--civic-border)] bg-white p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--civic-muted)]">
                 {t("profile.preferredLanguage")}
               </p>
               <div className="mt-2">
@@ -205,14 +205,14 @@ function Profile() {
         </div>
         <form onSubmit={handlePasswordChange} className="space-y-4 p-6">
           {passwordError && (
-            <p className="text-xs text-red-600" role="alert">
-              {passwordError}
-            </p>
+            <div className="civic-alert civic-alert-error" role="alert">
+              <span className="flex-1">{passwordError}</span>
+            </div>
           )}
           {passwordMessage && (
-            <p className="text-xs text-green-600" role="status">
-              {passwordMessage}
-            </p>
+            <div className="civic-alert civic-alert-success" role="status">
+              <span className="flex-1">{passwordMessage}</span>
+            </div>
           )}
           <div className="grid gap-4 md:grid-cols-3">
             <label className="civic-label">

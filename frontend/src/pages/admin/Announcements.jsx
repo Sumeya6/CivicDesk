@@ -23,7 +23,7 @@ export default function Announcements() {
       setLoading(true);
       setError("");
       const { data } = await api.get("/announcements");
-      setAnnouncements(data);
+      setAnnouncements(data.data);
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     } finally {
@@ -38,7 +38,7 @@ export default function Announcements() {
         setLoading(true);
         setError("");
         const { data } = await api.get("/announcements");
-        if (!cancelled) setAnnouncements(data);
+        if (!cancelled) setAnnouncements(data.data);
       } catch (err) {
         if (!cancelled) setError(err.response?.data?.message || err.message);
       } finally {
