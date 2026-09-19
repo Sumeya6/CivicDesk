@@ -28,14 +28,6 @@ function processQueue(error) {
 
 api.interceptors.response.use(
   (response) => {
-    // Unwrap the new API response format: { success, message, data, meta }
-    // Return just the data payload for backward compatibility
-    if (response.data && typeof response.data === "object" && "success" in response.data) {
-      return {
-        ...response,
-        data: response.data.data ?? response.data,
-      };
-    }
     return response;
   },
   async (error) => {

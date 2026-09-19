@@ -144,69 +144,69 @@ const ticketSlice = createSlice({
       })
       .addCase(fetchTickets.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.tickets = payload.tickets || [];
-        state.totalTickets = payload.totalTickets || 0;
-        state.page = payload.page || 1;
-        state.totalPages = payload.totalPages || 1;
+        state.tickets = payload.data || [];
+        state.totalTickets = payload.meta?.totalTickets || 0;
+        state.page = payload.meta?.page || 1;
+        state.totalPages = payload.meta?.totalPages || 1;
       })
       .addCase(fetchTickets.rejected, (state, { payload }) => {
         state.loading = false;
         state.error = payload;
       })
       .addCase(fetchTicket.fulfilled, (state, { payload }) => {
-        state.currentTicket = payload.ticket;
+        state.currentTicket = payload.data;
       })
       .addCase(fetchCategories.fulfilled, (state, { payload }) => {
-        state.categories = payload.categories || payload || [];
+        state.categories = payload.data || [];
       })
       .addCase(fetchTechnicians.fulfilled, (state, { payload }) => {
-        state.technicians = payload.users || payload || [];
+        state.technicians = payload.data || [];
       })
       .addCase(createTicket.fulfilled, (state, { payload }) => {
-        if (payload.ticket) state.tickets.unshift(payload.ticket);
+        if (payload.data) state.tickets.unshift(payload.data);
       })
       .addCase(assignTicket.fulfilled, (state, { payload }) => {
-        if (payload.ticket) {
-          const idx = state.tickets.findIndex((t) => t.id === payload.ticket.id);
-          if (idx !== -1) state.tickets[idx] = payload.ticket;
-          if (state.currentTicket?.id === payload.ticket.id) {
-            state.currentTicket = payload.ticket;
+        if (payload.data) {
+          const idx = state.tickets.findIndex((t) => t.id === payload.data.id);
+          if (idx !== -1) state.tickets[idx] = payload.data;
+          if (state.currentTicket?.id === payload.data.id) {
+            state.currentTicket = payload.data;
           }
         }
       })
       .addCase(requestPurchase.fulfilled, (state, { payload }) => {
-        if (payload.ticket) {
-          const idx = state.tickets.findIndex((t) => t.id === payload.ticket.id);
-          if (idx !== -1) state.tickets[idx] = payload.ticket;
-          if (state.currentTicket?.id === payload.ticket.id) {
-            state.currentTicket = payload.ticket;
+        if (payload.data) {
+          const idx = state.tickets.findIndex((t) => t.id === payload.data.id);
+          if (idx !== -1) state.tickets[idx] = payload.data;
+          if (state.currentTicket?.id === payload.data.id) {
+            state.currentTicket = payload.data;
           }
         }
       })
       .addCase(resolveTicket.fulfilled, (state, { payload }) => {
-        if (payload.ticket) {
-          const idx = state.tickets.findIndex((t) => t.id === payload.ticket.id);
-          if (idx !== -1) state.tickets[idx] = payload.ticket;
-          if (state.currentTicket?.id === payload.ticket.id) {
-            state.currentTicket = payload.ticket;
+        if (payload.data) {
+          const idx = state.tickets.findIndex((t) => t.id === payload.data.id);
+          if (idx !== -1) state.tickets[idx] = payload.data;
+          if (state.currentTicket?.id === payload.data.id) {
+            state.currentTicket = payload.data;
           }
         }
       })
       .addCase(verifyTicket.fulfilled, (state, { payload }) => {
-        if (payload.ticket) {
-          const idx = state.tickets.findIndex((t) => t.id === payload.ticket.id);
-          if (idx !== -1) state.tickets[idx] = payload.ticket;
-          if (state.currentTicket?.id === payload.ticket.id) {
-            state.currentTicket = payload.ticket;
+        if (payload.data) {
+          const idx = state.tickets.findIndex((t) => t.id === payload.data.id);
+          if (idx !== -1) state.tickets[idx] = payload.data;
+          if (state.currentTicket?.id === payload.data.id) {
+            state.currentTicket = payload.data;
           }
         }
       })
       .addCase(updateTicketStatus.fulfilled, (state, { payload }) => {
-        if (payload.ticket) {
-          const idx = state.tickets.findIndex((t) => t.id === payload.ticket.id);
-          if (idx !== -1) state.tickets[idx] = payload.ticket;
-          if (state.currentTicket?.id === payload.ticket.id) {
-            state.currentTicket = payload.ticket;
+        if (payload.data) {
+          const idx = state.tickets.findIndex((t) => t.id === payload.data.id);
+          if (idx !== -1) state.tickets[idx] = payload.data;
+          if (state.currentTicket?.id === payload.data.id) {
+            state.currentTicket = payload.data;
           }
         }
       });

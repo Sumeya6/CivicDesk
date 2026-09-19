@@ -8,7 +8,7 @@ export const fetchAnnouncements = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get("/announcements");
-      return response.data.announcements ?? [];
+      return response.data.data ?? [];
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message || "Unable to load announcements.",

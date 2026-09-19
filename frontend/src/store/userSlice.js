@@ -27,7 +27,7 @@ export const createUser = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const response = await api.post("/users", payload);
-      return response.data.user;
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message || "Unable to create user.",
@@ -41,7 +41,7 @@ export const createTechnician = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const response = await api.post("/users/technicians", payload);
-      return response.data.user;
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message || "Unable to create technician.",
@@ -55,7 +55,7 @@ export const updateUserStatus = createAsyncThunk(
   async ({ id, isActive }, { rejectWithValue }) => {
     try {
       const response = await api.put(`/users/${id}/status`, { isActive });
-      return response.data.user;
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message || "Unable to update user status.",
@@ -69,7 +69,7 @@ export const updateUser = createAsyncThunk(
   async ({ id, ...payload }, { rejectWithValue }) => {
     try {
       const response = await api.put(`/users/${id}`, payload);
-      return response.data.user;
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message || "Unable to update user.",
@@ -83,7 +83,7 @@ export const deleteUser = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await api.delete(`/users/${id}`);
-      return response.data.user;
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message || "Unable to delete user.",
@@ -99,7 +99,7 @@ export const assignTechnicianOffices = createAsyncThunk(
       const response = await api.post(`/users/technicians/${id}/offices`, {
         officeIds,
       });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message ||
@@ -129,7 +129,7 @@ export const fetchMyTechnicianOffices = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get("/users/me/offices");
-      return response.data.officeIds ?? [];
+      return response.data.data?.officeIds ?? [];
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message || "Unable to load assigned offices.",
@@ -157,7 +157,7 @@ const userSlice = createSlice({
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.items = action.payload.users ?? [];
+        state.items = action.payload.data ?? [];
         state.meta = action.payload.meta ?? null;
       })
       .addCase(fetchUsers.rejected, (state, action) => {

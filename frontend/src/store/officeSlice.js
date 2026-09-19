@@ -24,7 +24,7 @@ export const fetchOfficeOptions = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get("/offices/options");
-      return response.data.offices ?? [];
+      return response.data.data ?? [];
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message || "Unable to load office options.",
@@ -38,7 +38,7 @@ export const createOffice = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const response = await api.post("/offices", payload);
-      return response.data.office;
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message || "Unable to create office.",
@@ -52,7 +52,7 @@ export const updateOffice = createAsyncThunk(
   async ({ id, ...payload }, { rejectWithValue }) => {
     try {
       const response = await api.put(`/offices/${id}`, payload);
-      return response.data.office;
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message || "Unable to update office.",
@@ -66,7 +66,7 @@ export const updateOfficeStatus = createAsyncThunk(
   async ({ id, isActive }, { rejectWithValue }) => {
     try {
       const response = await api.put(`/offices/${id}/status`, { isActive });
-      return response.data.office;
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message || "Unable to update office status.",
@@ -80,7 +80,7 @@ export const deleteOffice = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await api.delete(`/offices/${id}`);
-      return response.data.office;
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message || "Unable to delete office.",
@@ -105,7 +105,7 @@ const officeSlice = createSlice({
       })
       .addCase(fetchOffices.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.items = action.payload.offices ?? [];
+        state.items = action.payload.data ?? [];
         state.meta = action.payload.meta ?? null;
       })
       .addCase(fetchOffices.rejected, (state, action) => {
