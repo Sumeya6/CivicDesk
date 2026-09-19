@@ -14,7 +14,7 @@ const {
 
 const router = Router();
 
-router.get("/options", authenticateUser, listOfficeOptions);
+router.get("/options", listOfficeOptions);
 
 router.use(authenticateUser);
 

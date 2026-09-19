@@ -112,8 +112,17 @@ const officeSlice = createSlice({
         state.status = "failed";
         state.error = action.payload;
       })
+      .addCase(fetchOfficeOptions.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
       .addCase(fetchOfficeOptions.fulfilled, (state, action) => {
+        state.status = "succeeded";
         state.items = action.payload;
+      })
+      .addCase(fetchOfficeOptions.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
       })
       .addCase(createOffice.fulfilled, (state, action) => {
         state.items.unshift(action.payload);
