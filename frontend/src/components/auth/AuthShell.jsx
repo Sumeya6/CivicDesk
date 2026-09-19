@@ -1,4 +1,3 @@
-import { Settings } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import LanguageToggle from "../LanguageToggle";
@@ -17,7 +16,7 @@ function AuthShell({ children }) {
           to="/login"
           aria-label="CivicDesk"
         >
-          <Settings size={17} strokeWidth={2.8} />
+          <img src="/favicon.png" alt="" className="h-[18px] w-[18px] rounded" />
           <span>CivicDesk</span>
         </Link>
         <LanguageToggle variant="auth" />

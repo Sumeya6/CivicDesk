@@ -121,8 +121,8 @@ function Sidebar({ role, onNavigate, mobile = false }) {
     >
       <div className="mb-6 border-b border-[var(--civic-border)] pb-4">
         <Link to="/dashboard" className="no-underline">
-          <h2 className="flex items-center gap-2 text-lg font-bold tracking-[-0.01em] text-[var(--civic-blue-950)]">
-            <span className="inline-block h-2 w-2 rounded-full bg-[var(--civic-cyan-500)]" />
+          <h2 className="flex items-center gap-2.5 text-lg font-bold tracking-[-0.01em] text-[var(--civic-blue-950)]">
+            <img src="/favicon.png" alt="" className="h-7 w-7 rounded-md" />
             CivicDesk
           </h2>
           <p className="mt-1 text-[13px] text-[var(--civic-muted)]">
