@@ -53,24 +53,24 @@ function Login() {
 
   return (
     <AuthShell>
-      <div>
-        <h1 className="m-0 font-bold leading-[1.3] tracking-[-0.02em] text-(--civic-text) max-[480px]:text-(--civic-font-size-lg)">
+      <div className="mb-5">
+        <h1 className="m-0 text-[21px] font-bold leading-[1.3] tracking-[-0.02em] text-[#0f172a] max-[480px]:text-[19px]">
           {t("auth.signInTitle")}
         </h1>
-        <p className="mb-5 mt-2 text-(--civic-font-size-md) leading-normal">
+        <p className="mb-5.5 mt-5.5 text-[13.5px] leading-normal text-[#64748b]">
           {t("auth.loginDescription")}
         </p>
       </div>
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+      <form className="flex flex-col gap-4.5" onSubmit={handleSubmit}>
         <div>
           <label
-            className="mb-1.5 block text-(--civic-font-size-base) font-medium"
+            className="mb-1.5 block text-[13px] font-medium text-[#334155]"
             htmlFor="phoneNumber"
           >
             {t("auth.phoneNumber")}
           </label>
-          <div className="flex h-10 items-center rounded-lg border border-(--civic-border) bg-white px-3 text-(--civic-muted) transition focus-within:border-(--civic-blue-600) focus-within:shadow-(--civic-focus-ring)">
-            <Phone size={16} className="shrink-0" />
+          <div className="flex h-10 items-center rounded-lg border-[1.5px] border-[#d1d9e6] bg-white px-2.75 text-[#94a3b8] transition focus-within:border-[#0757c9] focus-within:shadow-[0_0_0_3px_rgb(7_87_201/8%)]">
+            <Phone size={16} />
             <input
               id="phoneNumber"
               name="phoneNumber"
@@ -79,28 +79,25 @@ function Login() {
               onChange={handleChange}
               placeholder="+251 912345678"
               autoComplete="tel"
-              className="flex-1 border-0 bg-transparent pl-2 text-[15px] text-(--civic-text) outline-none placeholder:text-(--civic-muted)"
+              className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black text-[15px]"
             />
           </div>
           {errors.phoneNumber && (
-            <p
-              className="mt-1 text-[12px] leading-[1.4] text-(--civic-error)"
-              role="alert"
-            >
+            <p className="mt-1 text-[12.5px] leading-[1.4] text-red-600">
               {errors.phoneNumber}
             </p>
           )}
         </div>
         <div>
           <label
-            className="mb-1.5 block text-(--civic-font-size-base) font-medium"
+            className="mb-1.5 block text-[13px] font-medium text-[#334155]"
             htmlFor="password"
           >
             {t("auth.password")}
           </label>
           <div className="relative">
-            <div className="flex h-10 items-center rounded-lg border border-(--civic-border) bg-white px-3 text-(--civic-muted) transition focus-within:border-(--civic-blue-600) focus-within:shadow-(--civic-focus-ring)">
-              <LockKeyhole size={16} className="shrink-0" />
+            <div className="flex h-10 items-center rounded-lg border-[1.5px] border-[#d1d9e6] bg-white px-2.75 text-[#94a3b8] transition focus-within:border-[#0757c9] focus-within:shadow-[0_0_0_3px_rgb(7_87_201/8%)]">
+              <LockKeyhole size={16} />
               <input
                 id="password"
                 name="password"
@@ -109,12 +106,12 @@ function Login() {
                 onChange={handleChange}
                 placeholder="••••••••"
                 autoComplete="current-password"
-                className="flex-1 border-0 bg-transparent pl-2 text-[15px] text-(--civic-text) outline-none placeholder:text-(--civic-muted)"
+                className="flex-1 border-0 bg-transparent outline-none focus:border-0 focus:outline-none focus:ring-0 text-black text-[15px]"
               />
             </div>
             <button
               type="button"
-              className="absolute bottom-px right-px top-px flex w-10 items-center justify-center rounded-r-lg border-0 bg-transparent text-(--civic-muted) transition hover:text-(--civic-text)"
+              className="absolute bottom-px right-px top-px flex w-9.5 items-center justify-center rounded-r-[7px] border-0 bg-transparent text-[#94a3b8] transition hover:text-[#475569]"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={
                 showPassword ? t("auth.hidePassword") : t("auth.showPassword")
@@ -125,29 +122,21 @@ function Login() {
             </button>
           </div>
           {errors.password && (
-            <p
-              className="mt-1 text-[12px] leading-[1.4] text-(--civic-error)"
-              role="alert"
-            >
+            <p className="mt-1 text-[12.5px] leading-[1.4] text-red-600">
               {errors.password}
             </p>
           )}
         </div>
-        <div className="-mt-1 text-right text-[11px]">
-          <Link
-            to="/forgot-password"
-            className="text-(--civic-blue-700) hover:text-(--civic-blue-800) hover:underline"
-          >
-            {t("auth.forgotPassword")}
-          </Link>
+        <div className="-mt-1.5 text-right text-[11px] text-[#0546b0] hover:underline">
+          <Link to="/forgot-password">{t("auth.forgotPassword")}</Link>
         </div>
         {submitError && (
-          <div className="civic-alert civic-alert-error" role="alert">
-            <span className="flex-1">{submitError}</span>
-          </div>
+          <p className="mt-1 text-[12.5px] leading-[1.4] text-red-600">
+            {submitError}
+          </p>
         )}
         <button
-          className="mt-1 flex h-10 items-center justify-center gap-2 rounded-lg border-0 bg-(--civic-blue-800) text-sm font-semibold text-white transition hover:bg-(--civic-blue-950) hover:shadow-(--civic-shadow-md) active:translate-y-px disabled:cursor-wait disabled:opacity-65"
+          className="mt-1 flex h-10.5 items-center justify-center gap-2 rounded-lg border-0 bg-[#0757c9] text-sm font-semibold text-white transition hover:bg-[#0546b0] hover:shadow-[0_4px_12px_rgb(7_87_201/25%)] active:translate-y-px disabled:cursor-wait disabled:opacity-65"
           type="submit"
           disabled={isSubmitting}
         >
@@ -155,12 +144,9 @@ function Login() {
           <ArrowRight size={16} />
         </button>
       </form>
-      <div className="mt-5 border-t border-(--civic-border) pt-4 text-center text-[12px] text-(--civic-muted)">
+      <div className="mt-5 border-t border-[#e5eaf1] pt-4 text-center text-[12px] text-[#64748b]">
         {t("auth.noAccount")}{" "}
-        <Link
-          to="/register"
-          className="text-(--civic-blue-700) hover:text-(--civic-blue-800) hover:underline"
-        >
+        <Link to="/register" className="text-[#0546b0] hover:underline">
           {t("auth.registerNow")}
         </Link>
       </div>
