@@ -1056,6 +1056,106 @@ p {
   background: var(--civic-cyan-50);
 }
 
+.workflow-attention h2 {
+  margin: 0;
+  color: var(--civic-blue-950);
+  font-size: var(--civic-font-size-xl);
+}
+
+.workflow-action:focus-visible,
+.workflow-audit:focus-visible {
+  outline: 2px solid var(--civic-blue-600);
+  outline-offset: 2px;
+}
+
+.workflow-action {
+  min-height: 40px;
+}
+
+.workflow-attention {
+  display: grid;
+  gap: var(--civic-space-3);
+  border: 1px solid var(--civic-success-border);
+  border-radius: var(--civic-radius-lg);
+  padding: var(--civic-space-4);
+  background: var(--civic-success-bg);
+}
+
+.workflow-attention p {
+  margin: 4px 0 0;
+  color: var(--civic-muted);
+  line-height: 1.5;
+}
+
+.workflow-attention-list {
+  display: grid;
+  gap: 8px;
+}
+
+.workflow-attention-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--civic-space-3);
+  border: 1px solid var(--civic-success-border);
+  border-radius: var(--civic-radius-md);
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.workflow-attention-item strong,
+.workflow-attention-item span {
+  display: block;
+}
+
+.workflow-attention-item span,
+.ticket-status-explanation {
+  margin-top: 3px;
+  color: var(--civic-muted);
+  font-size: var(--civic-font-size-sm);
+}
+
+.ticket-status-explanation {
+  display: block;
+}
+
+.mobile-ticket-list {
+  display: none;
+}
+
+.mobile-ticket-card {
+  display: grid;
+  gap: 12px;
+  border-bottom: 1px solid var(--civic-border);
+  padding: 14px;
+}
+
+.mobile-ticket-card-heading,
+.mobile-ticket-meta,
+.mobile-ticket-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mobile-ticket-card h2 {
+  margin: 0;
+  color: var(--civic-blue-950);
+  font-size: var(--civic-font-size-md);
+}
+
+.mobile-ticket-card p {
+  margin: 3px 0 0;
+  color: var(--civic-muted);
+  font-size: var(--civic-font-size-sm);
+}
+
+.mobile-ticket-actions {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
 /* ═══════════════════════════════════════════════
    FORM CONTROLS
    ═══════════════════════════════════════════════ */
@@ -1580,6 +1680,23 @@ p {
 }
 
 @media (max-width: 760px) {
+  .workflow-attention-item {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mobile-ticket-list {
+    display: block;
+  }
+
+  .mobile-ticket-list + .table-scroll {
+    display: none;
+  }
+
+  .workflow-attention-item .workflow-action {
+    width: 100%;
+  }
+
   .workspace-header,
   .content-surface-header,
   .directory-toolbar {
