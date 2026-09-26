@@ -1,13 +1,15 @@
 const mockPrisma = {
   technicianOffice: { findMany: jest.fn() },
-  ticket: { groupBy: jest.fn() },
+  ticket: { groupBy: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
 };
+const mockCreateAuditEntry = jest.fn();
 
 jest.mock("../src/config/db", () => ({ prisma: mockPrisma }));
-jest.mock("../src/utils/audit.util", () => ({ createAuditEntry: jest.fn() }));
+jest.mock("../src/utils/audit.util", () => ({ createAuditEntry: mockCreateAuditEntry }));
 jest.mock("@prisma/client", () => ({
   TicketStatus: {
     PENDING: "PENDING",
+    ASSIGNED: "ASSIGNED",
     IN_PROGRESS: "IN_PROGRESS",
     AWAITING_PURCHASE: "AWAITING_PURCHASE",
   },
@@ -17,6 +19,7 @@ jest.mock("@prisma/client", () => ({
 
 const {
   findLeastBusyTechnician,
+  assignTechnicianToTicket,
   ACTIVE_TICKET_STATUSES,
 } = require("../src/services/assignment.service");
 
@@ -60,5 +63,37 @@ describe("assignment service", () => {
     mockPrisma.technicianOffice.findMany.mockResolvedValue([]);
     await expect(findLeastBusyTechnician("office-1")).resolves.toBeNull();
     expect(mockPrisma.ticket.groupBy).not.toHaveBeenCalled();
+  });
+
+  test("auto-assignment changes a pending ticket to assigned", async () => {
+    mockPrisma.ticket.findUnique.mockResolvedValue({
+      id: "ticket-1",
+      status: "PENDING",
+      technicianId: null,
+      priority: "MEDIUM",
+    });
+    mockPrisma.technicianOffice.findMany.mockResolvedValue([
+      { technician: { id: "tech-1", isActive: true, role: "TECHNICIAN", createdAt: new Date("2026-01-01") } },
+    ]);
+    mockPrisma.ticket.groupBy
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+    mockPrisma.ticket.update.mockResolvedValue({
+      id: "ticket-1",
+      technicianId: "tech-1",
+      status: "ASSIGNED",
+    });
+
+    await expect(assignTechnicianToTicket("ticket-1", "office-1")).resolves.toEqual(
+      expect.objectContaining({ technicianId: "tech-1", status: "ASSIGNED" }),
+    );
+    expect(mockPrisma.ticket.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ technicianId: "tech-1", status: "ASSIGNED" }),
+    }));
+    expect(mockCreateAuditEntry).toHaveBeenCalledWith(expect.objectContaining({
+      action: "STATUS_CHANGED",
+      previousValue: "PENDING",
+      newValue: "ASSIGNED",
+    }));
   });
 });

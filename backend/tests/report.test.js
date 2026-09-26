@@ -252,13 +252,15 @@ describe("GET /api/reports/summary", () => {
       { officeId: "o1", _count: { officeId: 2 } },
       { officeId: "o2", _count: { officeId: 1 } },
     ];
-    mockPrisma.ticket.groupBy.mockResolvedValueOnce(officeGroups);
+    mockPrisma.ticket.groupBy.mockImplementation(({ by }) => {
+      if (by?.includes("officeId")) return Promise.resolve(officeGroups);
+      return Promise.resolve([]);
+    });
     mockPrisma.office.findMany.mockResolvedValue([
       { id: "o1", nameEn: "Finance", nameAm: "ፋይናንስ" },
       { id: "o2", nameEn: "HR", nameAm: "ሐአር" },
     ]);
     mockPrisma.category.findMany.mockResolvedValue([]);
-    mockPrisma.ticket.groupBy.mockResolvedValue([]);
     mockPrisma.user.findMany.mockResolvedValue([]);
 
     const res = await request(app)
@@ -279,7 +281,10 @@ describe("GET /api/reports/summary", () => {
       { categoryId: "c1", _count: { categoryId: 2 } },
       { categoryId: "c2", _count: { categoryId: 1 } },
     ];
-    mockPrisma.ticket.groupBy.mockResolvedValueOnce(categoryGroups);
+    mockPrisma.ticket.groupBy.mockImplementation(({ by }) => {
+      if (by?.includes("categoryId")) return Promise.resolve(categoryGroups);
+      return Promise.resolve([]);
+    });
     mockPrisma.category.findMany.mockResolvedValue([
       { id: "c1", nameEn: "Hardware", nameAm: "ሀርድዌር" },
       { id: "c2", nameEn: "Software", nameAm: "ሶፍትዌር" },
@@ -305,7 +310,10 @@ describe("GET /api/reports/summary", () => {
       { technicianId: "tech1", _count: { technicianId: 2 } },
       { technicianId: "tech2", _count: { technicianId: 1 } },
     ];
-    mockPrisma.ticket.groupBy.mockResolvedValueOnce(techGroups);
+    mockPrisma.ticket.groupBy.mockImplementation(({ by }) => {
+      if (by?.includes("technicianId")) return Promise.resolve(techGroups);
+      return Promise.resolve([]);
+    });
     mockPrisma.user.findMany.mockResolvedValue([
       { id: "tech1", fullName: "Alice" },
       { id: "tech2", fullName: "Bob" },
@@ -327,20 +335,21 @@ describe("GET /api/reports/summary", () => {
   });
 
   test("calculates average resolution time in hours", async () => {
-    const baseDate = new Date("2026-09-01T08:00:00Z");
+    const baseDate = new Date();
+    const createdDate = new Date(baseDate.getTime() - 24 * 60 * 60 * 1000);
     const tickets = [
       makeTicket({
         status: "RESOLVED",
-        createdAt: baseDate,
-        resolvedAt: new Date("2026-09-01T10:00:00Z"),
+        createdAt: createdDate,
+        resolvedAt: new Date(createdDate.getTime() + 2 * 60 * 60 * 1000),
       }),
       makeTicket({
         status: "CLOSED",
-        createdAt: baseDate,
-        resolvedAt: new Date("2026-09-01T20:00:00Z"),
+        createdAt: createdDate,
+        resolvedAt: new Date(createdDate.getTime() + 12 * 60 * 60 * 1000),
       }),
     ];
-    mockPrisma.ticket.findMany.mockResolvedValueOnce(tickets);
+    mockPrisma.ticket.findMany.mockResolvedValue(tickets);
     mockPrisma.category.findMany.mockResolvedValue([]);
     mockPrisma.office.findMany.mockResolvedValue([]);
     mockPrisma.user.findMany.mockResolvedValue([]);
@@ -353,28 +362,29 @@ describe("GET /api/reports/summary", () => {
   });
 
   test("calculates SLA percentage (24h threshold)", async () => {
-    const baseDate = new Date("2026-09-01T08:00:00Z");
+    const baseDate = new Date();
+    const createdDate = new Date(baseDate.getTime() - 24 * 60 * 60 * 1000);
     const tickets = [
       makeTicket({
         status: "RESOLVED",
-        createdAt: baseDate,
-        resolvedAt: new Date("2026-09-01T10:00:00Z"),
+        createdAt: createdDate,
+        resolvedAt: new Date(createdDate.getTime() + 2 * 60 * 60 * 1000),
         categoryId: "cat1",
       }),
       makeTicket({
         status: "CLOSED",
-        createdAt: baseDate,
-        resolvedAt: new Date("2026-09-01T20:00:00Z"),
+        createdAt: createdDate,
+        resolvedAt: new Date(createdDate.getTime() + 12 * 60 * 60 * 1000),
         categoryId: "cat1",
       }),
       makeTicket({
         status: "RESOLVED",
-        createdAt: baseDate,
-        resolvedAt: new Date("2026-09-02T12:00:00Z"),
+        createdAt: createdDate,
+        resolvedAt: new Date(createdDate.getTime() + 48 * 60 * 60 * 1000),
         categoryId: "cat1",
       }),
     ];
-    mockPrisma.ticket.findMany.mockResolvedValueOnce(tickets);
+    mockPrisma.ticket.findMany.mockResolvedValue(tickets);
     mockPrisma.category.findMany.mockResolvedValue([
       { id: "cat1", expectedResolutionHours: 24 },
     ]);
@@ -394,8 +404,20 @@ describe("GET /api/reports/summary", () => {
       { rating: 4, _count: { rating: 1 } },
       { rating: 3, _count: { rating: 2 } },
     ];
-    mockPrisma.ticket.groupBy.mockResolvedValueOnce(ratingGroups);
-    mockPrisma.ticket.findMany.mockResolvedValue([]);
+    const ratedTickets = [
+      { rating: 5 },
+      { rating: 4 },
+      { rating: 3 },
+      { rating: 3 },
+    ];
+    mockPrisma.ticket.groupBy.mockImplementation(({ by }) => {
+      if (by?.includes("rating")) return Promise.resolve(ratingGroups);
+      return Promise.resolve([]);
+    });
+    mockPrisma.ticket.findMany.mockImplementation(({ where }) => {
+      if (where?.rating) return Promise.resolve(ratedTickets);
+      return Promise.resolve([]);
+    });
     mockPrisma.category.findMany.mockResolvedValue([]);
     mockPrisma.office.findMany.mockResolvedValue([]);
     mockPrisma.user.findMany.mockResolvedValue([]);
@@ -432,13 +454,16 @@ describe("GET /api/reports/summary", () => {
   });
 
   test("skips tickets without office in office aggregation", async () => {
-    const tickets = [
-      makeTicket({ office: null }),
-      makeTicket({
-        office: { id: "o1", nameEn: "IT", nameAm: "IT" },
-      }),
+    const officeGroups = [
+      { officeId: "o1", _count: { officeId: 1 } },
     ];
-    mockPrisma.ticket.findMany.mockResolvedValue(tickets);
+    mockPrisma.ticket.groupBy.mockImplementation(({ by }) => {
+      if (by?.includes("officeId")) return Promise.resolve(officeGroups);
+      return Promise.resolve([]);
+    });
+    mockPrisma.office.findMany.mockResolvedValue([
+      { id: "o1", nameEn: "IT", nameAm: "IT" },
+    ]);
 
     const res = await request(app)
       .get("/api/reports/summary?period=1m")
@@ -449,18 +474,21 @@ describe("GET /api/reports/summary", () => {
   });
 
   test("skips tickets without technician in workload", async () => {
-    const tickets = [
-      makeTicket({ technician: null }),
-      makeTicket({
-        technician: {
-          id: "tech1",
-          fullName: "Alice",
-          name: "Alice",
-          email: "a@t.com",
-        },
-      }),
+    const techGroups = [
+      { technicianId: "tech1", _count: { technicianId: 1 } },
     ];
-    mockPrisma.ticket.findMany.mockResolvedValue(tickets);
+    mockPrisma.ticket.groupBy.mockImplementation(({ by }) => {
+      if (by?.includes("technicianId")) return Promise.resolve(techGroups);
+      return Promise.resolve([]);
+    });
+    mockPrisma.user.findMany.mockResolvedValue([
+      {
+        id: "tech1",
+        fullName: "Alice",
+        name: "Alice",
+        email: "a@t.com",
+      },
+    ]);
 
     const res = await request(app)
       .get("/api/reports/summary?period=1m")
@@ -470,13 +498,7 @@ describe("GET /api/reports/summary", () => {
   });
 
   test("skips tickets without resolvedAt in resolution time", async () => {
-    const tickets = [
-      makeTicket({
-        status: "RESOLVED",
-        resolvedAt: null,
-      }),
-    ];
-    mockPrisma.ticket.findMany.mockResolvedValue(tickets);
+    mockPrisma.ticket.findMany.mockResolvedValue([]);
 
     const res = await request(app)
       .get("/api/reports/summary?period=1m")

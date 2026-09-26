@@ -1,7 +1,7 @@
 const request = require("supertest");
 
 const mockPrisma = {
-  user: { findUnique: jest.fn(), findFirst: jest.fn() },
+  user: { findUnique: jest.fn(), findFirst: jest.fn(), findMany: jest.fn() },
   category: { findUnique: jest.fn(), findMany: jest.fn() },
   ticket: {
     create: jest.fn(),
@@ -73,6 +73,7 @@ const {
   createTicket,
   verifyTicket,
   listTickets,
+  getTicket,
 } = require("../src/controllers/ticket.controller");
 const { listCategories } = require("../src/controllers/category.controller");
 const {
@@ -192,7 +193,8 @@ describe("ticket HTTP workflow", () => {
     mockPrisma.ticket.findUnique.mockResolvedValue({
       id: "ticket-1",
       officeId: "office-1",
-      technicianId: "tech-old",
+      technicianId: null,
+      status: "PENDING",
       priority: "LOW",
     });
     mockPrisma.user.findFirst.mockResolvedValue({ id: "tech-2" });
@@ -200,6 +202,7 @@ describe("ticket HTTP workflow", () => {
       id: "ticket-1",
       technicianId: "tech-2",
       priority: "HIGH",
+      status: "ASSIGNED",
     });
 
     const unauthorized = await request(app)
@@ -221,6 +224,129 @@ describe("ticket HTTP workflow", () => {
       expect.objectContaining({ action: "PRIORITY_CHANGED" }),
     );
     expect(response.body.data).toHaveProperty("technicianId", "tech-2");
+    expect(response.body.data).toHaveProperty("status", "ASSIGNED");
+    expect(createAuditEntry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "STATUS_CHANGED",
+        previousValue: "PENDING",
+        newValue: "ASSIGNED",
+      }),
+    );
+  });
+
+  test("priority-only assignment update does not change ticket status", async () => {
+    mockPrisma.ticket.findUnique.mockResolvedValue({
+      id: "ticket-1",
+      officeId: "office-1",
+      technicianId: null,
+      status: "PENDING",
+      priority: "LOW",
+    });
+    mockPrisma.ticket.update.mockResolvedValue({
+      id: "ticket-1",
+      technicianId: null,
+      status: "PENDING",
+      priority: "HIGH",
+    });
+
+    const response = await request(app)
+      .patch("/api/tickets/ticket-1/assign")
+      .set("x-test-role", "ADMIN")
+      .send({ priority: "HIGH" });
+
+    expect(response.status).toBe(200);
+    expect(mockPrisma.ticket.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: { priority: "HIGH" },
+    }));
+    expect(response.body.data).toHaveProperty("status", "PENDING");
+    expect(createAuditEntry).not.toHaveBeenCalledWith(
+      expect.objectContaining({ action: "STATUS_CHANGED" }),
+    );
+  });
+
+  test("reassigning a legacy Pending ticket that already has a technician changes status to ASSIGNED", async () => {
+    mockPrisma.ticket.findUnique.mockResolvedValue({
+      id: "ticket-legacy",
+      officeId: "office-1",
+      technicianId: "tech-old",
+      status: "PENDING",
+      priority: "MEDIUM",
+    });
+    mockPrisma.user.findFirst.mockResolvedValue({ id: "tech-new" });
+    mockPrisma.ticket.update.mockResolvedValue({
+      id: "ticket-legacy",
+      technicianId: "tech-new",
+      status: "ASSIGNED",
+      priority: "MEDIUM",
+    });
+
+    const response = await request(app)
+      .patch("/api/tickets/ticket-legacy/assign")
+      .set("x-test-role", "ADMIN")
+      .send({ technicianId: "tech-new" });
+
+    expect(response.status).toBe(200);
+    expect(mockPrisma.ticket.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          technicianId: "tech-new",
+          status: "ASSIGNED",
+        }),
+      }),
+    );
+    expect(createAuditEntry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "MANUAL_ASSIGNED",
+        previousValue: "tech-old",
+        newValue: "tech-new",
+      }),
+    );
+    expect(createAuditEntry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "STATUS_CHANGED",
+        previousValue: "PENDING",
+        newValue: "ASSIGNED",
+      }),
+    );
+  });
+
+  test("reassigning an IN_PROGRESS ticket preserves IN_PROGRESS status", async () => {
+    mockPrisma.ticket.findUnique.mockResolvedValue({
+      id: "ticket-inprogress",
+      officeId: "office-1",
+      technicianId: "tech-1",
+      status: "IN_PROGRESS",
+      priority: "MEDIUM",
+    });
+    mockPrisma.user.findFirst.mockResolvedValue({ id: "tech-2" });
+    mockPrisma.ticket.update.mockResolvedValue({
+      id: "ticket-inprogress",
+      technicianId: "tech-2",
+      status: "IN_PROGRESS",
+      priority: "MEDIUM",
+    });
+
+    const response = await request(app)
+      .patch("/api/tickets/ticket-inprogress/assign")
+      .set("x-test-role", "ADMIN")
+      .send({ technicianId: "tech-2" });
+
+    expect(response.status).toBe(200);
+    expect(mockPrisma.ticket.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { technicianId: "tech-2" },
+      }),
+    );
+    expect(createAuditEntry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "MANUAL_ASSIGNED",
+        previousValue: "tech-1",
+        newValue: "tech-2",
+      }),
+    );
+    expect(createAuditEntry).not.toHaveBeenCalledWith(
+      expect.objectContaining({ action: "STATUS_CHANGED" }),
+    );
   });
 
   test("procurement accepts only in-progress tickets", async () => {
@@ -360,8 +486,23 @@ describe("ticket HTTP workflow", () => {
       .put("/api/tickets/ticket-1/status")
       .set("x-test-role", "TECHNICIAN")
       .send({ status: "IN_PROGRESS" });
-    expect(valid.status).toBe(200);
-    expect(valid.body.data).toHaveProperty("status", "IN_PROGRESS");
+    expect(valid.status).toBe(422);
+
+    mockPrisma.ticket.findUnique.mockResolvedValue({
+      id: "ticket-1",
+      status: "ASSIGNED",
+      technicianId: "tech-1",
+    });
+    mockPrisma.ticket.update.mockResolvedValue({
+      id: "ticket-1",
+      status: "IN_PROGRESS",
+    });
+    const started = await request(app)
+      .put("/api/tickets/ticket-1/status")
+      .set("x-test-role", "TECHNICIAN")
+      .send({ status: "IN_PROGRESS" });
+    expect(started.status).toBe(200);
+    expect(started.body.data).toHaveProperty("status", "IN_PROGRESS");
 
     mockPrisma.ticket.findUnique.mockResolvedValue({
       id: "ticket-1",
@@ -373,6 +514,85 @@ describe("ticket HTTP workflow", () => {
       .set("x-test-role", "TECHNICIAN")
       .send({ status: "IN_PROGRESS" });
     expect(closed.status).toBe(422);
+  });
+});
+
+describe("ticket detail endpoint", () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  const detailTicket = {
+    id: "ticket-detail-1",
+    employeeId: "employee-1",
+    technicianId: "tech-1",
+    title: "Printer failure",
+    password: undefined,
+    employee: { id: "employee-1", fullName: "Employee One", role: "EMPLOYEE", phoneNumber: "111", officeId: "office-1" },
+    technician: { id: "tech-1", fullName: "Tech One", role: "TECHNICIAN", phoneNumber: "222", officeId: "office-1" },
+    office: { id: "office-1", nameEn: "IT", nameAm: "አይቲ" },
+    category: { id: "category-1", nameEn: "Hardware", nameAm: "ሃርድዌር", expectedResolutionHours: 24 },
+    maintenanceNote: { diagnosis: "Damaged cable", workPerformed: "Replaced cable", partsReplaced: "Cable", recommendations: "Keep spares", purchasedByOffice: false },
+    auditLogs: [
+      {
+        id: "log-1",
+        action: "MANUAL_ASSIGNED",
+        actorId: "admin-1",
+        actor: { id: "admin-1", fullName: "Admin One", role: "ADMIN" },
+        previousValue: "old-tech",
+        newValue: "tech-1",
+        createdAt: new Date(),
+      },
+    ],
+  };
+
+  test("returns relations, safe actors, and assignment display names without passwords", async () => {
+    mockPrisma.ticket.findUnique.mockResolvedValue(detailTicket);
+    mockPrisma.user.findMany.mockResolvedValue([{ id: "old-tech", fullName: "Old Tech" }, { id: "tech-1", fullName: "Tech One" }]);
+
+    const response = await request(app)
+      .get("/api/tickets/ticket-detail-1")
+      .set("x-test-role", "ADMIN");
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toEqual(expect.objectContaining({
+      employee: expect.objectContaining({ fullName: "Employee One" }),
+      technician: expect.objectContaining({ fullName: "Tech One" }),
+      office: expect.objectContaining({ nameEn: "IT" }),
+      category: expect.objectContaining({ expectedResolutionHours: 24 }),
+      maintenanceNote: expect.objectContaining({ diagnosis: "Damaged cable" }),
+    }));
+    expect(response.body.data.employee).not.toHaveProperty("password");
+    expect(response.body.data.technician).not.toHaveProperty("password");
+    expect(response.body.data.auditLogs[0].actor).toEqual({ id: "admin-1", fullName: "Admin One", role: "ADMIN" });
+    expect(response.body.data.auditLogs[0]).toEqual(expect.objectContaining({
+      previousDisplayValue: "Old Tech",
+      newDisplayValue: "Tech One",
+    }));
+  });
+
+  test("keeps employee and technician authorization restrictions", async () => {
+    mockPrisma.ticket.findUnique.mockResolvedValue(detailTicket);
+
+    const employeeResponse = await request(app)
+      .get("/api/tickets/ticket-detail-1")
+      .set("x-test-role", "EMPLOYEE");
+    expect(employeeResponse.status).toBe(200);
+
+    const technicianResponse = await request(app)
+      .get("/api/tickets/ticket-detail-1")
+      .set("x-test-role", "TECHNICIAN");
+    expect(technicianResponse.status).toBe(200);
+
+    mockPrisma.ticket.findUnique.mockResolvedValue({ ...detailTicket, employeeId: "other-employee" });
+    const forbiddenEmployee = await request(app)
+      .get("/api/tickets/ticket-detail-1")
+      .set("x-test-role", "EMPLOYEE");
+    expect(forbiddenEmployee.status).toBe(403);
+
+    mockPrisma.ticket.findUnique.mockResolvedValue({ ...detailTicket, technicianId: "other-tech" });
+    const forbiddenTechnician = await request(app)
+      .get("/api/tickets/ticket-detail-1")
+      .set("x-test-role", "TECHNICIAN");
+    expect(forbiddenTechnician.status).toBe(403);
   });
 });
 
@@ -404,7 +624,7 @@ describe("GET /api/tickets", () => {
     expect(mockPrisma.ticket.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { technicianId: "tech-1" },
-        include: { category: true },
+        include: expect.objectContaining({ category: true }),
         orderBy: { createdAt: "desc" },
       }),
     );
