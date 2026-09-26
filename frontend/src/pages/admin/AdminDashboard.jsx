@@ -301,6 +301,7 @@ function AdminDashboard() {
         isOpen={!!assignTicket}
         onClose={() => setAssignTicket(null)}
         ticket={assignTicket}
+        onSuccess={loadTickets}
       />
       <AuditTrailModal
         isOpen={!!auditTicketId}

@@ -29,6 +29,11 @@ export default function TechnicianQueue({ onRequestPurchase, onResolve, onViewAu
     dispatch(fetchTickets({ status: statusFilter || undefined, page: currentPage, limit: 20 }));
   }, [dispatch, statusFilter, currentPage]);
 
+  const selectStatus = (status) => {
+    setStatusFilter(status);
+    setCurrentPage(1);
+  };
+
   useEffect(() => {
     load();
   }, [load]);
@@ -44,7 +49,7 @@ export default function TechnicianQueue({ onRequestPurchase, onResolve, onViewAu
   };
 
   return (
-    <div className="admin-surface workspace-page">
+    <div id="technician-queue" className="admin-surface workspace-page">
       <header className="workspace-header">
         <div>
           <h1>Technician Queue</h1>
@@ -52,8 +57,9 @@ export default function TechnicianQueue({ onRequestPurchase, onResolve, onViewAu
         <div className="workspace-actions">
           <select
             value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+            onChange={(e) => selectStatus(e.target.value)}
             className="civic-select"
+            aria-label={t("workflow.filterByStatus")}
           >
             <option value="">All Statuses</option>
             {QUEUE_STATUSES.map((s) => (
@@ -90,6 +96,30 @@ export default function TechnicianQueue({ onRequestPurchase, onResolve, onViewAu
 
       {!loading && tickets.length > 0 && (
         <div className="content-surface">
+          <div className="mobile-ticket-list">
+            {tickets.map((ticket) => (
+              <article key={ticket.id} className="mobile-ticket-card">
+                <div className="mobile-ticket-card-heading">
+                  <div>
+                    <h2>{ticket.title}</h2>
+                    <p>{ticket.category?.nameEn || ticket.categoryId}</p>
+                  </div>
+                  <StatusBadge status={ticket.status} />
+                </div>
+                <div className="mobile-ticket-meta">
+                  <PriorityBadge priority={ticket.priority} />
+                  <SlaIndicator ticket={ticket} />
+                </div>
+                <div className="mobile-ticket-actions">
+                  {ticket.status === "ASSIGNED" && <button type="button" onClick={() => handleStatusChange(ticket.id, "IN_PROGRESS")} className="button-primary workflow-action" title={t("workflow.startHelp")}>{t("workflow.start")}</button>}
+                  {ticket.status === "IN_PROGRESS" && <button type="button" onClick={() => onResolve?.(ticket)} className="button-primary workflow-action" title={t("workflow.resolveHelp")}>{t("workflow.resolve")}</button>}
+                  {ticket.status === "IN_PROGRESS" && <button type="button" onClick={() => onRequestPurchase?.(ticket)} className="button-secondary workflow-action" title={t("workflow.purchaseHelp")}>{t("workflow.requestPurchase")}</button>}
+                  {ticket.status === "AWAITING_PURCHASE" && <button type="button" onClick={() => handleStatusChange(ticket.id, "IN_PROGRESS")} className="button-primary workflow-action" title={t("workflow.resumeHelp")}>{t("workflow.resume")}</button>}
+                  <button type="button" onClick={() => onViewAudit?.(ticket)} className="table-action workflow-audit">{t("workflow.audit")}</button>
+                </div>
+              </article>
+            ))}
+          </div>
           <div className="table-scroll">
             <table className="workspace-table">
               <thead>
@@ -137,42 +167,46 @@ export default function TechnicianQueue({ onRequestPurchase, onResolve, onViewAu
                           <button
                             type="button"
                             onClick={() => handleStatusChange(ticket.id, "IN_PROGRESS")}
-                            className="button-primary"
+                            className="button-primary workflow-action"
+                            title={t("workflow.startHelp")}
                           >
-                            Start
+                            {t("workflow.start")}
                           </button>
                         )}
                         {ticket.status === "IN_PROGRESS" && (
                           <button
                             type="button"
                             onClick={() => onResolve?.(ticket)}
-                            className="button-primary"
+                            className="button-primary workflow-action"
+                            title={t("workflow.resolveHelp")}
                           >
-                            Resolve
+                            {t("workflow.resolve")}
                           </button>
                         )}
                         {ticket.status === "IN_PROGRESS" && (
                           <button
                             type="button"
                             onClick={() => onRequestPurchase?.(ticket)}
-                            className="button-primary"
+                            className="button-secondary workflow-action"
+                            title={t("workflow.purchaseHelp")}
                           >
-                            Request Purchase
+                            {t("workflow.requestPurchase")}
                           </button>
                         )}
                         {ticket.status === "AWAITING_PURCHASE" && (
                           <button
                             type="button"
                             onClick={() => handleStatusChange(ticket.id, "IN_PROGRESS")}
-                            className="button-primary"
+                            className="button-primary workflow-action"
+                            title={t("workflow.resumeHelp")}
                           >
-                            Resume
+                            {t("workflow.resume")}
                           </button>
                         )}
                         <button
                           type="button"
                           onClick={() => onViewAudit?.(ticket)}
-                          className="table-action"
+                          className="table-action workflow-audit"
                         >
                           Audit
                         </button>

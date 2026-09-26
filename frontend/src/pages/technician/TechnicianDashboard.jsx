@@ -6,10 +6,6 @@ import {
   ClipboardList,
   MapPin,
   Wrench,
-  Clock,
-  ShoppingCart,
-  CheckCircle2,
-  AlertTriangle,
   ArrowRight,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
@@ -52,20 +48,7 @@ function TechnicianDashboard() {
     dispatch(fetchTickets({ page: 1, limit: 100 }));
   }, [dispatch]);
 
-  const stats = useMemo(() => {
-    const assigned = tickets.filter((t) => t.status === "ASSIGNED").length;
-    const inProgress = tickets.filter((t) => t.status === "IN_PROGRESS").length;
-    const awaitingPurchase = tickets.filter(
-      (t) => t.status === "AWAITING_PURCHASE",
-    ).length;
-    const resolved = tickets.filter(
-      (t) => t.status === "RESOLVED" || t.status === "CLOSED",
-    ).length;
-    const highPriority = tickets.filter(
-      (t) => t.priority === "HIGH" || t.priority === "CRITICAL",
-    ).length;
-    return { assigned, inProgress, awaitingPurchase, resolved, highPriority };
-  }, [tickets]);
+  const assignedCount = tickets.filter((ticket) => ticket.status === "ASSIGNED").length;
 
   const recentTickets = useMemo(() => {
     return [...tickets]
@@ -99,43 +82,7 @@ function TechnicianDashboard() {
           </span>
           <div>
             <span>{t("dashboard.assignedRequests")}</span>
-            <strong>{stats.assigned}</strong>
-          </div>
-        </div>
-        <div className="dashboard-stat">
-          <span className="dashboard-stat-icon dashboard-stat-icon-cyan">
-            <Clock size={18} />
-          </span>
-          <div>
-            <span>{t("dashboard.inProgress")}</span>
-            <strong>{stats.inProgress}</strong>
-          </div>
-        </div>
-        <div className="dashboard-stat">
-          <span className="dashboard-stat-icon dashboard-stat-icon-purple">
-            <ShoppingCart size={18} />
-          </span>
-          <div>
-            <span>{t("status.awaitingPurchase")}</span>
-            <strong>{stats.awaitingPurchase}</strong>
-          </div>
-        </div>
-        <div className="dashboard-stat">
-          <span className="dashboard-stat-icon dashboard-stat-icon-green">
-            <CheckCircle2 size={18} />
-          </span>
-          <div>
-            <span>{t("status.resolved")}</span>
-            <strong>{stats.resolved}</strong>
-          </div>
-        </div>
-        <div className="dashboard-stat">
-          <span className="dashboard-stat-icon" style={{ color: "#b45309", background: "#fef3c7" }}>
-            <AlertTriangle size={18} />
-          </span>
-          <div>
-            <span>{t("priority.high")} / {t("priority.critical")}</span>
-            <strong>{stats.highPriority}</strong>
+            <strong>{assignedCount}</strong>
           </div>
         </div>
       </div>
@@ -144,7 +91,7 @@ function TechnicianDashboard() {
         <section className="dashboard-panel">
           <div className="dashboard-panel-heading">
             <h2>{t("dashboard.assignedOffices")}</h2>
-            <MapPin size={18} className="text-[var(--civic-muted)]" />
+            <MapPin size={18} className="text-(--civic-muted)" />
           </div>
           <div className="dashboard-list-empty">
             {assignedOffices.length > 0 ? (
@@ -166,7 +113,7 @@ function TechnicianDashboard() {
         <div className="dashboard-panel-heading">
           <h2>{t("dashboard.recentRequests")}</h2>
           <Link to="/assigned-requests" className="button-secondary no-underline text-[12.5px]">
-            {t("dashboard.assignedRequests")} <ArrowRight size={14} />
+            {t("workflow.openAssignedRequests")} <ArrowRight size={14} />
           </Link>
         </div>
         {loading ? (
@@ -209,7 +156,7 @@ function TechnicianDashboard() {
 
       <div className="flex justify-center">
         <Link to="/assigned-requests" className="dashboard-primary-action no-underline">
-          {t("dashboard.assignedRequests")} <ArrowRight size={16} />
+          {t("workflow.openAssignedRequests")} <ArrowRight size={16} />
         </Link>
       </div>
     </section>

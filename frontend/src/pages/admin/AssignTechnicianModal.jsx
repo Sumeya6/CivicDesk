@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 
 const PRIORITIES = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 
-export default function AssignTechnicianModal({ isOpen, onClose, ticket }) {
+export default function AssignTechnicianModal({ isOpen, onClose, ticket, onSuccess }) {
   const dispatch = useDispatch();
   const technicians = useSelector((s) => s.tickets.technicians);
   const [submitting, setSubmitting] = useState(false);
@@ -18,12 +18,15 @@ export default function AssignTechnicianModal({ isOpen, onClose, ticket }) {
     register,
     handleSubmit,
     reset,
+    watch,
   } = useForm({
     defaultValues: {
       technicianId: "",
       priority: "MEDIUM",
     },
   });
+
+  const selectedTechnicianId = watch("technicianId");
 
   useEffect(() => {
     if (isOpen && ticket) {
@@ -53,6 +56,7 @@ export default function AssignTechnicianModal({ isOpen, onClose, ticket }) {
       ).unwrap();
       toast.success(result?.message || "Ticket updated successfully");
       reset();
+      onSuccess?.(result?.data);
       onClose();
     } catch (err) {
       setApiError(err?.message || "Failed to update ticket assignment");
@@ -90,13 +94,20 @@ export default function AssignTechnicianModal({ isOpen, onClose, ticket }) {
             {...register("technicianId")}
             className="civic-select"
           >
-            <option value="">Keep current assignment</option>
+            <option value="">Select technician...</option>
             {technicians.map((tech) => (
               <option key={tech.id} value={tech.id}>
                 {tech.fullName}
               </option>
             ))}
           </select>
+          {selectedTechnicianId && (
+            <p className="mt-1.5 rounded bg-blue-50 p-2 text-xs font-medium text-blue-700 border border-blue-200">
+              {ticket.status === "PENDING"
+                ? "Saving will assign the technician and move a Pending ticket to Assigned."
+                : "Saving will assign the technician."}
+            </p>
+          )}
         </div>
 
         <div>

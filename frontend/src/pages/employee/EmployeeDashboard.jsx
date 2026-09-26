@@ -14,6 +14,15 @@ import VerifyTicketModal from "./VerifyTicketModal";
 import AuditTrailModal from "../../components/AuditTrailModal";
 import AnnouncementBoard from "../../components/AnnouncementBoard";
 
+const STATUS_EXPLANATIONS = {
+  PENDING: "pendingExplanation",
+  ASSIGNED: "assignedExplanation",
+  IN_PROGRESS: "inProgressExplanation",
+  AWAITING_PURCHASE: "awaitingPurchaseExplanation",
+  RESOLVED: "resolvedExplanation",
+  CLOSED: "closedExplanation",
+};
+
 function EmptyRequestPanel({ title, description }) {
   return (
     <section className="dashboard-panel">
@@ -38,6 +47,7 @@ function EmployeeDashboard() {
   const [showCreate, setShowCreate] = useState(false);
   const [verifyTicket, setVerifyTicket] = useState(null);
   const [auditTicketId, setAuditTicketId] = useState(null);
+  const resolvedTickets = tickets.filter((ticket) => ticket.status === "RESOLVED");
 
   const load = useCallback(() => {
     dispatch(fetchTickets({ page: currentPage, limit: 20 }));
@@ -89,6 +99,35 @@ function EmployeeDashboard() {
         </div>
       )}
 
+      {!loading && resolvedTickets.length > 0 && (
+        <section className="workflow-attention" aria-labelledby="employee-action-title">
+          <div>
+            <p className="dashboard-eyebrow">{t("workflow.employeeActionLabel")}</p>
+            <h2 id="employee-action-title">{t("workflow.employeeActionTitle")}</h2>
+            <p>{t("workflow.employeeActionHint")}</p>
+          </div>
+          <div className="workflow-attention-list">
+            {resolvedTickets.map((ticket) => (
+              <div key={ticket.id} className="workflow-attention-item">
+                <div>
+                  <strong>{ticket.title}</strong>
+                  <span>{t("workflow.resolvedExplanation")}</span>
+                </div>
+                <button
+                  type="button"
+                  className="button-primary workflow-action"
+                  onClick={() => setVerifyTicket(ticket)}
+                  aria-label={`${t("workflow.verifyResolution")} ${ticket.title}`}
+                >
+                  <CheckCircle className="h-4 w-4" />
+                  {t("workflow.verifyResolution")}
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {!loading && tickets.length === 0 && (
         <div className="dashboard-grid dashboard-grid-two">
           <EmptyRequestPanel
@@ -103,6 +142,27 @@ function EmployeeDashboard() {
         <section className="dashboard-panel">
           <div className="dashboard-panel-heading">
             <h2>{t("dashboard.myRequests")}</h2>
+          </div>
+          <div className="mobile-ticket-list">
+            {tickets.map((ticket) => (
+              <article key={ticket.id} className="mobile-ticket-card">
+                <div className="mobile-ticket-card-heading">
+                  <div>
+                    <h2>{ticket.title}</h2>
+                    <p>{t(`workflow.${STATUS_EXPLANATIONS[ticket.status] || "statusExplanation"}`)}</p>
+                  </div>
+                  <StatusBadge status={ticket.status} />
+                </div>
+                <div className="mobile-ticket-meta">
+                  <PriorityBadge priority={ticket.priority} />
+                  <span>{ticket.technician?.fullName || t("workflow.notAssigned")}</span>
+                </div>
+                <div className="mobile-ticket-actions">
+                  {ticket.status === "RESOLVED" && <button type="button" onClick={() => setVerifyTicket(ticket)} className="button-primary workflow-action" aria-label={`${t("workflow.verifyResolution")} ${ticket.title}`}><CheckCircle className="h-4 w-4" />{t("workflow.verifyResolution")}</button>}
+                  <button type="button" onClick={() => setAuditTicketId(ticket.id)} className="table-action workflow-audit">{t("workflow.audit")}</button>
+                </div>
+              </article>
+            ))}
           </div>
           <div className="table-scroll">
             <table className="workspace-table">
@@ -135,10 +195,13 @@ function EmployeeDashboard() {
                     </td>
                     <td>
                       <StatusBadge status={ticket.status} />
+                      <span className="ticket-status-explanation">
+                        {t(`workflow.${STATUS_EXPLANATIONS[ticket.status] || "statusExplanation"}`)}
+                      </span>
                     </td>
                     <td>
                       {ticket.technician?.fullName || (
-                        <span className="text-[var(--civic-muted)]">—</span>
+                        <span className="text-(--civic-muted)">—</span>
                       )}
                     </td>
                     <td>
@@ -154,7 +217,7 @@ function EmployeeDashboard() {
                             className="button-primary"
                           >
                             <CheckCircle className="h-3 w-3" />
-                            Verify
+                            {t("workflow.verifyResolution")}
                           </button>
                         )}
                         <button
