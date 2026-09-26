@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Search,
@@ -9,6 +9,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import api from "../api/axios";
+import ticketApi from "../api/ticketApi";
 
 const initialFilters = {
   reporter: "",
@@ -60,10 +61,33 @@ function FilterField({ label, htmlFor, children }) {
 const inputClasses = "civic-input";
 
 function AdvancedFilterBar({ onResults, onLoading }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [filters, setFilters] = useState(initialFilters);
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+    ticketApi
+      .listCategories()
+      .then((data) => {
+        if (isMounted) {
+          const list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
+          setCategories(list.filter((c) => c.isActive !== false));
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load categories for search filter:", err);
+      })
+      .finally(() => {
+        if (isMounted) setCategoriesLoading(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -228,15 +252,26 @@ function AdvancedFilterBar({ onResults, onLoading }) {
               </select>
             </FilterField>
             <FilterField label={t("searchFilters.category")} htmlFor="category">
-              <input
+              <select
                 id="category"
                 name="category"
-                type="text"
                 value={filters.category}
                 onChange={handleChange}
-                placeholder={t("searchFilters.categoryId")}
+                disabled={categoriesLoading}
                 className={inputClasses}
-              />
+              >
+                <option value="">{t("searchFilters.allCategories", "All categories")}</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {i18n.language === "am" ? cat.nameAm || cat.nameEn : cat.nameEn || cat.nameAm}
+                  </option>
+                ))}
+              </select>
+              {categoriesLoading && (
+                <p className="mt-1 text-[11px] text-[var(--civic-muted)]">
+                  {t("searchFilters.loadingCategories", "Loading categories...")}
+                </p>
+              )}
             </FilterField>
           </FilterGroup>
 

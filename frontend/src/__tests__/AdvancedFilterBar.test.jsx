@@ -40,6 +40,19 @@ describe("AdvancedFilterBar", () => {
     vi.clearAllMocks();
     mockOnResults.mockClear();
     mockOnLoading.mockClear();
+    api.get.mockImplementation((url) => {
+      if (url === "/categories") {
+        return Promise.resolve({
+          data: {
+            success: true,
+            data: [
+              { id: "cat-abc", nameEn: "Hardware", nameAm: "ሀርድዌር", isActive: true },
+            ],
+          },
+        });
+      }
+      return Promise.resolve({ data: mockSearchData });
+    });
   });
 
   test("renders the filter title", () => {
@@ -124,9 +137,23 @@ describe("AdvancedFilterBar", () => {
   });
 
   test("maps category field to categoryId in API call", async () => {
-    api.get.mockResolvedValue({ data: mockSearchData });
+    api.get.mockImplementation((url) => {
+      if (url === "/categories") {
+        return Promise.resolve({
+          data: {
+            success: true,
+            data: [{ id: "cat-abc", nameEn: "Hardware", isActive: true }],
+          },
+        });
+      }
+      return Promise.resolve({ data: mockSearchData });
+    });
 
     render(<AdvancedFilterBar onResults={mockOnResults} />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("option", { name: "Hardware" })).toBeTruthy();
+    });
 
     fireEvent.change(screen.getByLabelText("Category"), {
       target: { value: "cat-abc" },
