@@ -4,18 +4,11 @@ import { useTranslation } from "react-i18next";
 import { Modal } from "./Modal";
 import { formatDate } from "./ticketConfig";
 import ticketApi from "../api/ticketApi";
-
-const ACTION_LABELS = {
-  CREATED: "Ticket Created",
-  AUTO_ASSIGNED: "Auto Assigned",
-  MANUAL_ASSIGNED: "Manually Assigned",
-  PRIORITY_CHANGED: "Priority Changed",
-  AWAITING_PURCHASE: "Purchase Requested",
-  STATUS_CHANGED: "Status Changed",
-  RESOLVED: "Ticket Resolved",
-  VERIFIED: "Ticket Verified",
-  REOPENED: "Ticket Reopened",
-};
+import {
+  AUDIT_ACTION_KEYS,
+  getAuditActorName,
+  getAuditValue,
+} from "../utils/auditPresentation";
 
 const initialState = { logs: [], loading: false, error: null };
 
@@ -77,45 +70,55 @@ export default function AuditTrailModal({ isOpen, onClose, ticketId }) {
       )}
       {!state.loading && !state.error && state.logs.length > 0 && (
         <div className="relative ml-3 border-l-2 border-[var(--civic-border)] pl-6 pb-5">
-          {state.logs.map((log) => (
-            <div key={log.id} className="relative mb-6 last:mb-0">
-              <div className="absolute -left-[31px] top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[var(--civic-blue-800)]" />
-              <div className="rounded-lg border border-[var(--civic-border)] bg-[#f8fafc] p-3">
-                <div className="mb-1 flex items-center gap-2">
-                  <span className="text-[var(--civic-font-size-base)] font-medium text-[var(--civic-text)]">
-                    {ACTION_LABELS[log.action] || log.action}
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-[var(--civic-muted)]">
-                  <span className="inline-flex items-center gap-1">
-                    <User className="h-3 w-3" />
-                    {log.actor?.fullName || log.actorId}
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {formatDate(log.createdAt)}
-                  </span>
-                </div>
-                {(log.previousValue || log.newValue) && (
-                  <div className="mt-2 flex items-center gap-2 text-[11px] text-[var(--civic-muted)]">
-                    {log.previousValue && (
-                      <span className="rounded bg-[var(--civic-border)] px-1.5 py-0.5 text-[var(--civic-text)]">
-                        {log.previousValue}
-                      </span>
-                    )}
-                    {log.previousValue && log.newValue && (
-                      <ArrowRight className="h-3 w-3 text-[var(--civic-muted)]" />
-                    )}
-                    {log.newValue && (
-                      <span className="rounded bg-[var(--civic-cyan-50)] px-1.5 py-0.5 text-[var(--civic-blue-800)]">
-                        {log.newValue}
-                      </span>
-                    )}
+          {state.logs.map((log) => {
+            const prevVal = getAuditValue(log, "previous", t);
+            const newVal = getAuditValue(log, "new", t);
+            const actorName = getAuditActorName(log, t);
+            const actorRole = log.actor?.role;
+
+            return (
+              <div key={log.id} className="relative mb-6 last:mb-0">
+                <div className="absolute -left-[31px] top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[var(--civic-blue-800)]" />
+                <div className="rounded-lg border border-[var(--civic-border)] bg-[#f8fafc] p-3">
+                  <div className="mb-1 flex items-center gap-2">
+                    <span className="text-[var(--civic-font-size-base)] font-medium text-[var(--civic-text)]">
+                      {t(
+                        `ticketDetail.auditActions.${AUDIT_ACTION_KEYS[log.action] || "unknown"}`,
+                        log.action,
+                      )}
+                    </span>
                   </div>
-                )}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-[var(--civic-muted)]">
+                    <span className="inline-flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      {actorName}{actorRole ? ` (${t(`roles.${actorRole}`, actorRole)})` : ""}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {formatDate(log.createdAt)}
+                    </span>
+                  </div>
+                  {(prevVal || newVal) && (
+                    <div className="mt-2 flex items-center gap-2 text-[11px] text-[var(--civic-muted)]">
+                      {prevVal && (
+                        <span className="rounded bg-[var(--civic-border)] px-1.5 py-0.5 text-[var(--civic-text)]">
+                          {prevVal}
+                        </span>
+                      )}
+                      {prevVal && newVal && (
+                        <ArrowRight className="h-3 w-3 text-[var(--civic-muted)]" />
+                      )}
+                      {newVal && (
+                        <span className="rounded bg-[var(--civic-cyan-50)] px-1.5 py-0.5 text-[var(--civic-blue-800)]">
+                          {newVal}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </Modal>
