@@ -107,15 +107,25 @@ async function assignTicket(req, res, next) {
         422,
       );
 
+    const shouldChangeStatus = Boolean(
+      technicianId && ticket.status === TicketStatus.PENDING,
+    );
+
     const updated = await prisma.$transaction(async (tx) => {
       const result = await tx.ticket.update({
         where: { id: ticket.id },
         data: {
           ...(technicianId && { technicianId }),
+          ...(shouldChangeStatus && { status: TicketStatus.ASSIGNED }),
           ...(priority !== undefined && { priority }),
         },
+        include: {
+          category: true,
+          technician: { select: { id: true, fullName: true } },
+        },
       });
-      if (technicianId && technicianId !== ticket.technicianId)
+
+      if (technicianId && technicianId !== ticket.technicianId) {
         await createAuditEntry({
           ticketId: ticket.id,
           actor: req.user.id,
@@ -124,7 +134,20 @@ async function assignTicket(req, res, next) {
           newValue: technicianId,
           tx,
         });
-      if (priority !== undefined && priority !== ticket.priority)
+      }
+
+      if (shouldChangeStatus) {
+        await createAuditEntry({
+          ticketId: ticket.id,
+          actor: req.user.id,
+          action: "STATUS_CHANGED",
+          previousValue: ticket.status,
+          newValue: TicketStatus.ASSIGNED,
+          tx,
+        });
+      }
+
+      if (priority !== undefined && priority !== ticket.priority) {
         await createAuditEntry({
           ticketId: ticket.id,
           actor: req.user.id,
@@ -133,9 +156,13 @@ async function assignTicket(req, res, next) {
           newValue: priority,
           tx,
         });
+      }
+
       return result;
     });
-    return res.status(200).json(successResponse("Ticket assignment updated.", updated));
+    return res
+      .status(200)
+      .json(successResponse("Ticket assignment updated.", updated));
   } catch (requestError) {
     return next(requestError);
   }
@@ -258,6 +285,11 @@ async function updateStatus(req, res, next) {
       where: { id: req.params.id },
     });
     if (!ticket) throw error("Ticket not found.", 404);
+    if (status === TicketStatus.ASSIGNED && !ticket.technicianId)
+      throw error(
+        "A technician must be assigned before the ticket can start.",
+        422,
+      );
     if (
       req.user.role === Role.TECHNICIAN &&
       ticket.technicianId !== req.user.id
@@ -267,7 +299,6 @@ async function updateStatus(req, res, next) {
       [TicketStatus.PENDING]: [
         TicketStatus.PENDING,
         TicketStatus.ASSIGNED,
-        TicketStatus.IN_PROGRESS,
       ],
       [TicketStatus.ASSIGNED]: [
         TicketStatus.ASSIGNED,
@@ -310,9 +341,39 @@ async function getTicket(req, res, next) {
       where: { id: req.params.id },
       include: {
         category: true,
+        office: true,
         asset: true,
         maintenanceNote: true,
-        auditLogs: { orderBy: { createdAt: "asc" } },
+        employee: {
+          select: {
+            id: true,
+            fullName: true,
+            role: true,
+            phoneNumber: true,
+            officeId: true,
+          },
+        },
+        technician: {
+          select: {
+            id: true,
+            fullName: true,
+            role: true,
+            phoneNumber: true,
+            officeId: true,
+          },
+        },
+        auditLogs: {
+          orderBy: { createdAt: "asc" },
+          include: {
+            actor: {
+              select: {
+                id: true,
+                fullName: true,
+                role: true,
+              },
+            },
+          },
+        },
       },
     });
     if (!ticket) throw error("Ticket not found.", 404);
@@ -323,7 +384,60 @@ async function getTicket(req, res, next) {
       ticket.technicianId !== req.user.id
     )
       throw error("You are not authorized to view this ticket.", 403);
-    return res.status(200).json(successResponse("Ticket retrieved successfully.", ticket));
+
+    const techIdsToFetch = new Set();
+    ticket.auditLogs.forEach((log) => {
+      if (
+        log.action === "MANUAL_ASSIGNED" ||
+        log.action === "AUTO_ASSIGNED" ||
+        log.action === "ASSIGNED"
+      ) {
+        if (log.previousValue) techIdsToFetch.add(log.previousValue);
+        if (log.newValue) techIdsToFetch.add(log.newValue);
+      }
+    });
+
+    let techMap = new Map();
+    if (techIdsToFetch.size > 0) {
+      const users = await prisma.user.findMany({
+        where: { id: { in: Array.from(techIdsToFetch) } },
+        select: { id: true, fullName: true },
+      });
+      techMap = new Map(users.map((u) => [u.id, u.fullName]));
+    }
+
+    const enrichedAuditLogs = ticket.auditLogs.map((log) => {
+      let previousDisplayValue = log.previousValue;
+      let newDisplayValue = log.newValue;
+
+      if (
+        log.action === "MANUAL_ASSIGNED" ||
+        log.action === "AUTO_ASSIGNED" ||
+        log.action === "ASSIGNED"
+      ) {
+        if (log.previousValue && techMap.has(log.previousValue)) {
+          previousDisplayValue = techMap.get(log.previousValue);
+        }
+        if (log.newValue && techMap.has(log.newValue)) {
+          newDisplayValue = techMap.get(log.newValue);
+        }
+      }
+
+      return {
+        ...log,
+        previousDisplayValue,
+        newDisplayValue,
+      };
+    });
+
+    const result = {
+      ...ticket,
+      auditLogs: enrichedAuditLogs,
+    };
+
+    return res
+      .status(200)
+      .json(successResponse("Ticket retrieved successfully.", result));
   } catch (requestError) {
     return next(requestError);
   }
@@ -353,7 +467,10 @@ async function listTickets(req, res, next) {
     const [tickets, totalTickets] = await Promise.all([
       prisma.ticket.findMany({
         where,
-        include: { category: true },
+        include: {
+          category: true,
+          technician: { select: { id: true, fullName: true } },
+        },
         orderBy: { createdAt: "desc" },
         skip,
         take: limitNum,

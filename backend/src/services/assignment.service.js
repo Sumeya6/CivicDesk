@@ -141,6 +141,9 @@ async function assignTechnicianToTicket(ticketId, officeId, tx = prisma) {
     where: { id: ticketId },
     data: {
       technicianId,
+      ...(existingTicket.status === TicketStatus.PENDING && {
+        status: TicketStatus.ASSIGNED,
+      }),
       ...(existingTicket.priority == null && { priority: Priority.MEDIUM }),
     },
   });
@@ -153,6 +156,17 @@ async function assignTechnicianToTicket(ticketId, officeId, tx = prisma) {
     newValue: technicianId,
     tx,
   });
+
+  if (existingTicket.status === TicketStatus.PENDING) {
+    await createAuditEntry({
+      ticketId,
+      actor: "SYSTEM",
+      action: "STATUS_CHANGED",
+      previousValue: existingTicket.status,
+      newValue: TicketStatus.ASSIGNED,
+      tx,
+    });
+  }
 
   return updatedTicket;
 }

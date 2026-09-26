@@ -24,6 +24,9 @@ function hoursAgo(hours) {
 }
 
 async function main() {
+  console.warn(
+    "WARNING: This seed resets development data. Never run it against production.",
+  );
   const passwordHash = await bcrypt.hash("Password123!", 12);
 
   await prisma.$transaction([
@@ -286,9 +289,24 @@ async function main() {
       description: "በቢሮው ውስጥ የኢንተርኔት ግንኙነት በድንገት ተቋርጧል።",
       categoryId: categoryRecords["Wi-Fi / Internet Disconnection"].id,
       employeeId: users.employeeOne.id,
-      officeId: officeRecords.EDUCATION.id,
+      officeId: officeRecords.LAND_MGMT.id,
       deviceOrSystem: "ቢሮ አውታረ መረብ (Office Network)",
       createdAt: hoursAgo(18),
+    },
+  });
+
+  const assignedTicket = await prisma.ticket.create({
+    data: {
+      title: "የኮምፒውተር ጥገና ጥያቄ",
+      description: "የቢሮ ኮምፒውተሩ በቀስታ እየሰራ ነው።",
+      categoryId: categoryRecords["Desktop / Laptop Hardware Damage"].id,
+      employeeId: users.employeeOne.id,
+      technicianId: users.techTwo.id,
+      officeId: officeRecords.EDUCATION.id,
+      deviceOrSystem: "Office Desktop",
+      priority: Priority.MEDIUM,
+      status: TicketStatus.ASSIGNED,
+      createdAt: hoursAgo(16),
     },
   });
 
@@ -299,7 +317,7 @@ async function main() {
       categoryId: categoryRecords["Printer / Scanner Failure"].id,
       employeeId: users.employeeTwo.id,
       technicianId: users.techOne.id,
-      officeId: officeRecords.FINANCE.id,
+      officeId: officeRecords.IT.id,
       deviceOrSystem: "አታሚ (Printer)",
       priority: Priority.HIGH,
       status: TicketStatus.IN_PROGRESS,
@@ -313,7 +331,7 @@ async function main() {
       description: "የፕሪንተሩ ቶነር አልቋል፣ በመታተም ላይ ትኩረት የሚያስፈልግ የንጥረ ነገር ግዢ ይፈልጋል።",
       categoryId: categoryRecords["Printer / Scanner Failure"].id,
       employeeId: users.employeeOne.id,
-      technicianId: users.techOne.id,
+      technicianId: users.techTwo.id,
       officeId: officeRecords.PUBLIC_SERVICE.id,
       deviceOrSystem: "HP LaserJet Printer",
       priority: Priority.MEDIUM,
@@ -331,7 +349,7 @@ async function main() {
       categoryId: categoryRecords["Email / Account Access Issue"].id,
       employeeId: users.employeeOne.id,
       technicianId: users.techTwo.id,
-      officeId: officeRecords.IT.id,
+      officeId: officeRecords.EDUCATION.id,
       deviceOrSystem: "የሥራ ኢሜይል (Work Email)",
       priority: Priority.MEDIUM,
       status: TicketStatus.RESOLVED,
@@ -392,6 +410,27 @@ async function main() {
         newValue: pendingTicket.title,
       },
       {
+        ticketId: assignedTicket.id,
+        actorId: users.employeeOne.id,
+        action: "TICKET_CREATED",
+        previousValue: null,
+        newValue: assignedTicket.title,
+      },
+      {
+        ticketId: assignedTicket.id,
+        actorId: users.techTwo.id,
+        action: "ASSIGNED",
+        previousValue: null,
+        newValue: users.techTwo.id,
+      },
+      {
+        ticketId: assignedTicket.id,
+        actorId: users.admin.id,
+        action: "STATUS_CHANGED",
+        previousValue: TicketStatus.PENDING,
+        newValue: TicketStatus.ASSIGNED,
+      },
+      {
         ticketId: inProgressTicket.id,
         actorId: users.employeeTwo.id,
         action: "TICKET_CREATED",
@@ -438,18 +477,18 @@ async function main() {
         actorId: users.admin.id,
         action: "ASSIGNED",
         previousValue: null,
-        newValue: users.techOne.id,
+        newValue: users.techTwo.id,
       },
       {
         ticketId: awaitingPurchaseTicket.id,
-        actorId: users.techOne.id,
+        actorId: users.techTwo.id,
         action: "PURCHASE_REQUIRED",
         previousValue: "false",
         newValue: awaitingPurchaseTicket.purchaseDetails,
       },
       {
         ticketId: awaitingPurchaseTicket.id,
-        actorId: users.techOne.id,
+        actorId: users.techTwo.id,
         action: "STATUS_CHANGE",
         previousValue: TicketStatus.IN_PROGRESS,
         newValue: TicketStatus.AWAITING_PURCHASE,
